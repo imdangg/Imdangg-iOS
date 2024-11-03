@@ -14,7 +14,7 @@
 		BCAAF8982CD75CF1002BAE67 /* Exceptions for "Imdangg" folder in "Imdangg" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Config/Info.plist,
 			);
 			target = BCAAF8852CD75CF0002BAE67 /* Imdangg */;
 		};
