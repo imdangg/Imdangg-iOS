@@ -19,12 +19,12 @@ final class FontUtility {
         case extraBold = "PretendardVariable-ExtraBold"
         case black = "PretendardVariable-Black"
         
-        func fonr(size: CGFloat) -> UIFont? {
+        func font(size: CGFloat) -> UIFont? {
             return UIFont(name: self.rawValue, size: size)
         }
     }
     
-    static func getFonr(type: PretendardVariable, size: CGFloat) -> UIFont? {
-        return type.fonr(size: size)
+    static func getFont(type: PretendardVariable, size: CGFloat) -> UIFont? {
+        return type.font(size: size)
     }
 }

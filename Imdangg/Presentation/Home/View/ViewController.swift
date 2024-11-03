@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     let testLabel: UILabel = {
         let label = UILabel()
         label.text = "Hello, World!"
-        label.font = FontUtility.getFonr(type: .bold, size: 40)
+        label.font = FontUtility.getFont(type: .bold, size: 40)
         return label
     }()
     let testLabel2: UILabel = {
