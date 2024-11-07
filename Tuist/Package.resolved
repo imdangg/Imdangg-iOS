@@ -1,10 +1,19 @@
 {
-  "originHash" : "bafeaab2edf7d0b9cb87db4e33b6f79ae236c1f34dc0358822e4201e2bf03b38",
+  "originHash" : "45b5cca179c6b4d1c90f221faf4945fa85f21e659da0101184b5058b4fac9404",
   "pins" : [
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire",
+      "state" : {
+        "revision" : "e16d3481f5ed35f0472cb93350085853d754913f",
+        "version" : "5.10.1"
+      }
+    },
     {
       "identity" : "kingfisher",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/onevcat/Kingfisher",
+      "location" : "https://github.com/onevcat/Kingfisher.git",
       "state" : {
         "revision" : "c0940e241945e6378c01fbd45fd3815579d47ef5",
         "version" : "8.1.0"
@@ -13,7 +22,7 @@
     {
       "identity" : "reactorkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ReactorKit/ReactorKit",
+      "location" : "https://github.com/ReactorKit/ReactorKit.git",
       "state" : {
         "revision" : "8fa33f09c6f6621a2aa536d739956d53b84dd139",
         "version" : "3.2.0"
