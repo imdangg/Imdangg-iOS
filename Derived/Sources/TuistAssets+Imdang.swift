@@ -19,9 +19,9 @@
 // MARK: - Asset Catalogs
 
 // swiftlint:disable identifier_name line_length nesting type_body_length type_name
-public enum ImdanggAsset: Sendable {
+public enum ImdangAsset: Sendable {
   public enum Assets {
-  public static let accentColor = ImdanggColors(name: "AccentColor")
+  public static let accentColor = ImdangColors(name: "AccentColor")
   }
   public enum PreviewAssets {
   }
@@ -30,7 +30,7 @@ public enum ImdanggAsset: Sendable {
 
 // MARK: - Implementation Details
 
-public final class ImdanggColors: Sendable {
+public final class ImdangColors: Sendable {
   public let name: String
 
   #if os(macOS)
@@ -59,9 +59,9 @@ public final class ImdanggColors: Sendable {
   }
 }
 
-public extension ImdanggColors.Color {
+public extension ImdangColors.Color {
   @available(iOS 11.0, tvOS 11.0, watchOS 4.0, macOS 10.13, visionOS 1.0, *)
-  convenience init?(asset: ImdanggColors) {
+  convenience init?(asset: ImdangColors) {
     let bundle = Bundle.module
     #if os(iOS) || os(tvOS) || os(visionOS)
     self.init(named: asset.name, in: bundle, compatibleWith: nil)
@@ -76,7 +76,7 @@ public extension ImdanggColors.Color {
 #if canImport(SwiftUI)
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, visionOS 1.0, *)
 public extension SwiftUI.Color {
-  init(asset: ImdanggColors) {
+  init(asset: ImdangColors) {
     let bundle = Bundle.module
     self.init(asset.name, bundle: bundle)
   }
