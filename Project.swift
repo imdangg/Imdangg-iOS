@@ -11,17 +11,28 @@ let project = Project(
             deploymentTargets: .iOS("15.0"),
             infoPlist: .extendingDefault(
                 with: [
-                    "UILaunchScreen": [
-                        "UIColorName": "",
-                        "UIImageName": "",
+                    "UILaunchStoryboardName": "LaunchScreen.storyboard",
+                    "UIApplicationSceneManifest": [
+                        "UIApplicationSupportsMultipleScenes": false,
+                        "UISceneConfigurations": [
+                            "UIWindowSceneSessionRoleApplication": [
+                                [
+                                    "UISceneConfigurationName": "Default Configuration",
+                                    "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
+                                ],
+                            ]
+                        ]
                     ],
                 ]
             ),
             sources: ["imdang/Sources/**"],
-            resources: ["imdang/Resources/**"],
+            resources: [
+                "imdang/Resources/**",
+                "imdang/Sources/App/LaunchScreen.storyboard",
+            ],
             dependencies: [
                 .external(name: "Kingfisher"),
-                .external(name: "Alamofire"), // default is .staticFramework
+                .external(name: "Alamofire"),
                 .external(name: "Then"),
                 .external(name: "SnapKit"),
                 .external(name: "ReactorKit"),
