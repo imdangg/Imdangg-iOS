@@ -54,10 +54,15 @@ class OnboardingPageViewController: UIPageViewController, UIPageViewControllerDa
     
     func goToNextPage() {
         if let currentVC = viewControllers?.first,
-           let currentIndex = pages.firstIndex(of: currentVC), currentIndex + 1 < pages.count {
-            let nextVC = pages[currentIndex + 1]
-            setViewControllers([nextVC], direction: .forward, animated: true, completion: nil)
-            pageControl.currentPage += 1
+           let currentIndex = pages.firstIndex(of: currentVC) {
+            if currentIndex + 1 < pages.count {
+                let nextVC = pages[currentIndex + 1]
+                setViewControllers([nextVC], direction: .forward, animated: true, completion: nil)
+                pageControl.currentPage += 1
+            } else {
+                let vc = TabBarController()
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
         }
     }
     

@@ -27,6 +27,9 @@ public enum ImdangAsset: Sendable {
     public static let googleLogo = ImdangImages(name: "googleLogo")
     public static let imdangLogo = ImdangImages(name: "imdangLogo")
     public static let kakaoLogo = ImdangImages(name: "kakaoLogo")
+    public static let tabHomeIcon = ImdangImages(name: "tabHomeIcon")
+    public static let tabSavedIcon = ImdangImages(name: "tabSavedIcon")
+    public static let tabWritingIcon = ImdangImages(name: "tabWritingIcon")
   }
   public enum PreviewAssets {
   }
