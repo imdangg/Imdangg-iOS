@@ -8,29 +8,36 @@ import UIKit
 import RxSwift
 import RxCocoa
 
-// TODO: 미완성
-class WideButtonView: UIView {
+class WideButtonView: UIView, UIGestureRecognizerDelegate {
     
     private let disposeBag = DisposeBag()
     private let wideButton = UIButton()
     
-    let isEnabled = BehaviorRelay(value: false)
-    let buttonTitle = BehaviorRelay(value: "완료")
-    let submit = BehaviorRelay(value: false)
+    var isEnabled: Bool
+    let title: String
     
-    override init(frame: CGRect) {
+    init(frame: CGRect, title: String, isEnabled: Bool = false) {
+        self.title = title
+        self.isEnabled = isEnabled
         super.init(frame: frame)
-        setupButton()
-        makeUI()
-        bindButtonProperties()
+        setupView()
     }
     
     required init?(coder: NSCoder) {
+        self.title = ""
+        self.isEnabled = false
         super.init(coder: coder)
     }
     
+    private func setupView() {
+        setupButton()
+        makeUI()
+    }
+    
     private func setupButton() {
-        wideButton.setTitleColor(.white, for: .normal)
+        wideButton.setTitle(title, for: .normal)
+        wideButton.setTitleColor(isEnabled ? .white : .grayScale500, for: .normal)
+        wideButton.backgroundColor = isEnabled ? .mainOrange500 : .grayScale100
         wideButton.titleLabel?.font = FontUtility.getFont(type: .semiBold, size: 16)
         wideButton.layer.cornerRadius = 8
         wideButton.clipsToBounds = true
@@ -42,32 +49,5 @@ class WideButtonView: UIView {
             $0.height.equalTo(56)
             $0.leading.trailing.equalToSuperview()
         }
-    }
-    
-    private func bindButtonProperties() {
-        isEnabled
-            .withUnretained(wideButton)
-            .subscribe(onNext: { button, enabled in
-                button.backgroundColor = enabled ? .mainOrange500 : .grayScale100
-                button.setTitleColor(enabled ? .white : .grayScale500, for: .normal)
-            })
-            .disposed(by: disposeBag)
-        wideButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.isEnabled.accept(!(self?.isEnabled.value ?? false))
-            })
-            .disposed(by: disposeBag)
-        
-        buttonTitle
-            .bind(to: wideButton.rx.title(for: .normal))
-            .disposed(by: disposeBag)
-    }
-    
-    func observeSubmitState() -> Observable<Bool> {
-        return submit.asObservable()
-    }
-    
-    func observeisEnabledState() -> Observable<Bool> {
-        return isEnabled.asObservable()
     }
 }

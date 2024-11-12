@@ -14,8 +14,8 @@ import ReactorKit
 class UserInfoEntryView: UIView {
     weak var vc: UserInfoEntryViewController?
     var disposeBag: DisposeBag = DisposeBag()
-    
-    private var submitButton = WideButtonView()
+   
+    private var submitButton = WideButtonView(frame: .zero, title: "완료")
    
     init(controlBy vc: UserInfoEntryViewController) {
         self.vc = vc
@@ -50,6 +50,10 @@ private extension UserInfoEntryView {
 // MARK: - Rector
 extension UserInfoEntryView: View {
     func bind(reactor: UserInfoEntryViewReactor) {
+
         
+        
+      
     }
+    
 }
