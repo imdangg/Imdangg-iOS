@@ -16,7 +16,8 @@ class UserInfoEntryView: UIView {
     var disposeBag: DisposeBag = DisposeBag()
    
     private var submitButton = WideButtonView(frame: .zero, title: "완료")
-   
+    private var genderButtonView = GenderButtonView(frame: .zero, userGender: .none, titleGender: .man)
+    
     init(controlBy vc: UserInfoEntryViewController) {
         self.vc = vc
         super.init(frame: UIScreen.main.bounds)
