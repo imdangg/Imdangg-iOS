@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 import Then
 
-final class SigninView: UIViewController {
+final class SigninViewController: UIViewController {
     let disposeBag = DisposeBag()
     
     let kakaoButton = UIButton().then {
@@ -65,8 +65,18 @@ final class SigninView: UIViewController {
     }
     
     private func configButtons() {
+        let vc = OnboardingContainerViewController()
+        
         kakaoButton.rx.tap.subscribe(onNext: {
-            print("aa")
+            self.navigationController?.pushViewController(vc, animated: true)
+        }).disposed(by: disposeBag)
+        
+        googleButton.rx.tap.subscribe(onNext: {
+            self.navigationController?.pushViewController(vc, animated: true)
+        }).disposed(by: disposeBag)
+        
+        appleButton.rx.tap.subscribe(onNext: {
+            self.navigationController?.pushViewController(vc, animated: true)
         }).disposed(by: disposeBag)
     }
     
