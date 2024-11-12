@@ -5,7 +5,6 @@
 //  Created by daye on 11/11/24.
 //
 
-import Foundation
 import UIKit
 import RxSwift
 import RxCocoa
@@ -16,9 +15,13 @@ class UserInfoEntryView: UIView {
     weak var vc: UserInfoEntryViewController?
     var disposeBag: DisposeBag = DisposeBag()
     
+    private var submitButton = WideButtonView()
+   
     init(controlBy vc: UserInfoEntryViewController) {
         self.vc = vc
         super.init(frame: UIScreen.main.bounds)
+        self.backgroundColor = .systemPink
+        setup()
     }
     
     required init?(coder: NSCoder) {
@@ -26,6 +29,7 @@ class UserInfoEntryView: UIView {
     }
     
     func setup() {
+        addSubview(submitButton)
         attriubute()
         layout()
     }
@@ -34,7 +38,13 @@ class UserInfoEntryView: UIView {
 // MARK: - View
 private extension UserInfoEntryView {
     func attriubute(){}
-    func layout(){}
+    func layout(){
+
+        submitButton.snp.makeConstraints {
+            $0.centerX.centerY.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(16)
+        }
+    }
 }
 
 // MARK: - Rector
