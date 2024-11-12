@@ -5,16 +5,22 @@
 //  Created by daye on 11/11/24.
 //
 import UIKit
-import RxSwift
-import RxCocoa
+import SnapKit
+import Then
 
-class WideButtonView: UIView, UIGestureRecognizerDelegate {
+class WideButtonView: UIView {
     
-    private let disposeBag = DisposeBag()
-    private let wideButton = UIButton()
-    
-    var isEnabled: Bool
+    let isEnabled: Bool
     let title: String
+    
+    private lazy var wideButton = UIButton().then {
+        $0.setTitle(title, for: .normal)
+        $0.setTitleColor(isEnabled ? .white : .grayScale500, for: .normal)
+        $0.backgroundColor = isEnabled ? .mainOrange500 : .grayScale100
+        $0.titleLabel?.font = FontUtility.getFont(type: .semiBold, size: 16)
+        $0.layer.cornerRadius = 8
+        $0.clipsToBounds = true
+    }
     
     init(frame: CGRect, title: String, isEnabled: Bool = false) {
         self.title = title
@@ -30,18 +36,8 @@ class WideButtonView: UIView, UIGestureRecognizerDelegate {
     }
     
     private func setupView() {
-        setupButton()
-        makeUI()
-    }
-    
-    private func setupButton() {
-        wideButton.setTitle(title, for: .normal)
-        wideButton.setTitleColor(isEnabled ? .white : .grayScale500, for: .normal)
-        wideButton.backgroundColor = isEnabled ? .mainOrange500 : .grayScale100
-        wideButton.titleLabel?.font = FontUtility.getFont(type: .semiBold, size: 16)
-        wideButton.layer.cornerRadius = 8
-        wideButton.clipsToBounds = true
         addSubview(wideButton)
+        makeUI()
     }
     
     private func makeUI() {
@@ -51,3 +47,4 @@ class WideButtonView: UIView, UIGestureRecognizerDelegate {
         }
     }
 }
+
