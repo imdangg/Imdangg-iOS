@@ -1,26 +1,38 @@
 import ProjectDescription
 
 let project = Project(
-    name: "imdangg",
+    name: "imdang",
     targets: [
         .target(
-            name: "imdangg",
+            name: "imdang",
             destinations: .iOS,
             product: .app,
-            bundleId: "io.tuist.imdangg",
+            bundleId: "info.imdang.imdang",
+            deploymentTargets: .iOS("15.0"),
             infoPlist: .extendingDefault(
                 with: [
-                    "UILaunchScreen": [
-                        "UIColorName": "",
-                        "UIImageName": "",
+                    "UILaunchStoryboardName": "LaunchScreen.storyboard",
+                    "UIApplicationSceneManifest": [
+                        "UIApplicationSupportsMultipleScenes": false,
+                        "UISceneConfigurations": [
+                            "UIWindowSceneSessionRoleApplication": [
+                                [
+                                    "UISceneConfigurationName": "Default Configuration",
+                                    "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
+                                ],
+                            ]
+                        ]
                     ],
                 ]
             ),
-            sources: ["imdangg/Sources/**"],
-            resources: ["imdangg/Resources/**"],
+            sources: ["imdang/Sources/**"],
+            resources: [
+                "imdang/Resources/**",
+                "imdang/Sources/App/LaunchScreen.storyboard",
+            ],
             dependencies: [
                 .external(name: "Kingfisher"),
-                .external(name: "Alamofire"), // default is .staticFramework
+                .external(name: "Alamofire"),
                 .external(name: "Then"),
                 .external(name: "SnapKit"),
                 .external(name: "ReactorKit"),
@@ -29,14 +41,15 @@ let project = Project(
             ]
         ),
         .target(
-            name: "imdanggTests",
+            name: "imdangTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "io.tuist.imdanggTests",
+            bundleId: "io.tuist.imdangTests",
+            deploymentTargets: .iOS("15.0"),
             infoPlist: .default,
-            sources: ["imdangg/Tests/**"],
+            sources: ["imdang/Tests/**"],
             resources: [],
-            dependencies: [.target(name: "imdangg")]
+            dependencies: [.target(name: "imdang")]
         ),
     ]
 )
