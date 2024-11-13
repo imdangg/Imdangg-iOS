@@ -13,6 +13,7 @@ class UserInfoEntryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        userInfoEntryView.backgroundColor = UIColor.grayScale25
         userInfoEntryView.setup()
         userInfoEntryView.reactor = UserInfoEntryViewReactor()
     }

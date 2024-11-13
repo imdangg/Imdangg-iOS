@@ -32,6 +32,10 @@ extension UIColor {
     static let mainOrange200 = UIColor(hexCode: "#FFC399")
     static let mainOrange100 = UIColor(hexCode: "#FFE1CC")
     static let mainOrange50 = UIColor(hexCode: "#FFF0E5")
+    
+    // MARK: - Other
+    static let error = UIColor(hexCode: "#E93528")
+    
 }
 
 // rgb to hex
