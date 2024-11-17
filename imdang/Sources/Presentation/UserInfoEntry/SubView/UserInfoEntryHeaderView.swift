@@ -10,18 +10,14 @@ import RxSwift
 import RxCocoa
 import Then
 
-// View init > userInfoEntryHeaderView.setTitle("Hi")
 // bind > textFieldErrorMessage, textFieldState
 
 
 // 임시. textfield의 state로 변경될예정
-enum headerState {
-    case normal
-    case done
-    case error
-}
 
 class UserInfoEntryHeaderView: UIView {
+    
+    var title: String
     
     private var titleLabel = UILabel().then {
         $0.font = .pretenMedium(14)
@@ -35,14 +31,20 @@ class UserInfoEntryHeaderView: UIView {
         $0.textColor = UIColor.error
     }
     
-    override init(frame: CGRect) {
+    init(frame: CGRect = .zero, title: String) {
+        self.title = title
         super.init(frame: frame)
+        attribute()
         addSubViews()
         makeUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func attribute() {
+        titleLabel.text = title
     }
     
     private func addSubViews() {
@@ -61,24 +63,24 @@ class UserInfoEntryHeaderView: UIView {
         }
     }
     
-    func setTitle(_ title: String) {
-        titleLabel.text = title
-    }
-    
-    func setState(_ state: headerState) {
-        switch state {
-        case .normal:
-            signImage.isHidden = true
-            errorMessageLabel.text = ""
-        case .done:
-            signImage.isHidden = false
-            signImage.image = UIImage(systemName: "checkmark.circle.fill")
-            signImage.tintColor = UIColor.mainOrange500
-            errorMessageLabel.text = ""
-        case .error:
-            signImage.image = UIImage(systemName: "exclamationmark.circle.fill")
-            signImage.isHidden = false
-            signImage.tintColor = UIColor.error
+    func setState(_ state: TextFieldState) {
+        UIView.animate(withDuration: 0.1) {
+            switch state {
+            case .normal, .editing:
+                self.signImage.alpha = 0.0
+                self.errorMessageLabel.text = ""
+            case .done:
+                self.signImage.image = UIImage(systemName: "checkmark.circle.fill")
+                self.signImage.tintColor = UIColor.mainOrange500
+                self.signImage.alpha = 1.0
+                self.errorMessageLabel.text = ""
+            case .error:
+                self.signImage.image = UIImage(systemName: "exclamationmark.circle.fill")
+                self.signImage.alpha = 1.0
+                self.signImage.tintColor = UIColor.error
+            }
+            
+            self.layoutIfNeeded()
         }
     }
     
@@ -95,9 +97,10 @@ extension Reactive where Base: UserInfoEntryHeaderView {
         }
     }
 
-    var textFieldState: Binder<headerState> {
+    var textFieldState: Binder<TextFieldState> {
         return Binder(self.base) { view, state in
             view.setState(state)
         }
     }
 }
+

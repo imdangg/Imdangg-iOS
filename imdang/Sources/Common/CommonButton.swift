@@ -13,15 +13,20 @@ import RxCocoa
 // add View > width, height
 // add Reactor > commonButtonTitle, commonButtonState, tap
 
-enum CommonButtonState {
+enum CommonButtonType {
     case enabled
     case disabled
+    case selectedBorderStyle
+    case unselectedBorderStyle
 }
 
 class CommonButton: UIButton {
-    private let disposeBag = DisposeBag()
 
-    override init(frame: CGRect) {
+    private let disposeBag = DisposeBag()
+    var title: String
+
+    init(frame: CGRect = .zero, title: String) {
+        self.title = title
         super.init(frame: frame)
         setupButton()
     }
@@ -31,35 +36,45 @@ class CommonButton: UIButton {
     }
     
     func setupButton() {
-        setTitle("", for: .normal)
+        setTitle(title, for: .normal)
         titleLabel?.font = .pretenSemiBold(16)
         layer.cornerRadius = 8
         clipsToBounds = true
         setState(.enabled)
     }
     
-    func setState(_ state: CommonButtonState) {
-        switch state {
-        case .enabled:
-            isEnabled = true
-            backgroundColor = .mainOrange500
-            setTitleColor(.white, for: .normal)
-        case .disabled:
-            isEnabled = false
-            backgroundColor = .grayScale100
-            setTitleColor(.grayScale500, for: .normal)
+    func setState(_ state: CommonButtonType) {
+        UIView.animate(withDuration: 0.1) {
+            switch state {
+            case .enabled:
+                self.isEnabled = true
+                self.backgroundColor = .mainOrange500
+                self.layer.borderWidth = 0
+                self.setTitleColor(.white, for: .normal)
+            case .disabled:
+                self.isEnabled = false
+                self.backgroundColor = .grayScale100
+                self.layer.borderWidth = 0
+                self.setTitleColor(.grayScale500, for: .normal)
+            case .selectedBorderStyle:
+                self.isEnabled = true
+                self.backgroundColor = .mainOrange50
+                self.setTitleColor(.mainOrange500, for: .normal)
+                self.layer.borderWidth = 1
+                self.layer.borderColor = UIColor.mainOrange500.cgColor
+            case .unselectedBorderStyle:
+                self.isEnabled = true
+                self.backgroundColor = .white
+                self.setTitleColor(.grayScale200, for: .normal)
+                self.layer.borderWidth = 1
+                self.layer.borderColor = UIColor.grayScale200.cgColor
+            }
         }
     }
 }
 
 extension Reactive where Base: CommonButton {
-    var commonButtonTitle: Binder<String?> {
-        return Binder(self.base) { button, title in
-            button.setTitle(title, for: .normal)
-        }
-    }
-
-    var commonButtonState: Binder<CommonButtonState> {
+    var commonButtonState: Binder<CommonButtonType> {
         return Binder(self.base) { button, state in
             button.setState(state)
         }

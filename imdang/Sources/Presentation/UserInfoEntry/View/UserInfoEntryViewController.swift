@@ -39,22 +39,27 @@ class UserInfoEntryViewController: UIViewController, View {
         $0.textColor = UIColor.grayScale700
     }
     
-    private var nicknameHeaderView = UserInfoEntryHeaderView()
-   
-
-    private var submitButton = CommonButton()
+    private var nicknameHeaderView = UserInfoEntryHeaderView(title: "닉네임")
+    private var nicknameTextField = CommomTextField(placeholderText: "임당이", textfieldType: .namePhonePad)
+    
+    private var birthHeaderView = UserInfoEntryHeaderView(title: "생년월일")
+    private var birthTextField = CommomTextField(placeholderText: "2000.01.01", textfieldType: .numberPad)
+    private var genderHeaderView = UserInfoEntryHeaderView(title: "성별")
+    private var manButton = CommonButton(title: "남자")
+    private var womanButton = CommonButton(title: "여자")
+    
+    private var submitButton = CommonButton(title: "다음")
      
     
     private lazy var stackView = UIStackView().then {
-        $0.alignment = .center
-        [mainTitle, subTitle, nicknameHeaderView, submitButton].forEach { view.addSubview($0) }
+        $0.isUserInteractionEnabled = false
+        [mainTitle, subTitle, nicknameHeaderView, nicknameTextField, birthHeaderView, birthTextField, genderHeaderView, manButton, womanButton, submitButton].forEach { view.addSubview($0) }
     }
     
    override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.grayScale25
         view.addSubview(stackView)
-       
         setup()
     }
 
@@ -64,8 +69,8 @@ class UserInfoEntryViewController: UIViewController, View {
     }
     
     func attriubute(){
-        nicknameHeaderView.setTitle("닉네임")
-        
+   
+       
     }
     
     func layout(){
@@ -81,7 +86,47 @@ class UserInfoEntryViewController: UIViewController, View {
         
         nicknameHeaderView.snp.makeConstraints {
             $0.top.equalTo(subTitle.snp.bottom).offset(44)
+            $0.height.equalTo(20)
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
+        nicknameTextField.snp.makeConstraints {
+            $0.top.equalTo(nicknameHeaderView.snp.bottom).offset(8)
+            $0.height.equalTo(52)
+            $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
+        birthHeaderView.snp.makeConstraints {
+            $0.top.equalTo(nicknameTextField.snp.bottom).offset(32)
+            $0.height.equalTo(20)
+            $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
+        birthTextField.snp.makeConstraints {
+            $0.top.equalTo(birthHeaderView.snp.bottom).offset(8)
+            $0.height.equalTo(52)
+            $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
+        genderHeaderView.snp.makeConstraints {
+            $0.top.equalTo(birthTextField.snp.bottom).offset(32)
+            $0.height.equalTo(20)
+            $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
+        manButton.snp.makeConstraints {
+            $0.top.equalTo(genderHeaderView.snp.bottom).offset(8)
+            $0.height.equalTo(52)
+            $0.leading.equalTo(stackView.snp.leading)
+            $0.width.equalTo(womanButton)
+        }
+        
+        womanButton.snp.makeConstraints {
+            $0.top.equalTo(genderHeaderView.snp.bottom).offset(8)
+            $0.leading.equalTo(manButton.snp.trailing).offset(8)
+            $0.height.equalTo(52)
+            $0.trailing.equalTo(stackView.snp.trailing)
+            $0.width.equalTo(manButton)
         }
         
         submitButton.snp.makeConstraints {
@@ -100,66 +145,107 @@ class UserInfoEntryViewController: UIViewController, View {
     
     func bind(reactor: UserInfoEntryReactor) {
   
-        //nicknameHeader
+        //nickname
         Observable.just("에러가 낫습니다.")
             .bind(to: nicknameHeaderView.rx.textFieldErrorMessage)
             .disposed(by: disposeBag)
-
-
-        Observable.just(.done)
-            .bind(to: nicknameHeaderView.rx.textFieldState)
+        
+        nicknameTextField.rx.controlEvent(.primaryActionTriggered)
+            .subscribe(onNext: {[weak self] in self?.birthTextField.becomeFirstResponder()})
             .disposed(by: disposeBag)
         
+        nicknameTextField.rx.controlEvent([.editingDidBegin])
+            .asDriver()
+            .map { Reactor.Action.changeNicknameTextFieldState(.editing) }
+            .drive(reactor.action)
+            .disposed(by: disposeBag)
         
+        nicknameTextField.rx.controlEvent([.editingDidEnd])
+            .map { Reactor.Action.changeNicknameTextFieldState(.done)}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+
+        manButton.rx.tap
+            .map{ Reactor.Action.tapGenderButton(.man)}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        womanButton.rx.tap
+            .map{ Reactor.Action.tapGenderButton(.woman)}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        // birth
+        birthTextField.rx.controlEvent([.editingDidBegin])
+            .asDriver()
+            .map { Reactor.Action.changeBirthTextFieldState(.editing) }
+            .drive(reactor.action)
+            .disposed(by: disposeBag)
+        
+        birthTextField.rx.controlEvent([.editingDidEnd])
+            .map { Reactor.Action.changeBirthTextFieldState(.done)}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        birthTextField.rx.text
+            .orEmpty
+            .map { text in
+                let limitedText = String(text.prefix(10))
+                let formattedText = self.formatText(limitedText)
+                return formattedText
+            }
+            .bind(to: birthTextField.rx.text)
+            .disposed(by: disposeBag)
         
         // submitButton
         submitButton.rx.tap
             .map{ Reactor.Action.submitButtonTapped }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
-        
-   
-        Observable.just("다음") //나중에 필요할까봐 Observable.
-            .bind(to: submitButton.rx.commonButtonTitle)
-            .disposed(by: disposeBag)
-
 
         Observable.just(.disabled)
             .bind(to: submitButton.rx.commonButtonState)
             .disposed(by: disposeBag)
+        
+        
+        
+        // r > v
+        reactor.state
+            .map { $0.nicknameTextfieldState }
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] state in
+                self?.nicknameHeaderView.rx.textFieldState.onNext(state) // nicknameHeaderView에 상태 전달
+                self?.nicknameTextField.setState(state) // nicknameTextField 상태 업데이트
+            })
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map {$0.selectedGender}
+            .distinctUntilChanged()
+            .filter { $0 != .none }
+            .subscribe(onNext: { [weak self] state in
+                self?.manButton.rx.commonButtonState.onNext(state == .man ? .selectedBorderStyle : .unselectedBorderStyle)
+                self?.womanButton.rx.commonButtonState.onNext(state == .woman ? .selectedBorderStyle : .unselectedBorderStyle)
+                self?.genderHeaderView.rx.textFieldState.onNext(.done)
+            })
+            .disposed(by: disposeBag)
+        
+    }
+    
+    func formatText(_ text: String) -> String {
+        var result = text.replacingOccurrences(of: ".", with: "")
+        
+        if result.count > 4 {
+            let index = result.index(result.startIndex, offsetBy: 4)
+            result.insert(".", at: index)
+        }
+        
+        if result.count > 7 {
+            let index = result.index(result.startIndex, offsetBy: 7)
+            result.insert(".", at: index)
+        }
+        
+        return result
     }
     
 }
-//
-//extension UserInfoEntryViewController: UITextFieldDelegate {
-//    
-//    func textFieldDidBeginEditing(_ textField: UITextField) {
-//        let animator = UIViewPropertyAnimator(duration: 0.2, curve: .easeInOut) {
-//            textField.layer.borderWidth = 1
-//            textField.layer.borderColor = UIColor.mainOrange500.cgColor
-//            textField.layoutIfNeeded()
-//        }
-//        
-//        animator.startAnimation()
-//    }
-//    
-//    func textFieldDidEndEditing(_ textField: UITextField) {
-//        let animator = UIViewPropertyAnimator(duration: 0.2, curve: .easeInOut) {
-//            textField.layer.borderWidth = 1
-//            textField.layer.borderColor = UIColor.grayScale100.cgColor
-//            textField.layoutIfNeeded()
-//        }
-//        
-//        animator.startAnimation()
-//    }
-//    
-//    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-//        
-//        if nicknameTextField == self.nicknameTextField {
-//            self.bitthTextField.becomeFirstResponder()
-//        }
-//        
-//        textField.resignFirstResponder()
-//        return true
-//    }
-//}
