@@ -38,6 +38,9 @@ let project = Project(
                 .external(name: "ReactorKit"),
                 .external(name: "RxSwift"),
                 .external(name: "RxCocoa"),
+                .external(name: "KakaoSDKAuth"),
+                .external(name: "FirebaseAuth"),
+                .external(name: "GoogleSignIn")
             ]
         ),
         .target(
