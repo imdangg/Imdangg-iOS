@@ -17,15 +17,6 @@ class UserInfoEntryViewController: UIViewController, View {
     
     var disposeBag: DisposeBag = DisposeBag()
     
-    init(reactor: UserInfoEntryReactor) {
-        super.init(nibName: nil, bundle: nil)
-        self.reactor = reactor
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     private var mainTitle = UILabel().then {
         $0.text = "기본정보입력"
         $0.font = .pretenExtraBold(26)
@@ -44,16 +35,25 @@ class UserInfoEntryViewController: UIViewController, View {
     
     private var birthHeaderView = UserInfoEntryHeaderView(title: "생년월일")
     private var birthTextField = CommomTextField(placeholderText: "2000.01.01", textfieldType: .numberPad)
-    private var genderHeaderView = UserInfoEntryHeaderView(title: "성별")
-    private var manButton = CommonButton(title: "남자")
-    private var womanButton = CommonButton(title: "여자")
     
-    private var submitButton = CommonButton(title: "다음")
-     
+    private var genderHeaderView = UserInfoEntryHeaderView(title: "성별")
+    private var manButton = CommonButton(title: "남자", initialButtonType: .unselectedBorderStyle)
+    private var womanButton = CommonButton(title: "여자", initialButtonType: .unselectedBorderStyle)
+    
+    private var submitButton = CommonButton(title: "다음", initialButtonType: .disabled)
     
     private lazy var stackView = UIStackView().then {
         $0.isUserInteractionEnabled = false
         [mainTitle, subTitle, nicknameHeaderView, nicknameTextField, birthHeaderView, birthTextField, genderHeaderView, manButton, womanButton, submitButton].forEach { view.addSubview($0) }
+    }
+    
+    init(reactor: UserInfoEntryReactor) {
+        super.init(nibName: nil, bundle: nil)
+        self.reactor = reactor
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
    override func viewDidLoad() {
@@ -151,7 +151,7 @@ class UserInfoEntryViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         nicknameTextField.rx.controlEvent(.primaryActionTriggered)
-            .subscribe(onNext: {[weak self] in self?.birthTextField.becomeFirstResponder()})
+            .subscribe(onNext: {[weak self] in self?.nicknameTextField.resignFirstResponder()})
             .disposed(by: disposeBag)
         
         nicknameTextField.rx.controlEvent([.editingDidBegin])
@@ -161,21 +161,21 @@ class UserInfoEntryViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         nicknameTextField.rx.controlEvent([.editingDidEnd])
-            .map { Reactor.Action.changeNicknameTextFieldState(.done)}
-            .bind(to: reactor.action)
-            .disposed(by: disposeBag)
-
-        manButton.rx.tap
-            .map{ Reactor.Action.tapGenderButton(.man)}
-            .bind(to: reactor.action)
-            .disposed(by: disposeBag)
-        
-        womanButton.rx.tap
-            .map{ Reactor.Action.tapGenderButton(.woman)}
+            .map { [weak self] in
+                guard let text = self?.nicknameTextField.text, !text.isEmpty else {
+                    self?.nicknameHeaderView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
+                    return Reactor.Action.changeNicknameTextFieldState(.error)
+                }
+                return Reactor.Action.changeNicknameTextFieldState(.done)
+            }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         // birth
+        nicknameTextField.rx.controlEvent(.primaryActionTriggered)
+            .subscribe(onNext: {[weak self] in self?.birthTextField.resignFirstResponder()})
+            .disposed(by: disposeBag)
+        
         birthTextField.rx.controlEvent([.editingDidBegin])
             .asDriver()
             .map { Reactor.Action.changeBirthTextFieldState(.editing) }
@@ -183,7 +183,13 @@ class UserInfoEntryViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         birthTextField.rx.controlEvent([.editingDidEnd])
-            .map { Reactor.Action.changeBirthTextFieldState(.done)}
+            .map { [weak self] in
+                guard let text = self?.birthTextField.text, !text.isEmpty else {
+                    self?.birthHeaderView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
+                    return Reactor.Action.changeBirthTextFieldState(.error)
+                }
+                return Reactor.Action.changeBirthTextFieldState(.done)
+            }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -197,19 +203,25 @@ class UserInfoEntryViewController: UIViewController, View {
             .bind(to: birthTextField.rx.text)
             .disposed(by: disposeBag)
         
-        // submitButton
-        submitButton.rx.tap
-            .map{ Reactor.Action.submitButtonTapped }
+        
+        // gender
+        manButton.rx.tap
+            .map{ Reactor.Action.tapGenderButton(.man)}
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
-
-        Observable.just(.disabled)
-            .bind(to: submitButton.rx.commonButtonState)
+        
+        womanButton.rx.tap
+            .map{ Reactor.Action.tapGenderButton(.woman)}
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         
-        
-        // r > v
+        // submitButton
+//        submitButton.rx.tap
+//            .map{ Reactor.Action.submitButtonTapped }
+//            .bind(to: reactor.action)
+//            .disposed(by: disposeBag)
+
         reactor.state
             .map { $0.nicknameTextfieldState }
             .distinctUntilChanged()
@@ -230,6 +242,26 @@ class UserInfoEntryViewController: UIViewController, View {
             })
             .disposed(by: disposeBag)
         
+        reactor.state
+            .map { state in
+                let isNicknameValid = state.nicknameTextfieldState == .done
+                let isBirthValid = state.bitrhTextFieldState == .done
+                let isGenderSelected = state.selectedGender != .none
+                
+                return isNicknameValid && isBirthValid && isGenderSelected
+            }
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] isEnableSubmitButton in
+                self?.reactor?.action.onNext(.checkEnableSubmitButton(isEnableSubmitButton))
+            })
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.submitButtonEnabled }
+            .subscribe(onNext: { [weak self] isEnabled in
+                self?.submitButton.rx.commonButtonState.onNext(isEnabled ? .enabled : .disabled)
+            })
+            .disposed(by: disposeBag)
     }
     
     func formatText(_ text: String) -> String {

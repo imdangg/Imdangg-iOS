@@ -23,31 +23,32 @@ class UserInfoEntryReactor: Reactor {
         var nicknameTextfieldState: TextFieldState
         var bitrhTextFieldState: TextFieldState
         var selectedGender: Gender
-        var submitButtonEnabled: CommonButtonType
+        var submitButtonEnabled: Bool
     }
     
     // v -> r
     enum Action {
-        case submmited(String)
+       
         case changeNicknameTextFieldState(TextFieldState)
         case changeBirthTextFieldState(TextFieldState)
         case tapGenderButton(Gender)
-        case submitButtonTapped
+        case checkEnableSubmitButton(Bool)
+       // case submitButtonTapped
     }
     
     // r -> v
     enum Mutation {
-        case isloginSusses(Bool)
+        
         case changeNicknameTextFieldState(TextFieldState)
         case changeBirthTextFieldState(TextFieldState)
         case changeSelectedGender(Gender)
-        case isEnableSubmitButton(TextFieldState, TextFieldState)
+        case isEnableSubmitButton(Bool)
     }
     
     var initialState: State
     
     init() {
-        self.initialState = State(loginResult: false, nicknameTextfieldState: .normal, bitrhTextFieldState: .normal, selectedGender: .none ,submitButtonEnabled: .enabled)
+        self.initialState = State(loginResult: false, nicknameTextfieldState: .normal, bitrhTextFieldState: .normal, selectedGender: .none ,submitButtonEnabled: false)
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -58,15 +59,14 @@ class UserInfoEntryReactor: Reactor {
         case .changeBirthTextFieldState(let state):
             return Observable.just(.changeBirthTextFieldState(state))
             
-        case .submmited(let id):
-            return Observable.just(.isloginSusses(id.isEmpty ? false : true))
-            
-        case .submitButtonTapped:
-            print("tap")
-            return Observable.just(.isloginSusses(true))
-            
         case .tapGenderButton(let gender):
             return Observable.just(.changeSelectedGender(gender))
+            
+//        case .submitButtonTapped:
+//            <#code#>
+            
+        case .checkEnableSubmitButton(let bool):
+            return Observable.just(.isEnableSubmitButton(bool))
         }
     }
 
@@ -74,10 +74,9 @@ class UserInfoEntryReactor: Reactor {
         var state = state
         
         switch mutation {
-        case .isloginSusses:
-            print("로그인 성공")
-            state.submitButtonEnabled = .disabled
-            
+        case .isEnableSubmitButton(let bool):
+            state.submitButtonEnabled = bool
+                
         case .changeNicknameTextFieldState(let textFieldState):
             state.nicknameTextfieldState = textFieldState
             print("nickNameTextfieldState: \(textFieldState)\n")
@@ -86,12 +85,6 @@ class UserInfoEntryReactor: Reactor {
             state.bitrhTextFieldState = textFieldState
             print("bitrhTextFieldState: \(textFieldState)\n")
             
-        case .isEnableSubmitButton(let nicknameTextField, let birthTextField):
-            if nicknameTextField == .done && birthTextField == .done {
-                state.submitButtonEnabled = .enabled
-            }else {
-                state.submitButtonEnabled = .disabled
-            }
         case .changeSelectedGender(let gender):
             state.selectedGender = gender
             print("selectedGender: \(gender)")

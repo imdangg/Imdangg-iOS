@@ -24,9 +24,11 @@ class CommonButton: UIButton {
 
     private let disposeBag = DisposeBag()
     var title: String
+    var initialButtonType: CommonButtonType
 
-    init(frame: CGRect = .zero, title: String) {
+    init(frame: CGRect = .zero, title: String, initialButtonType: CommonButtonType) {
         self.title = title
+        self.initialButtonType = initialButtonType
         super.init(frame: frame)
         setupButton()
     }
@@ -40,7 +42,7 @@ class CommonButton: UIButton {
         titleLabel?.font = .pretenSemiBold(16)
         layer.cornerRadius = 8
         clipsToBounds = true
-        setState(.enabled)
+        setState(initialButtonType)
     }
     
     func setState(_ state: CommonButtonType) {
