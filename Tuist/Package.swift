@@ -6,7 +6,7 @@
 
     let packageSettings = PackageSettings(
         productTypes: [
-            "Alamofire": .framework, // default is .staticFramework
+            "Alamofire": .framework,
             "Then": .framework,
             "SnapKit": .framework,
             "ReactorKit": .framework,
@@ -15,8 +15,7 @@
             "Kingfisher": .framework,
             "KakaoSDKAuth": .framework,
             "KakaoSDKCommon": .framework,
-            "FirebaseAuth": .framework,
-            "GoogleSignIn": .framework
+            "SharedLibraries": .framework
         ]
     )
 #endif

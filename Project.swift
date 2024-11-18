@@ -7,7 +7,7 @@ let project = Project(
             name: "imdang",
             destinations: .iOS,
             product: .app,
-            bundleId: "info.imdang.imdang",
+            bundleId: "info.apt.imdang",
             deploymentTargets: .iOS("15.0"),
             infoPlist: .extendingDefault(
                 with: [
@@ -39,20 +39,32 @@ let project = Project(
                 .external(name: "RxSwift"),
                 .external(name: "RxCocoa"),
                 .external(name: "KakaoSDKAuth"),
-                .external(name: "FirebaseAuth"),
-                .external(name: "GoogleSignIn")
+                .target(name: "SharedLibraries")
             ]
         ),
         .target(
             name: "imdangTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "io.tuist.imdangTests",
+            bundleId: "info.apt.imdangTests",
             deploymentTargets: .iOS("15.0"),
             infoPlist: .default,
             sources: ["imdang/Tests/**"],
             resources: [],
             dependencies: [.target(name: "imdang")]
+        ),
+        .target(
+            name: "SharedLibraries",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "info.imdang.SharedLibraries",
+            deploymentTargets: .iOS("15.0"),
+            infoPlist: .default,
+            sources: [],
+            dependencies: [
+                .external(name: "FirebaseAuth"),
+                .external(name: "GoogleSignIn"),
+            ]
         ),
     ]
 )
