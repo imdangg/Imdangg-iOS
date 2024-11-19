@@ -34,7 +34,9 @@ let project = Project(
                             "CFBundleTypeRole": "Editor",
                             "CFBundleURLSchemes": ["$(KAKAO_URL_KEY)"]
                         ]
-                    ]
+                    ],
+                    "KAKAO_URL_KEY": "$(KAKAO_URL_KEY)",
+                    "KAKAO_APP_KEY": "$(KAKAO_APP_KEY)"
                 ]
             ),
             sources: ["imdang/Sources/**"],
@@ -50,7 +52,8 @@ let project = Project(
                 .external(name: "ReactorKit"),
                 .external(name: "RxSwift"),
                 .external(name: "RxCocoa"),
-                .external(name: "KakaoSDKAuth"),
+                .external(name: "RxKakaoSDK"),
+//                .external(name: "KakaoSDK"),
                 .target(name: "SharedLibraries")
             ],
             settings: .settings(
