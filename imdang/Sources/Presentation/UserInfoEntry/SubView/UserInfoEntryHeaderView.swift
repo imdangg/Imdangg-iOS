@@ -12,9 +12,6 @@ import Then
 
 // bind > textFieldErrorMessage, textFieldState
 
-
-// 임시. textfield의 state로 변경될예정
-
 class UserInfoEntryHeaderView: UIView {
     
     var title: String

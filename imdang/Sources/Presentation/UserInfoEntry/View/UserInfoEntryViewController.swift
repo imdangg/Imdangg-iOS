@@ -146,10 +146,6 @@ class UserInfoEntryViewController: UIViewController, View {
     func bind(reactor: UserInfoEntryReactor) {
   
         //nickname
-        Observable.just("에러가 낫습니다.")
-            .bind(to: nicknameHeaderView.rx.textFieldErrorMessage)
-            .disposed(by: disposeBag)
-        
         nicknameTextField.rx.controlEvent(.primaryActionTriggered)
             .subscribe(onNext: {[weak self] in self?.nicknameTextField.resignFirstResponder()})
             .disposed(by: disposeBag)
@@ -161,6 +157,7 @@ class UserInfoEntryViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         nicknameTextField.rx.controlEvent([.editingDidEnd])
+            .asDriver()
             .map { [weak self] in
                 guard let text = self?.nicknameTextField.text, !text.isEmpty else {
                     self?.nicknameHeaderView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
@@ -168,7 +165,7 @@ class UserInfoEntryViewController: UIViewController, View {
                 }
                 return Reactor.Action.changeNicknameTextFieldState(.done)
             }
-            .bind(to: reactor.action)
+            .drive(reactor.action)
             .disposed(by: disposeBag)
         
         // birth
@@ -183,6 +180,7 @@ class UserInfoEntryViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         birthTextField.rx.controlEvent([.editingDidEnd])
+            .asDriver()
             .map { [weak self] in
                 guard let text = self?.birthTextField.text, !text.isEmpty else {
                     self?.birthHeaderView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
@@ -190,7 +188,7 @@ class UserInfoEntryViewController: UIViewController, View {
                 }
                 return Reactor.Action.changeBirthTextFieldState(.done)
             }
-            .bind(to: reactor.action)
+            .drive(reactor.action)
             .disposed(by: disposeBag)
         
         birthTextField.rx.text

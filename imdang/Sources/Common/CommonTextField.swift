@@ -55,14 +55,20 @@ class CommomTextField: UITextField {
     
     func setState(_ state: TextFieldState) {
         UIView.animate(withDuration: 0.1) {
+            print("setSatete: \(state)")
             switch state {
             case .normal, .done :
+                print("노말")
                 self.layer.borderColor = UIColor.grayScale100.cgColor
             case .editing :
+                print("에디팅")
                 self.layer.borderColor = UIColor.mainOrange500.cgColor
             case .error :
+                print("에러")
                 self.layer.borderColor = UIColor.error.cgColor
             }
+            self.setNeedsDisplay()
+            
         }
     }
 }
