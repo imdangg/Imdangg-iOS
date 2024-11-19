@@ -23,6 +23,18 @@ let project = Project(
                             ]
                         ]
                     ],
+                    "LSApplicationQueriesSchemes" : [
+                        "kakaokompassauth",
+                        "kakaolink",
+                        "kakaoplus",
+                        "kakaotalk"
+                    ],
+                    "CFBundleURLTypes" : [
+                        [
+                            "CFBundleTypeRole": "Editor",
+                            "CFBundleURLSchemes": ["$(KAKAO_URL_KEY)"]
+                        ]
+                    ]
                 ]
             ),
             sources: ["imdang/Sources/**"],
@@ -40,7 +52,13 @@ let project = Project(
                 .external(name: "RxCocoa"),
                 .external(name: "KakaoSDKAuth"),
                 .target(name: "SharedLibraries")
-            ]
+            ],
+            settings: .settings(
+                configurations: [
+                    .debug(name: "Debug", xcconfig: "imdang/Config/Config.xcconfig"),
+                    .release(name: "Release", xcconfig: "imdang/Config/Config.xcconfig")
+                ]
+            )
         ),
         .target(
             name: "imdangTests",
