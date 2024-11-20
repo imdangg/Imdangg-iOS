@@ -72,14 +72,11 @@ final class SigninViewController: UIViewController, View {
         configButtons()
         addSubView()
         makeConstraints()
+        bind(reactor: reactor)
     }
     
     private func configButtons() {
         let vc = OnboardingContainerViewController()
-        
-        kakaoButton.rx.tap.subscribe(onNext: {
-            self.navigationController?.pushViewController(vc, animated: true)
-        }).disposed(by: disposeBag)
         
         googleButton.rx.tap.subscribe(onNext: {
             self.navigationController?.pushViewController(vc, animated: true)
@@ -88,6 +85,7 @@ final class SigninViewController: UIViewController, View {
 //        appleButton.rx.tap.subscribe(onNext: {
 //            self.navigationController?.pushViewController(vc, animated: true)
 //        }).disposed(by: disposeBag)
+
     }
     
     private func addSubView() {
@@ -154,6 +152,22 @@ final class SigninViewController: UIViewController, View {
                 }
             })
             .disposed(by: disposeBag)
+ 
+        kakaoButton.rx.tap
+            .map { SigninReactor.Action.tapKakaoButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.isKakaoSigninSuccess }
+            .distinctUntilChanged()
+            .filter { $0 }
+            .subscribe(onNext: { [weak self] _ in
+                let vc = OnboardingContainerViewController()
+                self?.navigationController?.pushViewController(vc, animated: true)
+            })
+            .disposed(by: disposeBag)
     }
+
 }
 
