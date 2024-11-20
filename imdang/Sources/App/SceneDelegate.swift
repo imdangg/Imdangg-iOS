@@ -18,21 +18,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.makeKeyAndVisible()
         
     }
-    
-    // 사용법 :
-    // (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(UIViewController(), animated: true)
-    /// 루트뷰 변경
-    func changeRootView(_ viewController: UIViewController, animated: Bool) {
-        guard let window = self.window else { return }
-        
-        if animated {
-            let transition = CATransition()
-            transition.duration = 0.3
-            transition.type = CATransitionType.push
-            transition.subtype = CATransitionSubtype.fromRight
-            window.layer.add(transition, forKey: kCATransition)
-        }
-        window.rootViewController = viewController
-        window.makeKeyAndVisible()
-    }
 }
