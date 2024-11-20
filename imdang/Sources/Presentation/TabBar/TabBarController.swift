@@ -12,6 +12,7 @@ class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setValue(CustomTabBar(), forKey: "tabBar")
+        UITabBar.appearance().backgroundColor = .white
         self.navigationItem.hidesBackButton = true
         
         configureTabBar()
@@ -31,17 +32,17 @@ class TabBarController: UITabBarController {
     }
     
     private func configureTabBar() {
-        let firstViewController = ViewController()
-        let secondViewController = ViewController()
-        let thirdViewController = ViewController()
+        let firstViewController = HomeContainerViewController()
+        let secondViewController = EmptyViewController(labelText: "작성뷰")
+        let thirdViewController = EmptyViewController(labelText: "보관함")
         
         let firstNav = UINavigationController(rootViewController: firstViewController)
         let secondNav = UINavigationController(rootViewController: secondViewController)
         let thirdNav = UINavigationController(rootViewController: thirdViewController)
         
-        firstNav.tabBarItem = UITabBarItem(title: "홈", image: ImdangImages.Image(resource: .tabHomeIcon).withRenderingMode(.alwaysOriginal), tag: 0)
+        firstNav.tabBarItem = UITabBarItem(title: "홈", image: ImdangImages.Image(resource: .tabHomeIcon), tag: 0)
         secondNav.tabBarItem = UITabBarItem(title: "", image: ImdangImages.Image(resource: .tabWritingIcon).withRenderingMode(.alwaysOriginal), tag: 1)
-        thirdNav.tabBarItem = UITabBarItem(title: "보관함", image: ImdangImages.Image(resource: .tabSavedIcon).withRenderingMode(.alwaysOriginal), tag: 2)
+        thirdNav.tabBarItem = UITabBarItem(title: "보관함", image: ImdangImages.Image(resource: .tabSavedIcon), tag: 2)
         
         viewControllers = [firstNav, secondNav, thirdNav]
         
@@ -53,7 +54,6 @@ class TabBarController: UITabBarController {
     private func makeBoundaryLine() {
         let topBorder = UIView()
         topBorder.backgroundColor = UIColor.lightGray.withAlphaComponent(0.2)
-        topBorder.translatesAutoresizingMaskIntoConstraints = false
         
         tabBar.addSubview(topBorder)
         

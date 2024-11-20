@@ -7,7 +7,7 @@ let project = Project(
             name: "imdang",
             destinations: .iOS,
             product: .app,
-            bundleId: "info.imdang.imdang",
+            bundleId: "info.apt.imdang",
             deploymentTargets: .iOS("15.0"),
             infoPlist: .extendingDefault(
                 with: [
@@ -23,6 +23,20 @@ let project = Project(
                             ]
                         ]
                     ],
+                    "LSApplicationQueriesSchemes" : [
+                        "kakaokompassauth",
+                        "kakaolink",
+                        "kakaoplus",
+                        "kakaotalk"
+                    ],
+                    "CFBundleURLTypes" : [
+                        [
+                            "CFBundleTypeRole": "Editor",
+                            "CFBundleURLSchemes": ["$(KAKAO_URL_KEY)"]
+                        ]
+                    ],
+                    "KAKAO_URL_KEY": "$(KAKAO_URL_KEY)",
+                    "KAKAO_APP_KEY": "$(KAKAO_APP_KEY)"
                 ]
             ),
             sources: ["imdang/Sources/**"],
@@ -38,18 +52,40 @@ let project = Project(
                 .external(name: "ReactorKit"),
                 .external(name: "RxSwift"),
                 .external(name: "RxCocoa"),
-            ]
+                .external(name: "RxKakaoSDK"),
+//                .external(name: "KakaoSDK"),
+                .target(name: "SharedLibraries")
+            ],
+            settings: .settings(
+                configurations: [
+                    .debug(name: "Debug", xcconfig: "imdang/Config/Config.xcconfig"),
+                    .release(name: "Release", xcconfig: "imdang/Config/Config.xcconfig")
+                ]
+            )
         ),
         .target(
             name: "imdangTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "io.tuist.imdangTests",
+            bundleId: "info.apt.imdangTests",
             deploymentTargets: .iOS("15.0"),
             infoPlist: .default,
             sources: ["imdang/Tests/**"],
             resources: [],
             dependencies: [.target(name: "imdang")]
+        ),
+        .target(
+            name: "SharedLibraries",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "info.imdang.SharedLibraries",
+            deploymentTargets: .iOS("15.0"),
+            infoPlist: .default,
+            sources: [],
+            dependencies: [
+                .external(name: "FirebaseAuth"),
+                .external(name: "GoogleSignIn"),
+            ]
         ),
     ]
 )

@@ -62,8 +62,6 @@ class OnboardingPageViewController: UIPageViewController, UIPageViewControllerDa
             } else {
                 let vc = UserInfoEntryViewController(reactor: UserInfoEntryReactor())
                 self.navigationController?.pushViewController(vc, animated: true)
-//                let vc = TabBarController()
-//                self.navigationController?.pushViewController(vc, animated: true)
             }
         }
     }
