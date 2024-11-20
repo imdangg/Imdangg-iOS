@@ -22,7 +22,6 @@ final class UserInfoEntryReactor: Reactor {
         var birthTextFieldState: TextFieldState
         var selectedGender: Gender
         var submitButtonEnabled: Bool
-//        var isSubmitButtonTapped: Bool
     }
     
     // v -> r
@@ -32,7 +31,6 @@ final class UserInfoEntryReactor: Reactor {
         case changeBirthTextFieldState(TextFieldState)
         case tapGenderButton(Gender)
         case checkEnableSubmitButton(Bool)
-//        case submitButtonTapped
     }
     
     // r -> v
@@ -42,7 +40,6 @@ final class UserInfoEntryReactor: Reactor {
         case changeBirthTextFieldState(TextFieldState)
         case changeSelectedGender(Gender)
         case isEnableSubmitButton(Bool)
-//        case submitButtonTapped
     }
     
     var initialState: State
@@ -61,10 +58,7 @@ final class UserInfoEntryReactor: Reactor {
             
         case .tapGenderButton(let gender):
             return Observable.just(.changeSelectedGender(gender))
-            
-//        case .submitButtonTapped:
-//            return Observable.just(.submitButtonTapped)
-            
+
         case .checkEnableSubmitButton(let bool):
             return Observable.just(.isEnableSubmitButton(bool))
         }
@@ -88,9 +82,7 @@ final class UserInfoEntryReactor: Reactor {
         case .changeSelectedGender(let gender):
             state.selectedGender = gender
             print("selectedGender: \(gender)")
-            
-//        case .submitButtonTapped:
-//            state.isSubmitButtonTapped = true
+
         }
         return state
     }
