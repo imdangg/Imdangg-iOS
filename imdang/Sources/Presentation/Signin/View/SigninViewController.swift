@@ -10,10 +10,19 @@ import SnapKit
 import RxSwift
 import RxCocoa
 import Then
+import ReactorKit
 
-final class SigninViewController: UIViewController {
-    let disposeBag = DisposeBag()
-    let reactor = SigninReactor()
+final class SigninViewController: UIViewController, View {
+    var disposeBag = DisposeBag()
+    
+    init(reactor: SigninReactor) {
+        super.init(nibName: nil, bundle: nil)
+        self.reactor = reactor
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     let kakaoButton = UIButton().then {
         $0.backgroundColor = UIColor(red: 1.0, green: 0.89, blue: 0.0, alpha: 1.0)
@@ -73,10 +82,10 @@ final class SigninViewController: UIViewController {
             self.navigationController?.pushViewController(vc, animated: true)
         }).disposed(by: disposeBag)
         
-        appleButton.rx.tap.subscribe(onNext: {
+//        appleButton.rx.tap.subscribe(onNext: {
 //            self.navigationController?.pushViewController(vc, animated: true)
-            self.reactor.kakaoUnlink()
-        }).disposed(by: disposeBag)
+//        }).disposed(by: disposeBag)
+
     }
     
     private func addSubView() {
@@ -123,7 +132,27 @@ final class SigninViewController: UIViewController {
         }
     }
     
-    private func bind(reactor: SigninReactor) {
+    func bind(reactor: SigninReactor) {
+        let vc = OnboardingContainerViewController()
+        
+        self.appleButton.rx.tap
+            .map { SigninReactor.Action.tapAppleButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+
+        reactor.state.map { $0.appleLoginResult }
+            .compactMap { $0 }
+            .subscribe(onNext: { result in
+                switch result {
+                case .success(let credential):
+                    print("Apple ID 로그인 성공:", credential.user)
+                    self.navigationController?.pushViewController(vc, animated: true)
+                case .failure(let error):
+                    print("로그인 실패:", error.localizedDescription)
+                }
+            })
+            .disposed(by: disposeBag)
+ 
         kakaoButton.rx.tap
             .map { SigninReactor.Action.tapKakaoButton }
             .bind(to: reactor.action)
