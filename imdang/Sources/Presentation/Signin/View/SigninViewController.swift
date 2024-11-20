@@ -13,6 +13,7 @@ import Then
 
 final class SigninViewController: UIViewController {
     let disposeBag = DisposeBag()
+    let reactor = SigninReactor()
     
     let kakaoButton = UIButton().then {
         $0.backgroundColor = UIColor(red: 1.0, green: 0.89, blue: 0.0, alpha: 1.0)
@@ -62,21 +63,19 @@ final class SigninViewController: UIViewController {
         configButtons()
         addSubView()
         makeConstraints()
+        bind(reactor: reactor)
     }
     
     private func configButtons() {
         let vc = OnboardingContainerViewController()
-        
-        kakaoButton.rx.tap.subscribe(onNext: {
-            self.navigationController?.pushViewController(vc, animated: true)
-        }).disposed(by: disposeBag)
         
         googleButton.rx.tap.subscribe(onNext: {
             self.navigationController?.pushViewController(vc, animated: true)
         }).disposed(by: disposeBag)
         
         appleButton.rx.tap.subscribe(onNext: {
-            self.navigationController?.pushViewController(vc, animated: true)
+//            self.navigationController?.pushViewController(vc, animated: true)
+            self.reactor.kakaoUnlink()
         }).disposed(by: disposeBag)
     }
     
@@ -123,5 +122,23 @@ final class SigninViewController: UIViewController {
             $0.leading.equalTo(appleButton.snp.leading).offset(20)
         }
     }
+    
+    private func bind(reactor: SigninReactor) {
+        kakaoButton.rx.tap
+            .map { SigninReactor.Action.tapKakaoButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.isKakaoSigninSuccess }
+            .distinctUntilChanged()
+            .filter { $0 }
+            .subscribe(onNext: { [weak self] _ in
+                let vc = OnboardingContainerViewController()
+                self?.navigationController?.pushViewController(vc, animated: true)
+            })
+            .disposed(by: disposeBag)
+    }
+
 }
 
