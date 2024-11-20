@@ -60,8 +60,10 @@ class OnboardingPageViewController: UIPageViewController, UIPageViewControllerDa
                 setViewControllers([nextVC], direction: .forward, animated: true, completion: nil)
                 pageControl.currentPage += 1
             } else {
-                let vc = TabBarController()
+                let vc = UserInfoEntryViewController(reactor: UserInfoEntryReactor())
                 self.navigationController?.pushViewController(vc, animated: true)
+//                let vc = TabBarController()
+//                self.navigationController?.pushViewController(vc, animated: true)
             }
         }
     }

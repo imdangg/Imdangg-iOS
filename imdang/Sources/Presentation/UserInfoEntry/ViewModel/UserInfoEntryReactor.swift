@@ -11,19 +11,18 @@ import ReactorKit
 
 enum Gender {
     case none
-    case man
-    case woman
+    case male
+    case female
 }
 
-class UserInfoEntryReactor: Reactor {
+final class UserInfoEntryReactor: Reactor {
     
     struct State {
-        var loginResult: Bool
-        
-        var nicknameTextfieldState: TextFieldState
-        var bitrhTextFieldState: TextFieldState
+        var nicknameTextFieldState: TextFieldState
+        var birthTextFieldState: TextFieldState
         var selectedGender: Gender
         var submitButtonEnabled: Bool
+//        var isSubmitButtonTapped: Bool
     }
     
     // v -> r
@@ -33,7 +32,7 @@ class UserInfoEntryReactor: Reactor {
         case changeBirthTextFieldState(TextFieldState)
         case tapGenderButton(Gender)
         case checkEnableSubmitButton(Bool)
-       // case submitButtonTapped
+//        case submitButtonTapped
     }
     
     // r -> v
@@ -43,12 +42,13 @@ class UserInfoEntryReactor: Reactor {
         case changeBirthTextFieldState(TextFieldState)
         case changeSelectedGender(Gender)
         case isEnableSubmitButton(Bool)
+//        case submitButtonTapped
     }
     
     var initialState: State
     
     init() {
-        self.initialState = State(loginResult: false, nicknameTextfieldState: .normal, bitrhTextFieldState: .normal, selectedGender: .none ,submitButtonEnabled: false)
+        self.initialState = State(nicknameTextFieldState: .normal, birthTextFieldState: .normal, selectedGender: .none,  submitButtonEnabled: false)
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -63,7 +63,7 @@ class UserInfoEntryReactor: Reactor {
             return Observable.just(.changeSelectedGender(gender))
             
 //        case .submitButtonTapped:
-//            <#code#>
+//            return Observable.just(.submitButtonTapped)
             
         case .checkEnableSubmitButton(let bool):
             return Observable.just(.isEnableSubmitButton(bool))
@@ -78,16 +78,19 @@ class UserInfoEntryReactor: Reactor {
             state.submitButtonEnabled = bool
                 
         case .changeNicknameTextFieldState(let textFieldState):
-            state.nicknameTextfieldState = textFieldState
+            state.nicknameTextFieldState = textFieldState
             print("nickNameTextfieldState: \(textFieldState)\n")
             
         case .changeBirthTextFieldState(let textFieldState):
-            state.bitrhTextFieldState = textFieldState
+            state.birthTextFieldState = textFieldState
             print("bitrhTextFieldState: \(textFieldState)\n")
             
         case .changeSelectedGender(let gender):
             state.selectedGender = gender
             print("selectedGender: \(gender)")
+            
+//        case .submitButtonTapped:
+//            state.isSubmitButtonTapped = true
         }
         return state
     }

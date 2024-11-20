@@ -7,8 +7,10 @@
 
 import Foundation
 import UIKit
+import SnapKit
 import RxSwift
 import RxCocoa
+import Then
 
 // TODO: clear button, dateFormatter
 
@@ -23,7 +25,14 @@ class CommomTextField: UITextField {
     
     var placeholderText: String
     var textfieldType: UIKeyboardType
-    
+
+//    lazy var clearButton = UIButton().then {
+//        $0.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+//        $0.tintColor = .grayScale100
+//        $0.addTarget(self, action: #selector(clearText), for: .touchUpInside)
+//        $0.frame = CGRect(x: 0.0, y: 0.0, width: 36.0, height: 0.0)
+//    }
+   
     init(frame: CGRect = .zero, placeholderText: String, textfieldType: UIKeyboardType) {
         self.placeholderText = placeholderText
         self.textfieldType = textfieldType
@@ -36,7 +45,6 @@ class CommomTextField: UITextField {
     }
     
     func setAttribute() {
-        self.clearButtonMode = .whileEditing
         self.font = .pretenSemiBold(16)
         self.layer.borderColor = UIColor.grayScale100.cgColor
         self.textColor = UIColor.grayScale900
@@ -48,8 +56,10 @@ class CommomTextField: UITextField {
         self.layer.borderWidth = 1
         autocapitalizationType = .none
         self.placeholder = placeholderText
-        self.rightViewMode = .always
-        self.clearButtonMode = .always
+    
+//        self.rightView = clearButton
+        self.rightViewMode = .whileEditing
+        self.clearButtonMode = .whileEditing
         self.keyboardType = textfieldType
     }
     
@@ -58,19 +68,21 @@ class CommomTextField: UITextField {
             print("setSatete: \(state)")
             switch state {
             case .normal, .done :
-                print("노말")
                 self.layer.borderColor = UIColor.grayScale100.cgColor
             case .editing :
-                print("에디팅")
                 self.layer.borderColor = UIColor.mainOrange500.cgColor
             case .error :
-                print("에러")
                 self.layer.borderColor = UIColor.error.cgColor
             }
             self.setNeedsDisplay()
-            
         }
     }
+
+//    @objc func clearText() {
+//        DispatchQueue.main.async {
+//            self.text = ""
+//        }
+//    }
 }
 
 extension Reactive where Base: CommomTextField {

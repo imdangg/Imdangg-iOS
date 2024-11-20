@@ -11,12 +11,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let viewController = SigninViewController()
         viewController.view.backgroundColor = .white
-        
-//        let viewController = UserInfoEntryViewController(reactor: UserInfoEntryReactor())
-//        viewController.view.backgroundColor = UIColor.grayScale25
-        viewController.hideKeyboardwhenTappedAround()
-        
+
         let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.hideKeyboardwhenTappedAround()
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
