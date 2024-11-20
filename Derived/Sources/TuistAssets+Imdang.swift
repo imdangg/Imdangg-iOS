@@ -30,6 +30,8 @@ public enum ImdangAsset: Sendable {
     public static let tabHomeIcon = ImdangImages(name: "tabHomeIcon")
     public static let tabSavedIcon = ImdangImages(name: "tabSavedIcon")
     public static let tabWritingIcon = ImdangImages(name: "tabWritingIcon")
+    public static let alarm = ImdangImages(name: "Alarm")
+    public static let person = ImdangImages(name: "Person")
   }
   public enum PreviewAssets {
   }
