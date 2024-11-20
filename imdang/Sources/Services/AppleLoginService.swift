@@ -11,6 +11,7 @@ import RxSwift
 
 class AppleLoginService: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
     
+    static let shared = AppleLoginService()
     let loginResult = PublishSubject<Result<ASAuthorizationAppleIDCredential, Error>>()
     
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {

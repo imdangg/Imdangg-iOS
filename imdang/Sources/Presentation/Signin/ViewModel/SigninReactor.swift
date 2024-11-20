@@ -16,7 +16,7 @@ final class SigninReactor: Reactor {
         var isGoogleSigninTapped: Bool = false
         var isAppleSigninTapped: Bool = false
         
-        var loginResult: Result<ASAuthorizationAppleIDCredential, Error>?
+        var appleLoginResult: Result<ASAuthorizationAppleIDCredential, Error>?
     }
     
     enum Action {
@@ -30,11 +30,11 @@ final class SigninReactor: Reactor {
         case setGoogleSigninTapped(Bool)
         case setAppleSigninTapped(Bool)
         
-        case setLoginResult(Result<ASAuthorizationAppleIDCredential, Error>)
+        case setAppleLoginResult(Result<ASAuthorizationAppleIDCredential, Error>)
     }
     
     let initialState = State()
-    private let appleLoginService = AppleLoginService()
+    private let appleLoginService = AppleLoginService.shared
 
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -47,7 +47,7 @@ final class SigninReactor: Reactor {
                 print("tap apple")
                 appleLoginService.startSignInWithApple()
                 return appleLoginService.loginResult
-                .map{Mutation.setLoginResult($0) }
+                .map{Mutation.setAppleLoginResult($0) }
         }
     }
     
@@ -62,8 +62,8 @@ final class SigninReactor: Reactor {
             case .setAppleSigninTapped(let isTapped):
                 newState.isAppleSigninTapped = isTapped
                
-            case .setLoginResult(let result):
-                newState.loginResult = result
+            case .setAppleLoginResult(let result):
+                newState.appleLoginResult = result
         }
         
         return newState
