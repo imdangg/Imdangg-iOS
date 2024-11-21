@@ -23,6 +23,7 @@ enum ServerAuthError: Error {
 }
 
 final class SigninReactor: Reactor {
+    let disposeBag = DisposeBag()
     
     struct State {
         var isKakaoSigninTapped: Bool = false
@@ -46,6 +47,7 @@ final class SigninReactor: Reactor {
         case setAppleSigninTapped(Bool)
         
         case setAppleLoginResult(Result<ASAuthorizationAppleIDCredential, Error>)
+        case setKakaoSigninSuccess(Bool)
     }
     
     let initialState = State()
@@ -54,16 +56,16 @@ final class SigninReactor: Reactor {
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-            case .tapKakaoButton:
-               return kakaoSignIn()
-            case .tapGoogleButton:
-                return Observable.just(.setGoogleSigninTapped(true))
-            case .tapAppleButton:
-                print("tap apple")
-                appleLoginService.startSignInWithApple()
-                return appleLoginService.loginResult
+        case .tapKakaoButton:
+            return kakaoSignIn()
+        case .tapGoogleButton:
+            return Observable.just(.setGoogleSigninTapped(true))
+        case .tapAppleButton:
+            print("tap apple")
+            appleLoginService.startSignInWithApple()
+            return appleLoginService.loginResult
                 .map{Mutation.setAppleLoginResult($0) }
-        case setKakaoSigninSuccess(Bool)
+        }
     }
     
     func reduce(state: State, mutation: Mutation) -> State {

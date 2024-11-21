@@ -72,7 +72,7 @@ final class SigninViewController: UIViewController, View {
         configButtons()
         addSubView()
         makeConstraints()
-        bind(reactor: reactor)
+        bind(reactor: reactor!)
     }
     
     private func configButtons() {
