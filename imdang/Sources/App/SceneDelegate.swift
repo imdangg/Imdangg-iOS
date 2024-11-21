@@ -10,7 +10,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let viewController = SigninViewController(reactor: SigninReactor())
+        let viewController = SigninViewController()
+        let reactor = SigninReactor()
+        viewController.reactor = reactor
         viewController.view.backgroundColor = .white
 
         let navigationController = UINavigationController(rootViewController: viewController)

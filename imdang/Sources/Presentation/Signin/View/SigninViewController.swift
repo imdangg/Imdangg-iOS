@@ -15,15 +15,6 @@ import ReactorKit
 final class SigninViewController: UIViewController, View {
     var disposeBag = DisposeBag()
     
-    init(reactor: SigninReactor) {
-        super.init(nibName: nil, bundle: nil)
-        self.reactor = reactor
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     let kakaoButton = UIButton().then {
         $0.backgroundColor = UIColor(red: 1.0, green: 0.89, blue: 0.0, alpha: 1.0)
         $0.setTitle("카카오 로그인", for: .normal)
@@ -72,7 +63,6 @@ final class SigninViewController: UIViewController, View {
         configButtons()
         addSubView()
         makeConstraints()
-        bind(reactor: reactor!)
     }
     
     private func configButtons() {
