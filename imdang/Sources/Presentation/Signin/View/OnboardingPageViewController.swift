@@ -60,7 +60,8 @@ class OnboardingPageViewController: UIPageViewController, UIPageViewControllerDa
                 setViewControllers([nextVC], direction: .forward, animated: true, completion: nil)
                 pageControl.currentPage += 1
             } else {
-                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+                let vc = UserInfoEntryViewController(reactor: UserInfoEntryReactor())
+                self.navigationController?.pushViewController(vc, animated: true)
             }
         }
     }
