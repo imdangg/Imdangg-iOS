@@ -39,10 +39,10 @@ let project = Project(
                     "KAKAO_APP_KEY": "$(KAKAO_APP_KEY)"
                 ]
             ),
-            sources: ["imdang/Sources/**"],
+            sources: ["Sources/**"],
             resources: [
-                "imdang/Resources/**",
-                "imdang/Sources/App/LaunchScreen.storyboard",
+                "Resources/**",
+                "Sources/App/LaunchScreen.storyboard",
             ],
             dependencies: [
                 .external(name: "Kingfisher"),
@@ -58,8 +58,8 @@ let project = Project(
             ],
             settings: .settings(
                 configurations: [
-                    .debug(name: "Debug", xcconfig: "imdang/Config/Config.xcconfig"),
-                    .release(name: "Release", xcconfig: "imdang/Config/Config.xcconfig")
+                    .debug(name: "Debug", xcconfig: "Config/Config.xcconfig"),
+                    .release(name: "Release", xcconfig: "Config/Config.xcconfig")
                 ]
             )
         ),
@@ -70,7 +70,7 @@ let project = Project(
             bundleId: "info.apt.imdangTests",
             deploymentTargets: .iOS("15.0"),
             infoPlist: .default,
-            sources: ["imdang/Tests/**"],
+            sources: ["Tests/**"],
             resources: [],
             dependencies: [.target(name: "imdang")]
         ),
