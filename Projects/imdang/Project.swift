@@ -54,6 +54,7 @@ let project = Project(
                 .external(name: "RxCocoa"),
                 .external(name: "RxKakaoSDK"),
 //                .external(name: "KakaoSDK"),
+                .project(target: "NetworkKit", path: "../NetworkKit"),
                 .target(name: "SharedLibraries")
             ],
             settings: .settings(
