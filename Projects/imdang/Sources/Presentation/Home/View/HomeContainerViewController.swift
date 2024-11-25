@@ -31,12 +31,10 @@ class HomeContainerViewController: UIViewController {
     
     private let alramButton = UIButton().then {
         $0.setImage(ImdangImages.Image(resource: .alarm), for: .normal)
-        $0.frame.size = CGSize(width: 40, height: 40)
     }
     
     private let myPageButton = UIButton().then {
         $0.setImage(ImdangImages.Image(resource: .person), for: .normal)
-        $0.frame.size = CGSize(width: 40, height: 40)
     }
     
     private let searchView = UIView().then {
@@ -101,21 +99,43 @@ class HomeContainerViewController: UIViewController {
     }
     
     private func configNavigationBarItem() {
-        let leftStackView = UIStackView.init(arrangedSubviews: [searchButton, exchangeButton])
-        leftStackView.distribution = .equalSpacing
-        leftStackView.axis = .horizontal
-        leftStackView.alignment = .center
-        leftStackView.spacing = 24
+        let leftStackView = UIStackView(arrangedSubviews: [searchButton, exchangeButton]).then {
+            $0.distribution = .equalSpacing
+            $0.axis = .horizontal
+            $0.alignment = .center
+            $0.spacing = 26
+        }
         
+        let rightStackView = UIStackView(arrangedSubviews: [alramButton, myPageButton]).then {
+            $0.distribution = .equalSpacing
+            $0.axis = .horizontal
+            $0.alignment = .center
+            $0.spacing = 18
+        }
         
-        let rightStackView = UIStackView.init(arrangedSubviews: [alramButton, myPageButton])
-        rightStackView.distribution = .equalSpacing
-        rightStackView.axis = .horizontal
-        rightStackView.alignment = .center
-        rightStackView.spacing = 16
+        let leftContainerView = UIView()
+        let rightContainerView = UIView()
         
-        let leftView = UIBarButtonItem(customView: leftStackView)
-        let rightView = UIBarButtonItem(customView: rightStackView)
+        leftContainerView.addSubview(leftStackView)
+        rightContainerView.addSubview(rightStackView)
+        
+        alramButton.snp.makeConstraints {
+            $0.width.height.equalTo(24)
+        }
+
+        myPageButton.snp.makeConstraints {
+            $0.width.height.equalTo(40)
+        }
+
+        leftStackView.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 6, bottom: 0, right: 0))
+        }
+        rightStackView.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 6))
+        }
+        
+        let leftView = UIBarButtonItem(customView: leftContainerView)
+        let rightView = UIBarButtonItem(customView: rightContainerView)
         
         navigationItem.leftBarButtonItems = [leftView]
         navigationItem.rightBarButtonItems = [rightView]
