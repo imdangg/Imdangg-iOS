@@ -14,7 +14,7 @@ import Then
 class HomeContainerViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
-    private let searchViewController = EmptyViewController(labelText: "탐색뷰")
+    private let searchViewController = SearchingViewController()
     private let exchangeViewController = EmptyViewController(labelText: "교환뷰")
     
     private let searchButton = UIButton().then {
