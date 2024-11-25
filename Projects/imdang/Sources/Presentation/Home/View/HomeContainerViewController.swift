@@ -19,13 +19,13 @@ class HomeContainerViewController: UIViewController {
     
     private let searchButton = UIButton().then {
         $0.setTitle("탐색", for: .normal)
-        $0.setTitleColor(.black, for: .normal)
+        $0.setTitleColor(.grayScale900, for: .normal)
         $0.titleLabel?.font = .pretenBold(24)
     }
     
     private let exchangeButton = UIButton().then {
         $0.setTitle("교환소", for: .normal)
-        $0.setTitleColor(.black, for: .normal)
+        $0.setTitleColor(.grayScale500, for: .normal)
         $0.titleLabel?.font = .pretenBold(24)
     }
     
@@ -101,30 +101,42 @@ class HomeContainerViewController: UIViewController {
     }
     
     private func configNavigationBarItem() {
-        let searchButton = UIBarButtonItem(customView: searchButton)
-        let exchangeButton = UIBarButtonItem(customView: exchangeButton)
-        let alramButton = UIBarButtonItem(customView: alramButton)
-        let myPageButton = UIBarButtonItem(customView: myPageButton)
+        let leftStackView = UIStackView.init(arrangedSubviews: [searchButton, exchangeButton])
+        leftStackView.distribution = .equalSpacing
+        leftStackView.axis = .horizontal
+        leftStackView.alignment = .center
+        leftStackView.spacing = 24
         
-        let fixedSpace = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
-        fixedSpace.width = 24
         
-        navigationItem.leftBarButtonItems = [searchButton, fixedSpace, exchangeButton]
-        navigationItem.rightBarButtonItems = [myPageButton, fixedSpace, alramButton]
+        let rightStackView = UIStackView.init(arrangedSubviews: [alramButton, myPageButton])
+        rightStackView.distribution = .equalSpacing
+        rightStackView.axis = .horizontal
+        rightStackView.alignment = .center
+        rightStackView.spacing = 16
+        
+        let leftView = UIBarButtonItem(customView: leftStackView)
+        let rightView = UIBarButtonItem(customView: rightStackView)
+        
+        navigationItem.leftBarButtonItems = [leftView]
+        navigationItem.rightBarButtonItems = [rightView]
     }
     
     private func bindActions() {
         searchButton.rx.tap
-            .subscribe(onNext: { _ in
-                self.searchView.isHidden = false
-                self.exchangeView.isHidden = true
+            .subscribe(onNext: { [weak self] state in
+                self?.searchView.isHidden = false
+                self?.exchangeView.isHidden = true
+                self?.exchangeButton.setTitleColor(.grayScale500, for: .normal)
+                self?.searchButton.setTitleColor(.grayScale900, for: .normal)
             })
             .disposed(by: disposeBag)
         
         exchangeButton.rx.tap
-            .subscribe(onNext: { _ in
-                self.searchView.isHidden = true
-                self.exchangeView.isHidden = false
+            .subscribe(onNext: { [weak self] state in
+                self?.searchView.isHidden = true
+                self?.exchangeView.isHidden = false
+                self?.searchButton.setTitleColor(.grayScale500, for: .normal)
+                self?.exchangeButton.setTitleColor(.grayScale900, for: .normal)
             })
             .disposed(by: disposeBag)
     }
