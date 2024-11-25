@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Combine
+import RxSwift
 public import Alamofire
 
 public final class NetworkManager: Network {
@@ -16,27 +16,32 @@ public final class NetworkManager: Network {
         self.session = session
     }
     
-    public func request<E: Requestable>(with endpoint: E) -> AnyPublisher<E.Response, Error> {
-        Future { [weak self] promise in
+    public func request<E: Requestable>(with endpoint: E) -> Observable<E.Response> {
+        return Observable.create { [weak self] observer in
             guard let self = self else {
-                return promise(.failure(NSError(domain: "Network Error", code: -1, userInfo: nil)))
+                observer.onError(NSError(domain: "Network Error", code: -1, userInfo: nil))
+                return Disposables.create()
             }
             
-            self.session.request(endpoint.makeURL(),
-                                 method: endpoint.method,
-                                 parameters: endpoint.parameters,
-                                 encoding: endpoint.encoding,
-                                 headers: endpoint.headers)
-            .validate()
-            .responseDecodable(of: E.Response.self) { response in
-                switch response.result {
-                case .success(let data):
-                    promise(.success(data))
-                case .failure(let error):
-                    promise(.failure(error))
+            let request = self.session.request(endpoint.makeURL(),
+                                               method: endpoint.method,
+                                               parameters: endpoint.parameters,
+                                               encoding: endpoint.encoding,
+                                               headers: endpoint.headers)
+                .validate()
+                .responseDecodable(of: E.Response.self) { response in
+                    switch response.result {
+                    case .success(let data):
+                        observer.onNext(data)
+                        observer.onCompleted()
+                    case .failure(let error):
+                        observer.onError(error)
+                    }
                 }
+            
+            return Disposables.create {
+                request.cancel()
             }
         }
-        .eraseToAnyPublisher()
     }
 }

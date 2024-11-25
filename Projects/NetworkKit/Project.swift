@@ -17,7 +17,9 @@ let NetworkKit = Project(
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             dependencies: [
-                .external(name: "Alamofire")
+                .external(name: "Alamofire"),
+                .external(name: "RxSwift"),
+                .external(name: "RxCocoa")
             ],
             settings: .settings(
                 configurations: [

@@ -8,15 +8,14 @@
 import XCTest
 @testable internal import NetworkKit
 
-import Combine
+import RxSwift
 internal import Alamofire
 
 
 final class NetworkKitTests: XCTestCase {
     
     var sut: NetworkManager!
-    
-    private var cancellables = Set<AnyCancellable>()
+    private var disposeBag = DisposeBag()
     
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -50,23 +49,24 @@ final class NetworkKitTests: XCTestCase {
         let expectation = self.expectation(description: "Fetching advice")
         
         sut.request(with: endpoint)
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished:
+            .subscribe(
+                onNext: { response in
+                    // then
+                    XCTAssertNotNil(response, "Response should not be nil")
+                    // 응답 데이터 검증
+                    print("✅ Received response: \(response)")
+                    print("✅ Advice ID: \(response.slip.id)")
+                    print("✅ Advice: \(response.slip.content)")
+                },
+                onError: { error in
+                    XCTFail("🚨 Request failed with error: \(error)")
+                },
+                onCompleted: {
                     // Test succeeds
                     expectation.fulfill()
-                case .failure(let error):
-                    XCTFail("🚨 Request failed with error: \(error)")
                 }
-            }, receiveValue: { response in
-                // then
-                XCTAssertNotNil(response, "Response should not be nil")
-                // 응답 데이터 검증
-                print("✅ Received response: \(response)")
-                print("✅ Advice ID: \(response.slip.id)")
-                print("✅ Advice: \(response.slip.content)")
-            })
-            .store(in: &cancellables)
+            )
+            .disposed(by: disposeBag)
         
         waitForExpectations(timeout: 5, handler: nil)
     }

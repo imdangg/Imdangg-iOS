@@ -6,12 +6,12 @@
 //
 
 import Foundation
-import Combine
+import RxSwift
 
 internal import Alamofire
 
 protocol Network {
     var session: Session { get }
     
-    func request<E: Requestable>(with endpoint: E) -> AnyPublisher<E.Response, Error>
+    func request<E: Requestable>(with endpoint: E) -> Observable<E.Response> 
 }
