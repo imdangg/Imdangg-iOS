@@ -33,7 +33,11 @@ let project = Project(
                         [
                             "CFBundleTypeRole": "Editor",
                             "CFBundleURLSchemes": ["$(KAKAO_URL_KEY)"]
-                        ]
+                        ],
+                        [
+                            "CFBundleTypeRole": "Editor",
+                            "CFBundleURLSchemes": ["$(GOOGLE_URL_KEY)"]
+                        ],
                     ],
                     "KAKAO_URL_KEY": "$(KAKAO_URL_KEY)",
                     "KAKAO_APP_KEY": "$(KAKAO_APP_KEY)"
@@ -58,6 +62,8 @@ let project = Project(
                 .target(name: "SharedLibraries")
             ],
             settings: .settings(
+                // 하.. 구글로그인 에러 3시간동안 안되서 찾으니 tuist objc 충돌 이거쓰면 된다네요
+                base: ["OTHER_LDFLAGS":["-all_load -Objc"]],
                 configurations: [
                     .debug(name: "Debug", xcconfig: "Config/Config.xcconfig"),
                     .release(name: "Release", xcconfig: "Config/Config.xcconfig")
@@ -78,7 +84,7 @@ let project = Project(
         .target(
             name: "SharedLibraries",
             destinations: .iOS,
-            product: .framework,
+            product: .staticFramework,
             bundleId: "info.imdang.SharedLibraries",
             deploymentTargets: .iOS("15.0"),
             infoPlist: .default,

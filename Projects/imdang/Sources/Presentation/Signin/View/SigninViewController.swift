@@ -60,22 +60,8 @@ final class SigninViewController: UIViewController, View {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        configButtons()
         addSubView()
         makeConstraints()
-    }
-    
-    private func configButtons() {
-        let vc = OnboardingContainerViewController()
-        
-        googleButton.rx.tap.subscribe(onNext: {
-            self.navigationController?.pushViewController(vc, animated: true)
-        }).disposed(by: disposeBag)
-        
-//        appleButton.rx.tap.subscribe(onNext: {
-//            self.navigationController?.pushViewController(vc, animated: true)
-//        }).disposed(by: disposeBag)
-
     }
     
     private func addSubView() {
@@ -129,7 +115,7 @@ final class SigninViewController: UIViewController, View {
             .map { SigninReactor.Action.tapAppleButton }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
-
+        
         reactor.state.map { $0.appleLoginResult }
             .compactMap { $0 }
             .subscribe(onNext: { result in
@@ -142,7 +128,7 @@ final class SigninViewController: UIViewController, View {
                 }
             })
             .disposed(by: disposeBag)
- 
+        
         kakaoButton.rx.tap
             .map { SigninReactor.Action.tapKakaoButton }
             .bind(to: reactor.action)
@@ -153,11 +139,25 @@ final class SigninViewController: UIViewController, View {
             .distinctUntilChanged()
             .filter { $0 }
             .subscribe(onNext: { [weak self] _ in
-                let vc = OnboardingContainerViewController()
+                self?.navigationController?.pushViewController(vc, animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+        
+        googleButton.rx.tap
+            .map { SigninReactor.Action.tapGoogleButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.isGoogleSigninSuccess }
+            .distinctUntilChanged()
+            .filter { $0 }
+            .subscribe(onNext: { [weak self] _ in
                 self?.navigationController?.pushViewController(vc, animated: true)
             })
             .disposed(by: disposeBag)
     }
-
+    
 }
 
