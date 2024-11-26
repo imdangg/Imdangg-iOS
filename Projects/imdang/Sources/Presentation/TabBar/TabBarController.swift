@@ -44,6 +44,10 @@ class TabBarController: UITabBarController {
         secondNav.tabBarItem = UITabBarItem(title: "", image: ImdangImages.Image(resource: .tabWritingIcon).withRenderingMode(.alwaysOriginal), tag: 1)
         thirdNav.tabBarItem = UITabBarItem(title: "보관함", image: ImdangImages.Image(resource: .tabSavedIcon), tag: 2)
         
+        firstNav.navigationBar.prefersLargeTitles = false
+        secondNav.navigationBar.prefersLargeTitles = false
+        thirdNav.navigationBar.prefersLargeTitles = false
+        
         viewControllers = [firstNav, secondNav, thirdNav]
         
         tabBar.tintColor = .black

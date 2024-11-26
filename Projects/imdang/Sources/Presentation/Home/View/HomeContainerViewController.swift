@@ -14,29 +14,27 @@ import Then
 class HomeContainerViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
-    private let searchViewController = EmptyViewController(labelText: "탐색뷰")
+    private let searchViewController = SearchingViewController()
     private let exchangeViewController = EmptyViewController(labelText: "교환뷰")
     
     private let searchButton = UIButton().then {
         $0.setTitle("탐색", for: .normal)
-        $0.setTitleColor(.black, for: .normal)
+        $0.setTitleColor(.grayScale900, for: .normal)
         $0.titleLabel?.font = .pretenBold(24)
     }
     
     private let exchangeButton = UIButton().then {
         $0.setTitle("교환소", for: .normal)
-        $0.setTitleColor(.black, for: .normal)
+        $0.setTitleColor(.grayScale500, for: .normal)
         $0.titleLabel?.font = .pretenBold(24)
     }
     
     private let alramButton = UIButton().then {
         $0.setImage(ImdangImages.Image(resource: .alarm), for: .normal)
-        $0.frame.size = CGSize(width: 40, height: 40)
     }
     
     private let myPageButton = UIButton().then {
         $0.setImage(ImdangImages.Image(resource: .person), for: .normal)
-        $0.frame.size = CGSize(width: 40, height: 40)
     }
     
     private let searchView = UIView().then {
@@ -101,30 +99,64 @@ class HomeContainerViewController: UIViewController {
     }
     
     private func configNavigationBarItem() {
-        let searchButton = UIBarButtonItem(customView: searchButton)
-        let exchangeButton = UIBarButtonItem(customView: exchangeButton)
-        let alramButton = UIBarButtonItem(customView: alramButton)
-        let myPageButton = UIBarButtonItem(customView: myPageButton)
+        let leftStackView = UIStackView(arrangedSubviews: [searchButton, exchangeButton]).then {
+            $0.distribution = .equalSpacing
+            $0.axis = .horizontal
+            $0.alignment = .center
+            $0.spacing = 26
+        }
         
-        let fixedSpace = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
-        fixedSpace.width = 24
+        let rightStackView = UIStackView(arrangedSubviews: [alramButton, myPageButton]).then {
+            $0.distribution = .equalSpacing
+            $0.axis = .horizontal
+            $0.alignment = .center
+            $0.spacing = 18
+        }
         
-        navigationItem.leftBarButtonItems = [searchButton, fixedSpace, exchangeButton]
-        navigationItem.rightBarButtonItems = [myPageButton, fixedSpace, alramButton]
+        let leftContainerView = UIView()
+        let rightContainerView = UIView()
+        
+        leftContainerView.addSubview(leftStackView)
+        rightContainerView.addSubview(rightStackView)
+        
+        alramButton.snp.makeConstraints {
+            $0.width.height.equalTo(24)
+        }
+
+        myPageButton.snp.makeConstraints {
+            $0.width.height.equalTo(40)
+        }
+
+        leftStackView.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 6, bottom: 0, right: 0))
+        }
+        rightStackView.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 6))
+        }
+        
+        let leftView = UIBarButtonItem(customView: leftContainerView)
+        let rightView = UIBarButtonItem(customView: rightContainerView)
+        
+        navigationItem.leftBarButtonItems = [leftView]
+        navigationItem.rightBarButtonItems = [rightView]
     }
     
     private func bindActions() {
         searchButton.rx.tap
-            .subscribe(onNext: { _ in
-                self.searchView.isHidden = false
-                self.exchangeView.isHidden = true
+            .subscribe(onNext: { [weak self] state in
+                self?.searchView.isHidden = false
+                self?.exchangeView.isHidden = true
+                self?.exchangeButton.setTitleColor(.grayScale500, for: .normal)
+                self?.searchButton.setTitleColor(.grayScale900, for: .normal)
             })
             .disposed(by: disposeBag)
         
         exchangeButton.rx.tap
-            .subscribe(onNext: { _ in
-                self.searchView.isHidden = true
-                self.exchangeView.isHidden = false
+            .subscribe(onNext: { [weak self] state in
+                self?.searchView.isHidden = true
+                self?.exchangeView.isHidden = false
+                self?.searchButton.setTitleColor(.grayScale500, for: .normal)
+                self?.exchangeButton.setTitleColor(.grayScale900, for: .normal)
             })
             .disposed(by: disposeBag)
     }

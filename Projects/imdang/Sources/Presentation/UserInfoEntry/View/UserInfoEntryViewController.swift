@@ -229,8 +229,7 @@ final class UserInfoEntryViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         submitButton.rx.tap.subscribe(onNext: {
-            let vc = TabBarController()
-            self.navigationController?.pushViewController(vc, animated: true)
+            (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
         }).disposed(by: disposeBag)
         
         reactor.state
