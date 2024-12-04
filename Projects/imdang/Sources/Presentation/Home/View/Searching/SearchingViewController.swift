@@ -20,6 +20,7 @@ class SearchingViewController: UIViewController {
         $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "BannerCell")
     }
     private let bannerImageView = BannerView()
+    private let searchBoxView = SearchBoxView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,8 +39,16 @@ class SearchingViewController: UIViewController {
         collectionView.register(SectionSeparatorView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: SectionSeparatorView.reuseIdentifier)
         
         view.addSubview(collectionView)
+        view.addSubview(searchBoxView)
+        searchBoxView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(24)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(50)
+        }
         collectionView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.equalTo(searchBoxView.snp.bottom).offset(16)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
     
@@ -60,7 +69,7 @@ class SearchingViewController: UIViewController {
         let item = NSCollectionLayoutItem(layoutSize: size)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: size, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 20, leading: 0, bottom: 20, trailing: 0)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0)
         return section
     }
 
@@ -85,9 +94,7 @@ class SearchingViewController: UIViewController {
             elementKind: UICollectionView.elementKindSectionFooter,
             alignment: .bottom
         )
-        separator.contentInsets = NSDirectionalEdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 0)
 
-        
         section.boundarySupplementaryItems = [header, separator]
         
         return section

@@ -17,4 +17,14 @@ extension UIViewController {
     @objc func dismisskeyboard() {
         view.endEditing(true)
     }
+    
+    /// 네비게이션 safeArea 까지의 배경색 설정
+    func configNavigationBgColor(backgroundColor: UIColor = .systemBackground) {
+        let navigationBarAppearance = UINavigationBarAppearance()
+        navigationBarAppearance.backgroundColor = backgroundColor
+        navigationBarAppearance.shadowColor = .clear // 밑줄 제거
+        navigationBarAppearance.shadowImage = UIImage() // 밑줄 제거
+        navigationController?.navigationBar.standardAppearance = navigationBarAppearance
+        navigationController?.navigationBar.scrollEdgeAppearance = navigationBarAppearance
+    }
 }

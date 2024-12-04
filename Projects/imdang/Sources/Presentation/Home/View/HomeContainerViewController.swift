@@ -50,6 +50,7 @@ class HomeContainerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        configNavigationBgColor(backgroundColor: .white)
         
         addSubviews()
         makeConstraints()
