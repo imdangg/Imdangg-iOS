@@ -29,9 +29,7 @@ extension UILabel {
         paragraphStyle.lineHeightMultiple = lineHeightMultiple
         
         let attributedString = NSAttributedString(string: text, attributes: [
-            .paragraphStyle: paragraphStyle,
-            .font: self.font ?? UIFont.systemFont(ofSize: 17),
-            .foregroundColor: self.textColor ?? UIColor.black
+            .paragraphStyle: paragraphStyle
         ])
         
         self.attributedText = attributedString
