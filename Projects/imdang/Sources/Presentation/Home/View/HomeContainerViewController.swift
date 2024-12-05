@@ -50,6 +50,7 @@ class HomeContainerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        configNavigationBgColor(backgroundColor: .white)
         
         addSubviews()
         makeConstraints()
@@ -59,7 +60,16 @@ class HomeContainerViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
         configNavigationBarItem()
+        presentModal()
+    }
+    
+    private func presentModal() {
+        let modalVC = TicketModalViewController()
+        modalVC.modalPresentationStyle = .overFullScreen
+        modalVC.modalTransitionStyle = .crossDissolve
+        self.present(modalVC, animated: true, completion: nil)
     }
     
     private func addSubviews() {

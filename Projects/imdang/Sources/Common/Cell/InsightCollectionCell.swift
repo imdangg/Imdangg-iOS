@@ -8,7 +8,20 @@
 import UIKit
 import Kingfisher
 
+enum DirectionType {
+    case vertical
+    case horizontal
+}
+
 final class InsightCollectionCell: UICollectionViewCell {
+    var directionType: DirectionType? {
+        didSet {
+            guard let type = directionType else { return }
+            resetConstraints()
+            configureLayout(type: type)
+        }
+    }
+
     
     private let titleImageView = UIImageView().then {
         $0.contentMode = .scaleAspectFill
@@ -55,7 +68,6 @@ final class InsightCollectionCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubView()
-        makeConstraints()
     }
     
     @available(*, unavailable)
@@ -71,6 +83,8 @@ final class InsightCollectionCell: UICollectionViewCell {
         likeLabel.text = ""
         titleLabel.text = ""
         userNameLabel.text = ""
+        resetConstraints()
+        directionType = nil
     }
     
     private func addSubView() {
@@ -79,40 +93,12 @@ final class InsightCollectionCell: UICollectionViewCell {
         }
     }
     
-    private func makeConstraints() {
-        titleImageView.snp.makeConstraints {
-            $0.width.height.equalTo(100)
-            $0.top.equalToSuperview()
-            $0.leading.equalToSuperview()
-        }
-        
-        adressLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(2.5)
-            $0.leading.equalTo(titleImageView.snp.trailing).offset(16)
-        }
-        
-        likeLabel.snp.makeConstraints {
-            $0.top.equalTo(adressLabel.snp.top)
-            $0.leading.equalTo(adressLabel.snp.trailing).offset(4)
-        }
-        
-        titleLabel.snp.makeConstraints {
-            $0.top.equalTo(adressLabel.snp.bottom).offset(12)
-            $0.leading.equalTo(adressLabel.snp.leading)
-        }
-        
-        profileImageView.snp.makeConstraints {
-            $0.width.height.equalTo(22)
-            $0.top.equalTo(titleLabel.snp.bottom).offset(12)
-            $0.leading.equalTo(adressLabel.snp.leading)
-        }
-        
-        userNameLabel.snp.makeConstraints {
-            $0.centerY.equalTo(profileImageView)
-            $0.leading.equalTo(profileImageView.snp.trailing).offset(4)
+    private func resetConstraints() {
+        [titleImageView, profileImageView, adressLabel, likeLabel, titleLabel, userNameLabel].forEach {
+            $0.snp.removeConstraints()
         }
     }
-    
+
     private func createAttributedString(image: UIImage, text: String) -> NSAttributedString {
         let attachment = NSTextAttachment()
         attachment.image = image.withRenderingMode(.alwaysOriginal)
@@ -132,7 +118,74 @@ final class InsightCollectionCell: UICollectionViewCell {
         return combined
     }
     
-    func configure(insight: Insight) {
+    private func configureLayout(type: DirectionType) {
+        switch type {
+        case .horizontal:
+            configureHorizontalLayout()
+        case .vertical:
+            configureVerticalLayout()
+        }
+    }
+
+    private func configureHorizontalLayout() {
+        titleImageView.snp.makeConstraints {
+            $0.width.height.equalTo(100)
+            $0.top.leading.equalToSuperview()
+        }
+        adressLabel.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(2.5)
+            $0.leading.equalTo(titleImageView.snp.trailing).offset(16)
+        }
+        likeLabel.snp.makeConstraints {
+            $0.top.equalTo(adressLabel.snp.top)
+            $0.leading.equalTo(adressLabel.snp.trailing).offset(4)
+        }
+        titleLabel.snp.makeConstraints {
+            $0.top.equalTo(adressLabel.snp.bottom).offset(12)
+            $0.leading.equalTo(adressLabel.snp.leading)
+        }
+        profileImageView.snp.makeConstraints {
+            $0.width.height.equalTo(22)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(12)
+            $0.leading.equalTo(adressLabel.snp.leading)
+        }
+        userNameLabel.snp.makeConstraints {
+            $0.centerY.equalTo(profileImageView)
+            $0.leading.equalTo(profileImageView.snp.trailing).offset(4)
+        }
+    }
+
+    private func configureVerticalLayout() {
+        titleImageView.snp.makeConstraints {
+            $0.width.equalTo(200)
+            $0.height.equalTo(160)
+            $0.centerX.top.equalToSuperview()
+        }
+        adressLabel.snp.makeConstraints {
+            $0.top.equalTo(titleImageView.snp.bottom).offset(16)
+            $0.leading.equalTo(titleImageView)
+        }
+        likeLabel.snp.makeConstraints {
+            $0.top.equalTo(titleImageView.snp.bottom).offset(16)
+            $0.leading.equalTo(adressLabel.snp.trailing).offset(4)
+        }
+        titleLabel.snp.makeConstraints {
+            $0.top.equalTo(adressLabel.snp.bottom).offset(12)
+            $0.leading.equalTo(titleImageView)
+        }
+        profileImageView.snp.makeConstraints {
+            $0.width.height.equalTo(22)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(12)
+            $0.leading.equalTo(titleImageView)
+        }
+        userNameLabel.snp.makeConstraints {
+            $0.centerY.equalTo(profileImageView)
+            $0.leading.equalTo(profileImageView.snp.trailing).offset(4)
+        }
+    }
+    
+    func configure(insight: Insight, layoutType: DirectionType) {
+        self.directionType = layoutType
         guard let url = URL(string: insight.titleImageUrl) else { return }
         titleImageView.kf.setImage(with: url)
         titleImageView.contentMode = .scaleAspectFill
@@ -144,4 +197,3 @@ final class InsightCollectionCell: UICollectionViewCell {
         userNameLabel.text = insight.userName
     }
 }
-
