@@ -9,32 +9,31 @@ import UIKit
 import SnapKit
 import Then
 
-
 class InsightTableCell: UITableViewCell {
     static let identifier = "InsightTableCell"
 
-    private let insightTableCell = InsightCellView()
+    private let insightCellView = InsightCellView()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        contentView.addSubview(insightTableCell)
+        contentView.addSubview(insightCellView)
         
-        insightTableCell.snp.makeConstraints {
+        insightCellView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
     
     override func prepareForReuse() {
-        insightTableCell.titleImageView.image = UIImage(systemName: "")
-        insightTableCell.profileImageView.image = UIImage(systemName: "")
+        insightCellView.titleImageView.image = UIImage(systemName: "")
+        insightCellView.profileImageView.image = UIImage(systemName: "")
 
-        insightTableCell.adressLabel.text = ""
-        insightTableCell.likeLabel.text = ""
-        insightTableCell.titleLabel.text = ""
-        insightTableCell.userNameLabel.text = ""
-        insightTableCell.resetConstraints()
-        insightTableCell.directionType = nil
+        insightCellView.adressLabel.text = ""
+        insightCellView.likeLabel.text = ""
+        insightCellView.titleLabel.text = ""
+        insightCellView.userNameLabel.text = ""
+        insightCellView.resetConstraints()
+        insightCellView.directionType = nil
     }
     
     required init?(coder: NSCoder) {
@@ -42,6 +41,6 @@ class InsightTableCell: UITableViewCell {
     }
 
     func configure(insight: Insight, layoutType: DirectionType) {
-        insightTableCell.configure(insight: insight, layoutType: layoutType)
+        insightCellView.configure(insight: insight, layoutType: layoutType)
     }
 }
