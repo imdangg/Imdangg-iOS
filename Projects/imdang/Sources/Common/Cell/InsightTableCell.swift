@@ -1,21 +1,21 @@
 //
-//  InsightCollectionCell.swift
+//  InsightTableCell.swift
 //  SharedLibraries
 //
-//  Created by 임대진 on 11/26/24.
+//  Created by 임대진 on 12/8/24.
 //
 
 import UIKit
 import SnapKit
 import Then
 
-class InsightCollectionCell: UICollectionViewCell {
-    static let identifier = "InsightCollectionCell"
+class InsightTableCell: UITableViewCell {
+    static let identifier = "InsightTableCell"
 
     private let insightCellView = InsightCellView()
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         contentView.addSubview(insightCellView)
         
