@@ -13,20 +13,23 @@ final class ExchangeReactor: Reactor {
     
     struct State {
         var selectedExchangeState: ExchangeState
+        var selectedRequestState: ExchangeRequestState
     }
     
     enum Action {
         case tapExchangeStateButton(ExchangeState)
+        case selectedRequestSegmentControl(ExchangeRequestState)
     }
     
     enum Mutation {
         case changeSelectedExchangeState(ExchangeState)
+        case changeSelectedRequestState(ExchangeRequestState)
     }
     
     var initialState: State
     
     init() {
-        self.initialState = State(selectedExchangeState: .waiting)
+        self.initialState = State(selectedExchangeState: .waiting, selectedRequestState: .request)
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
@@ -34,6 +37,8 @@ final class ExchangeReactor: Reactor {
             
         case .tapExchangeStateButton(let exchangeState):
             return Observable.just(.changeSelectedExchangeState(exchangeState))
+        case .selectedRequestSegmentControl(let requestState):
+            return Observable.just(.changeSelectedRequestState(requestState))
         }
     }
     func reduce(state: State, mutation: Mutation) -> State {
@@ -44,6 +49,9 @@ final class ExchangeReactor: Reactor {
         case .changeSelectedExchangeState(let exchangeState):
             state.selectedExchangeState = exchangeState
             print("\(exchangeState)")
+        case .changeSelectedRequestState(let requestState):
+            state.selectedRequestState = requestState
+            print("\(requestState)")
         }
         return state
     }

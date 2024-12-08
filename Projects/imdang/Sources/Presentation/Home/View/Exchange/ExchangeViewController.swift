@@ -12,6 +12,11 @@ import RxSwift
 import RxCocoa
 import ReactorKit
 
+enum ExchangeRequestState {
+    case request
+    case receive
+}
+
 class ExchangeViewController: UIViewController, View {
    
     private let insights = BehaviorSubject<[Insight]>(value: [])
@@ -164,6 +169,11 @@ class ExchangeViewController: UIViewController, View {
             })
             .disposed(by: disposeBag)
         
+        segmentControl.rx.selectedSegmentIndex
+            .map{ index in Reactor.Action.selectedRequestSegmentControl(index == 0 ? ExchangeRequestState.request : ExchangeRequestState.receive)}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         exchangeStateButtonView.waitingButton.rx.tap
             .map{ Reactor.Action.tapExchangeStateButton(.waiting)}
             .bind(to: reactor.action)
@@ -179,6 +189,8 @@ class ExchangeViewController: UIViewController, View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
 
+        
+        
         reactor.state
             .map { $0.selectedExchangeState }
             .distinctUntilChanged()
@@ -195,6 +207,7 @@ class ExchangeViewController: UIViewController, View {
                 updateButtonTitle(state: state, num: count)
             })
             .disposed(by: disposeBag)
+        
         
     }
     
