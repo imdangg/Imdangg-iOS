@@ -15,7 +15,7 @@ class HomeContainerViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     private let searchViewController = SearchingViewController()
-    private let exchangeViewController = EmptyViewController(labelText: "교환뷰")
+    private let exchangeViewController = ExchangeViewController(reactor: ExchangeReactor())
     
     private let searchButton = UIButton().then {
         $0.setTitle("탐색", for: .normal)
