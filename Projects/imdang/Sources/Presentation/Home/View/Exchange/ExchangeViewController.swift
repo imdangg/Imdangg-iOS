@@ -22,6 +22,9 @@ final class ExchangeViewController: UIViewController, View {
     private let insights = BehaviorSubject<[Insight]>(value: [])
     var disposeBag = DisposeBag()
     
+    private let navigationLineView = UIView().then {
+        $0.backgroundColor = .grayScale100
+    }
     private let ticketView = TicketView()
     private let segmentControl = UISegmentedControl().then {
         $0.insertSegment(withTitle: "내가 요청한 내역", at: 0, animated: true)
@@ -88,7 +91,7 @@ final class ExchangeViewController: UIViewController, View {
         subviews.forEach { headerView.addSubview($0) }
         
         ticketView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(24)
+            $0.top.equalToSuperview().offset(24)
             $0.horizontalEdges.equalToSuperview().inset(20)
         }
         
@@ -135,11 +138,18 @@ final class ExchangeViewController: UIViewController, View {
     
     // MARK: - Setup Table View
     private func setupTableView() {
+        view.addSubview(navigationLineView)
         view.addSubview(tableView)
         tableView.register(InsightTableCell.self, forCellReuseIdentifier: "InsightTableCell")
         
+        navigationLineView.snp.makeConstraints {
+            $0.top.equalToSuperview().inset(16)
+            $0.height.equalTo(1)
+            $0.horizontalEdges.equalToSuperview()
+        }
         tableView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.equalTo(navigationLineView.snp.bottom)
+            $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
     
