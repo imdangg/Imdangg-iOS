@@ -76,7 +76,7 @@ final class ExchangeViewController: UIViewController, View {
         view.backgroundColor = .white
         
         setupHeaderView()
-        setupTableView()
+        setupView()
         setupItems()
         
         let currentInsights = try? insights.value()
@@ -136,8 +136,8 @@ final class ExchangeViewController: UIViewController, View {
         tableView.tableHeaderView = headerView
     }
     
-    // MARK: - Setup Table View
-    private func setupTableView() {
+    // MARK: - Setup View
+    private func setupView() {
         view.addSubview(navigationLineView)
         view.addSubview(tableView)
         tableView.register(InsightTableCell.self, forCellReuseIdentifier: "InsightTableCell")
