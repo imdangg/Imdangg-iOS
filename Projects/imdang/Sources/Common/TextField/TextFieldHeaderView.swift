@@ -12,13 +12,20 @@ import Then
 
 // bind > textFieldErrorMessage, textFieldState
 
-class UserInfoEntryHeaderView: UIView {
+class TextFieldHeaderView: UIView {
     
-    var title: String
+    let title: String
+    let isEssential: Bool
     
     private var titleLabel = UILabel().then {
         $0.font = .pretenMedium(14)
         $0.textColor = UIColor.grayScale600
+    }
+    
+    private var EssentialLabel = UILabel().then {
+        $0.font = .pretenMedium(14)
+        $0.text = "*"
+        $0.textColor = UIColor.error
     }
     
     private var signImage = UIImageView()
@@ -28,8 +35,9 @@ class UserInfoEntryHeaderView: UIView {
         $0.textColor = UIColor.error
     }
     
-    init(frame: CGRect = .zero, title: String) {
+    init(frame: CGRect = .zero, title: String, isEssential: Bool) {
         self.title = title
+        self.isEssential = isEssential
         super.init(frame: frame)
         attribute()
         addSubViews()
@@ -45,18 +53,33 @@ class UserInfoEntryHeaderView: UIView {
     }
     
     private func addSubViews() {
-        [titleLabel, signImage, errorMessageLabel].forEach { addSubview($0) }
+        [titleLabel, EssentialLabel, signImage, errorMessageLabel].forEach { addSubview($0) }
     }
     
     private func makeUI() {
         titleLabel.snp.makeConstraints {
             $0.leading.equalToSuperview()
         }
-        signImage.snp.makeConstraints {
-            $0.leading.equalTo(titleLabel.snp.trailing).offset(4)
+        
+        if isEssential {
+            EssentialLabel.snp.makeConstraints {
+                $0.leading.equalTo(titleLabel.snp.trailing)
+                $0.centerY.equalTo(titleLabel)
+            }
+            signImage.snp.makeConstraints {
+                $0.leading.equalTo(EssentialLabel.snp.trailing).offset(4)
+                $0.centerY.equalTo(titleLabel)
+            }
+        } else {
+            signImage.snp.makeConstraints {
+                $0.leading.equalTo(titleLabel.snp.trailing).offset(6)
+                $0.centerY.equalTo(titleLabel)
+            }
         }
+    
         errorMessageLabel.snp.makeConstraints {
             $0.trailing.equalToSuperview()
+            $0.centerY.equalTo(titleLabel)
         }
     }
     
@@ -87,7 +110,7 @@ class UserInfoEntryHeaderView: UIView {
 }
 
 // 네이밍,, 뭘로하는겨
-extension Reactive where Base: UserInfoEntryHeaderView {
+extension Reactive where Base: TextFieldHeaderView {
     var textFieldErrorMessage: Binder<String> {
         return Binder(self.base) { view, message in
             view.setErrorMessage(message)

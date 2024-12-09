@@ -30,21 +30,27 @@ final class UserInfoEntryViewController: UIViewController, View {
         $0.textColor = UIColor.grayScale700
     }
     
-    private var nicknameHeaderView = UserInfoEntryHeaderView(title: "닉네임")
+    //nickname
+    private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임", isEssential: true)
     private var nicknameTextField = CommomTextField(placeholderText: "임당이", textfieldType: .namePhonePad)
+    private var niknameFooterView = TextFieldFooterView()
     
-    private var birthHeaderView = UserInfoEntryHeaderView(title: "생년월일")
+    //birth
+    private var birthHeaderView = TextFieldHeaderView(title: "생년월일", isEssential: false)
     private var birthTextField = CommomTextField(placeholderText: "2000.01.01", textfieldType: .decimalPad)
+    private var birthFooterView = TextFieldFooterView()
     
-    private var genderHeaderView = UserInfoEntryHeaderView(title: "성별")
+    //gender
+    private var genderHeaderView = TextFieldHeaderView(title: "성별", isEssential: false)
     private var selectMaleButton = CommonButton(title: "남자", initialButtonType: .unselectedBorderStyle)
     private var selectFemaleButton = CommonButton(title: "여자", initialButtonType: .unselectedBorderStyle)
     
+    //button
     private var submitButton = CommonButton(title: "다음", initialButtonType: .disabled)
     
     private lazy var stackView = UIStackView().then {
         $0.isUserInteractionEnabled = false
-        [mainTitle, subTitle, nicknameHeaderView, nicknameTextField, birthHeaderView, birthTextField, genderHeaderView, selectMaleButton, selectFemaleButton, submitButton].forEach { view.addSubview($0) }
+        [mainTitle, subTitle, nicknameHeaderView, nicknameTextField, niknameFooterView, birthHeaderView, birthTextField, birthFooterView, genderHeaderView, selectMaleButton, selectFemaleButton, submitButton].forEach { view.addSubview($0) }
     }
     
     init(reactor: UserInfoEntryReactor) {
@@ -96,8 +102,14 @@ final class UserInfoEntryViewController: UIViewController, View {
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
         }
         
+        niknameFooterView.snp.makeConstraints {
+            $0.top.equalTo(nicknameTextField.snp.bottom).offset(8)
+            $0.height.equalTo(17)
+            $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
         birthHeaderView.snp.makeConstraints {
-            $0.top.equalTo(nicknameTextField.snp.bottom).offset(32)
+            $0.top.equalTo(niknameFooterView.snp.bottom).offset(24)
             $0.height.equalTo(20)
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
         }
@@ -108,8 +120,14 @@ final class UserInfoEntryViewController: UIViewController, View {
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
         }
         
+        birthFooterView.snp.makeConstraints {
+            $0.top.equalTo(birthTextField.snp.bottom).offset(8)
+            $0.height.equalTo(17)
+            $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
         genderHeaderView.snp.makeConstraints {
-            $0.top.equalTo(birthTextField.snp.bottom).offset(32)
+            $0.top.equalTo(birthFooterView.snp.bottom).offset(24)
             $0.height.equalTo(20)
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
         }
@@ -160,11 +178,11 @@ final class UserInfoEntryViewController: UIViewController, View {
             .asDriver()
             .map { [weak self] in
                 guard let text = self?.nicknameTextField.text, !text.isEmpty else {
-                    self?.nicknameHeaderView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
+                    self?.niknameFooterView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
                     return Reactor.Action.changeNicknameTextFieldState(.error)
                 }
                 guard text.count >= 2 && text.count <= 10 else {
-                    self?.nicknameHeaderView.rx.textFieldErrorMessage.onNext("2자~10자로 입력해주세요.")
+                    self?.niknameFooterView.rx.textFieldErrorMessage.onNext("2자~10자로 입력해주세요.")
                     return Reactor.Action.changeNicknameTextFieldState(.error)
                 }
                 return Reactor.Action.changeNicknameTextFieldState(.done)
@@ -197,7 +215,7 @@ final class UserInfoEntryViewController: UIViewController, View {
             .asDriver()
             .map { [weak self] in
                 guard let text = self?.birthTextField.text, !text.isEmpty else {
-                    self?.birthHeaderView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
+                    self?.birthFooterView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
                     return Reactor.Action.changeBirthTextFieldState(.error)
                 }
                 // TODO: 유효한 날짜 추가 필요해보임
@@ -238,6 +256,7 @@ final class UserInfoEntryViewController: UIViewController, View {
             .subscribe(onNext: { [weak self] state in
                 self?.nicknameHeaderView.rx.textFieldState.onNext(state)
                 self?.nicknameTextField.setState(state)
+                self?.niknameFooterView.setState(state)
             })
             .disposed(by: disposeBag)
         
@@ -247,6 +266,7 @@ final class UserInfoEntryViewController: UIViewController, View {
             .subscribe(onNext: { [weak self] state in
                 self?.birthHeaderView.rx.textFieldState.onNext(state)
                 self?.birthTextField.setState(state)
+                self?.birthFooterView.setState(state)
             })
             .disposed(by: disposeBag)
         
