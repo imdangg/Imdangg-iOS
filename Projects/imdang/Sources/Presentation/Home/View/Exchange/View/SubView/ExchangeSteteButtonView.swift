@@ -16,8 +16,7 @@ enum ExchangeState: String, Equatable {
     case done = "교환 완료"
 }
 
-class ExchangeStateButtonView: UIView {
-    // Buttons
+final class ExchangeStateButtonView: UIView {
     var waitingButton = CommonButton(title: ExchangeState.waiting.rawValue, initialButtonType: .unselectedBorderStyle, radius: 18)
     var rejectButton = CommonButton(title: ExchangeState.reject.rawValue, initialButtonType: .unselectedBorderStyle, radius: 18)
     var doneButton = CommonButton(title: ExchangeState.done.rawValue, initialButtonType: .unselectedBorderStyle, radius: 18)
@@ -28,7 +27,6 @@ class ExchangeStateButtonView: UIView {
         $0.addSubview(doneButton)
     }
     
-    // Dispose bag
     private let disposeBag = DisposeBag()
     
     override init(frame: CGRect) {

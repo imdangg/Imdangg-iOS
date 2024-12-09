@@ -17,7 +17,7 @@ enum ExchangeRequestState {
     case receive
 }
 
-class ExchangeViewController: UIViewController, View {
+final class ExchangeViewController: UIViewController, View {
    
     private let insights = BehaviorSubject<[Insight]>(value: [])
     var disposeBag = DisposeBag()
@@ -51,16 +51,12 @@ class ExchangeViewController: UIViewController, View {
     }
     
     private let exchangeStateButtonView = ExchangeStateButtonView()
-    private let noticeScriptView = NoticeScriptView().then {
-        $0.configure(text: "교환한 인사이트는 보관함에 저장되며, 완료 내역은\n최근 7일간의 기록만 표시돼요.")
-    }
+    private let noticeScriptView = NoticeScriptView()
     
     private let tableView = UITableView().then {
         $0.separatorStyle = .none
         $0.rowHeight = UITableView.automaticDimension
-        $0.rowHeight = 100
-       
-    
+        $0.rowHeight = 112
     }
     
     init(reactor: ExchangeReactor) {
@@ -88,12 +84,8 @@ class ExchangeViewController: UIViewController, View {
     private func setupHeaderView() {
         let headerView = UIView()
         
-        headerView.addSubview(ticketView)
-        headerView.addSubview(segmentControl)
-        headerView.addSubview(underLineView)
-        headerView.addSubview(divideLineView)
-        headerView.addSubview(exchangeStateButtonView)
-        headerView.addSubview(noticeScriptView)
+        let subviews = [ticketView, segmentControl, underLineView, divideLineView, exchangeStateButtonView, noticeScriptView]
+        subviews.forEach { headerView.addSubview($0) }
         
         ticketView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(24)
@@ -135,9 +127,9 @@ class ExchangeViewController: UIViewController, View {
             x: 0,
             y: 0,
             width: view.frame.width,
-            height: noticeScriptView.frame.maxY + 40
+            height: noticeScriptView.frame.maxY + 20
         )
-        tableView.separatorInset = UIEdgeInsets(top: 4, left: 20, bottom: 4, right: 20)
+        
         tableView.tableHeaderView = headerView
     }
     
@@ -149,18 +141,27 @@ class ExchangeViewController: UIViewController, View {
         tableView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
-       
     }
     
-
+    // MARK: - Bind
     func bind(reactor: ExchangeReactor) {
-        insights
-            .bind(to: tableView.rx.items(cellIdentifier: "InsightTableCell", cellType: InsightTableCell.self)) { _, insight, cell in
-                cell.configure(insight: insight, layoutType: .horizontal)
-            }
-            .disposed(by: disposeBag)
         
+        insights.bind(to: tableView.rx.items) { (tableView, row, insight) in
+            let cell = tableView.dequeueReusableCell(withIdentifier: "InsightTableCell") as? InsightTableCell ?? InsightTableCell(style: .default, reuseIdentifier: "InsightTableCell")
+
+            cell.configure(insight: insight, layoutType: .horizontal)
+        
+            cell.contentView.subviews.forEach { subview in
+                if let insightCellView = subview as? InsightCellView {
+                    insightCellView.snp.remakeConstraints {
+                        $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 6, left: 20, bottom: 6, right: 20))
+                    }
+                }
+            }
+            return cell
+        }
+        .disposed(by: disposeBag)
+
         tableView.rx.itemSelected
             .subscribe(onNext: { [weak self] indexPath in
                 guard let self = self, let insight = try? self.insights.value()[indexPath.row] else { return }
@@ -188,14 +189,13 @@ class ExchangeViewController: UIViewController, View {
             .map{ Reactor.Action.tapExchangeStateButton(.done)}
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
-
-        
-        
+    
         reactor.state
             .map { $0.selectedExchangeState }
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] state in
                 guard let self = self else { return }
+                
                 exchangeStateButtonView.waitingButton.rx.commonButtonState.onNext(state == .waiting ? .enabled : .unselectedBorderStyle)
                 exchangeStateButtonView.rejectButton.rx.commonButtonState.onNext(state == .reject ? .enabled : .unselectedBorderStyle)
                 exchangeStateButtonView.doneButton.rx.commonButtonState.onNext(state == .done ? .enabled : .unselectedBorderStyle)
@@ -207,23 +207,10 @@ class ExchangeViewController: UIViewController, View {
                 updateButtonTitle(state: state, num: count)
             })
             .disposed(by: disposeBag)
-        
-        
     }
     
-    @objc func segmentChanged() {
-        let selectedIndex = segmentControl.selectedSegmentIndex
-        UIView.animate(withDuration: 0.3) {
-            let segmentWidth = self.segmentControl.bounds.width / CGFloat(self.segmentControl.numberOfSegments) + 1
-            let centerXOffset = CGFloat(selectedIndex + 1) * segmentWidth + segmentWidth / 2
-            
-            self.underLineView.snp.updateConstraints {
-                $0.centerX.equalTo(self.segmentControl.snp.leading).offset(centerXOffset - self.segmentControl.bounds.width / 2)
-            }
-            self.view.layoutIfNeeded()
-        }
-    }
-
+    // MARK: - update view
+    
     private func updateButtonTitle(state: ExchangeState, num: Int) {
         switch state {
         case .waiting:
@@ -263,6 +250,19 @@ class ExchangeViewController: UIViewController, View {
             }
         }
     }
+    
+    @objc func segmentChanged() {
+        let selectedIndex = segmentControl.selectedSegmentIndex
+        UIView.animate(withDuration: 0.2) {
+            let segmentWidth = self.segmentControl.bounds.width / CGFloat(self.segmentControl.numberOfSegments) + 1
+            let centerXOffset = CGFloat(selectedIndex + 1) * segmentWidth + segmentWidth / 2
+            
+            self.underLineView.snp.updateConstraints {
+                $0.centerX.equalTo(self.segmentControl.snp.leading).offset(centerXOffset - self.segmentControl.bounds.width / 2)
+            }
+            self.view.layoutIfNeeded()
+        }
+    }
 }
 
 extension ExchangeViewController {
@@ -271,7 +271,7 @@ extension ExchangeViewController {
             Insight(
                 id: index,
                 titleName: "Insight \(index)",
-                titleImageUrl: "https://s3-alpha-sig.figma.com/img/bfd4/929c/86aa0d3566cba94912f0b4d10410b9b2?Expires=1733702400&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=jVznuLFIzwecr875Ecx3wk6BTv7gmC1~-b0UoCUkxJI8rSjqu-NfEArK9bTrf~soTgQ9P8Dw-SGQaoN-k1R4nUTC1mz8Svwhdw7nd8YWWVbLO3a7nmdUH3oLTVfR0uqwvjJbVKPb7Pf3KQzXOHBp1o0JLhOt0sTYBMt8B2p47EYJe0QKTNrlmJDSQgJQCEyudHAyBl9WhC5CLU3UYHgN1VC9Ao6DbMkJusxmT3INQ3w-gHrvlovCvbLsBNvMTVlq4H7hAFzxLhR8ySqJ2cNzP7v-LyB2AwWIC15vYjs7lhctVXclsngtwPcUCSkaT53ghxo-TfB8bhZznInDWcTg0w__",
+                titleImageUrl: "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg",
                 userName: "User \(index)",
                 profileImageUrl: "",
                 adress: "Address \(index)",

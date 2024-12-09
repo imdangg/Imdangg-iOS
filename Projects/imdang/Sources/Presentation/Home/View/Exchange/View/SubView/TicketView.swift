@@ -44,9 +44,7 @@ final class TicketView: UIView {
         self.layer.cornerRadius = 8
         self.clipsToBounds = true
         
-        addSubview(iconImageView)
-        addSubview(textLabel)
-        addSubview(ticketNumberLabel)
+        [iconImageView, textLabel, ticketNumberLabel].forEach { addSubview($0) }
         
          iconImageView.snp.makeConstraints {
              $0.size.equalTo(CGSize(width: 20, height: 20))
