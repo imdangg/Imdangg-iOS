@@ -16,6 +16,8 @@ class TextFieldHeaderView: UIView {
     
     let title: String
     let isEssential: Bool
+    let descriptionText: String?
+    let limitNumber: Int?
     
     private var titleLabel = UILabel().then {
         $0.font = .pretenMedium(14)
@@ -30,14 +32,21 @@ class TextFieldHeaderView: UIView {
     
     private var signImage = UIImageView()
     
-    private var errorMessageLabel = UILabel().then {
+    private var descriptionLabel = UILabel().then {
         $0.font = .pretenMedium(14)
-        $0.textColor = UIColor.error
+        $0.textColor = UIColor.grayScale500
     }
     
-    init(frame: CGRect = .zero, title: String, isEssential: Bool) {
+    private var textNumLabel = UILabel().then {
+        $0.font = .pretenMedium(14)
+        $0.textColor = UIColor.mainOrange500
+    }
+    
+    init(frame: CGRect = .zero, title: String, isEssential: Bool, descriptionText: String? = nil, limitNumber: Int? = nil) {
         self.title = title
         self.isEssential = isEssential
+        self.descriptionText = descriptionText
+        self.limitNumber = limitNumber
         super.init(frame: frame)
         attribute()
         addSubViews()
@@ -50,10 +59,11 @@ class TextFieldHeaderView: UIView {
     
     private func attribute() {
         titleLabel.text = title
+        descriptionLabel.text = descriptionText
     }
     
     private func addSubViews() {
-        [titleLabel, EssentialLabel, signImage, errorMessageLabel].forEach { addSubview($0) }
+        [titleLabel, EssentialLabel, signImage, descriptionLabel, textNumLabel].forEach { addSubview($0) }
     }
     
     private func makeUI() {
@@ -77,8 +87,13 @@ class TextFieldHeaderView: UIView {
             }
         }
     
-        errorMessageLabel.snp.makeConstraints {
+        textNumLabel.snp.makeConstraints {
             $0.trailing.equalToSuperview()
+            $0.centerY.equalTo(titleLabel)
+        }
+        
+        descriptionLabel.snp.makeConstraints {
+            $0.trailing.equalTo(textNumLabel.snp.leading).offset(-4)
             $0.centerY.equalTo(titleLabel)
         }
     }
@@ -86,34 +101,38 @@ class TextFieldHeaderView: UIView {
     func setState(_ state: TextFieldState) {
         UIView.animate(withDuration: 0.1) {
             switch state {
-            case .normal, .editing:
+            case .normal:
                 self.signImage.alpha = 0.0
-                self.errorMessageLabel.text = ""
+                self.textNumLabel.text = ""
+            case .editing:
+                self.signImage.alpha = 0.0
+                self.textNumLabel.textColor = UIColor.mainOrange500
             case .done:
                 self.signImage.image = UIImage(systemName: "checkmark.circle.fill")
                 self.signImage.tintColor = UIColor.mainOrange500
                 self.signImage.alpha = 1.0
-                self.errorMessageLabel.text = ""
+                self.textNumLabel.textColor = UIColor.mainOrange500
             case .error:
                 self.signImage.image = UIImage(systemName: "exclamationmark.circle.fill")
                 self.signImage.alpha = 1.0
                 self.signImage.tintColor = UIColor.error
+                self.textNumLabel.textColor = UIColor.error
             }
-            
             self.layoutIfNeeded()
         }
     }
     
-    func setErrorMessage(_ message: String) {
-        errorMessageLabel.text = message
+    func setTextNumber(_ num: Int) {
+        guard let limitNumber else { return }
+        textNumLabel.text = "(\(num)/\(limitNumber))"
     }
 }
 
 // 네이밍,, 뭘로하는겨
 extension Reactive where Base: TextFieldHeaderView {
-    var textFieldErrorMessage: Binder<String> {
-        return Binder(self.base) { view, message in
-            view.setErrorMessage(message)
+    var setTextNumber: Binder<Int> {
+        return Binder(self.base) { view, num in
+            view.setTextNumber(num)
         }
     }
 

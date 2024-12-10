@@ -31,7 +31,7 @@ final class UserInfoEntryViewController: UIViewController, View {
     }
     
     //nickname
-    private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임", isEssential: true)
+    private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임", isEssential: false, descriptionText: "최소 2자-최대10자", limitNumber: 10)
     private var nicknameTextField = CommomTextField(placeholderText: "임당이", textfieldType: .namePhonePad)
     private var niknameFooterView = TextFieldFooterView()
     
@@ -192,12 +192,9 @@ final class UserInfoEntryViewController: UIViewController, View {
         
         nicknameTextField.rx.text
             .orEmpty
-            .map { text in
-                let limitedText = String(text.prefix(10))
-                let formattedText = self.formatText(limitedText)
-                return formattedText
+            .bind { [weak self] text in
+                self?.nicknameHeaderView.setTextNumber(text.count)
             }
-            .bind(to: nicknameTextField.rx.text)
             .disposed(by: disposeBag)
         
         // birth

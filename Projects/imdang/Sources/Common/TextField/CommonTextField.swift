@@ -25,13 +25,6 @@ class CommomTextField: UITextField {
     
     var placeholderText: String
     var textfieldType: UIKeyboardType
-
-//    lazy var clearButton = UIButton().then {
-//        $0.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-//        $0.tintColor = .grayScale100
-//        $0.addTarget(self, action: #selector(clearText), for: .touchUpInside)
-//        $0.frame = CGRect(x: 0.0, y: 0.0, width: 36.0, height: 0.0)
-//    }
    
     init(frame: CGRect = .zero, placeholderText: String, textfieldType: UIKeyboardType) {
         self.placeholderText = placeholderText
@@ -57,7 +50,6 @@ class CommomTextField: UITextField {
         autocapitalizationType = .none
         self.placeholder = placeholderText
     
-//        self.rightView = clearButton
         self.rightViewMode = .whileEditing
         self.clearButtonMode = .whileEditing
         self.keyboardType = textfieldType
@@ -77,12 +69,6 @@ class CommomTextField: UITextField {
             self.setNeedsDisplay()
         }
     }
-
-//    @objc func clearText() {
-//        DispatchQueue.main.async {
-//            self.text = ""
-//        }
-//    }
 }
 
 extension Reactive where Base: CommomTextField {
