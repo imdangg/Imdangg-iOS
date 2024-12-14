@@ -17,8 +17,10 @@ class PagingFooterView: UICollectionReusableView {
     
     private let pageControl = UIPageControl().then {
         $0.currentPage = 0
+        $0.numberOfPages = 4
         $0.pageIndicatorTintColor = .grayScale100
         $0.currentPageIndicatorTintColor = .mainOrange500
+        
         $0.isUserInteractionEnabled = false
     }
     
@@ -40,9 +42,8 @@ class PagingFooterView: UICollectionReusableView {
         }
     }
     
-    func bind(input: Observable<Int>, indexPath: IndexPath, pageNumber: Int, collectionView: UICollectionView) {
+    func bind(input: Observable<Int>, indexPath: IndexPath, collectionView: UICollectionView) {
         self.collectionView = collectionView
-        pageControl.numberOfPages = pageNumber
         
         input
             .subscribe(onNext: { [weak self] currentPage in

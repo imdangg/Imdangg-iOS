@@ -92,7 +92,6 @@ class TicketModalViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        preferredContentSize = CGSize(width: view.frame.width, height: 502) // 고정된 높이
     }
     private func addSubViews() {
         [dimView, modalView, ticketImageView, titleLabel, subTitleLabel, descriptionLabel, acceptButton, closeButton, xButton].forEach { view.addSubview($0) }
@@ -104,7 +103,7 @@ class TicketModalViewController: UIViewController {
         }
         
         modalView.snp.makeConstraints {
-            $0.height.equalTo(502)
+            $0.height.equalTo(534)
             $0.width.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
@@ -118,12 +117,12 @@ class TicketModalViewController: UIViewController {
         
         ticketImageView.snp.makeConstraints {
             $0.width.height.equalTo(100)
-            $0.top.equalTo(modalView.snp.top).offset(68)
+            $0.top.equalTo(modalView.snp.top).offset(82)
             $0.centerX.equalToSuperview()
         }
         
         titleLabel.snp.makeConstraints {
-            $0.top.equalTo(ticketImageView.snp.bottom).offset(26)
+            $0.top.equalTo(ticketImageView.snp.bottom).offset(24)
             $0.centerX.equalToSuperview()
         }
         
@@ -134,7 +133,7 @@ class TicketModalViewController: UIViewController {
         
         descriptionLabel.snp.makeConstraints {
             $0.height.equalTo(72)
-            $0.top.equalTo(subTitleLabel.snp.bottom).offset(24)
+            $0.top.equalTo(subTitleLabel.snp.bottom).offset(28)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalToSuperview().offset(-20)
         }

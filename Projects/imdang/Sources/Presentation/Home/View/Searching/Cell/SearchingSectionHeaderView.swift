@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 enum HeaderType {
     case topten
@@ -14,7 +16,21 @@ enum HeaderType {
 
 class SearchingSectionHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "SearchingSectionHeaderView"
-    private var headerType: HeaderType = .notTopten
+    private let disposeBag = DisposeBag()
+    private var collectionView: UICollectionView?
+    private var currentPage = 1 {
+        didSet {
+            updatePageLabel()
+        }
+    }
+    
+    private var headerType: HeaderType? {
+        didSet {
+            guard let type = headerType else { return }
+            resetConstraints()
+            configureLayout(type: type)
+        }
+    }
     
     private let titleLabel = UILabel().then {
         $0.font = .pretenSemiBold(18)
@@ -28,16 +44,62 @@ class SearchingSectionHeaderView: UICollectionReusableView {
         $0.setTitleColor(.grayScale700, for: .normal)
     }
     
+    private let currentPageLabel = UILabel().then {
+        $0.text = "1"
+        $0.font = .pretenSemiBold(14)
+        $0.textColor = .mainOrange500
+        $0.textAlignment = .center
+    }
+    
+    private let totalPageLabel = UILabel().then {
+        $0.text = " / 4"
+        $0.font = .pretenRegular(14)
+        $0.textColor = .grayScale700
+        $0.textAlignment = .center
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addSubview(titleLabel)
-        titleLabel.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func updatePageLabel() {
+        currentPageLabel.text = "\(currentPage)"
+    }
+    
+    private func resetConstraints() {
+        subviews.forEach { $0.removeFromSuperview() }
+    }
+    
+    private func configureLayout(type: HeaderType) {
+        
+        addSubview(titleLabel)
+        titleLabel.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        switch type {
+        case .topten:
+            addSubview(totalPageLabel)
+            addSubview(currentPageLabel)
+            totalPageLabel.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.trailing.equalToSuperview()
+            }
+            currentPageLabel.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.trailing.equalTo(totalPageLabel.snp.leading)
+            }
+        case .notTopten:
+            addSubview(fullViewBotton)
+            fullViewBotton.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.trailing.equalToSuperview()
+            }
+        }
     }
     
     func configure(with title: String, type: HeaderType) {
@@ -50,12 +112,17 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             attributedString.addAttribute(.foregroundColor, value: UIColor.mainOrange500, range: range)
             
             titleLabel.attributedText = attributedString
-        } else {
-            addSubview(fullViewBotton)
-            fullViewBotton.snp.makeConstraints {
-                $0.centerY.equalToSuperview()
-                $0.trailing.equalToSuperview()
-            }
         }
+    }
+    
+    func bind(input: Observable<Int>, indexPath: IndexPath, collectionView: UICollectionView) {
+        self.collectionView = collectionView
+        
+        input
+            .subscribe(onNext: { [weak self] currentPage in
+                self?.currentPage = currentPage + 1
+            })
+            .disposed(by: disposeBag)
+
     }
 }

@@ -15,7 +15,7 @@ class HomeContainerViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     private let searchViewController = SearchingViewController()
-    private let exchangeViewController = EmptyViewController(labelText: "교환뷰")
+    private let exchangeViewController = ExchangeViewController(reactor: ExchangeReactor())
     
     private let searchButton = UIButton().then {
         $0.setTitle("탐색", for: .normal)
@@ -138,10 +138,10 @@ class HomeContainerViewController: UIViewController {
         }
 
         leftStackView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 6, bottom: 0, right: 0))
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
         }
         rightStackView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 6))
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 6))
         }
         
         let leftView = UIBarButtonItem(customView: leftContainerView)

@@ -5,6 +5,7 @@
 //  Created by daye on 11/14/24.
 //
 
+
 import UIKit
 import RxSwift
 import SnapKit
@@ -25,10 +26,12 @@ class CommonButton: UIButton {
     private let disposeBag = DisposeBag()
     var title: String
     var initialButtonType: CommonButtonType
+    var radius: CGFloat?
 
-    init(frame: CGRect = .zero, title: String, initialButtonType: CommonButtonType) {
+    init(frame: CGRect = .zero, title: String, initialButtonType: CommonButtonType, radius: CGFloat? = 8) {
         self.title = title
         self.initialButtonType = initialButtonType
+        self.radius = radius
         super.init(frame: frame)
         setupButton()
     }
@@ -40,8 +43,9 @@ class CommonButton: UIButton {
     func setupButton() {
         setTitle(title, for: .normal)
         titleLabel?.font = .pretenSemiBold(16)
-        layer.cornerRadius = 8
+        layer.cornerRadius = radius ?? 8
         clipsToBounds = true
+        contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         setState(initialButtonType)
     }
     
@@ -72,6 +76,10 @@ class CommonButton: UIButton {
                 self.layer.borderColor = UIColor.grayScale200.cgColor
             }
         }
+    }
+    
+    func setButtonTitle(title: String) {
+        setTitle(title, for: .normal)
     }
 }
 

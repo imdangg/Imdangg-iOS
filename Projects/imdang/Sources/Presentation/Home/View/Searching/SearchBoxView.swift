@@ -16,9 +16,9 @@ class SearchBoxView: UIView {
         configuration.attributedTitle?.font = .pretenMedium(14)
         configuration.attributedTitle?.foregroundColor = .grayScale500
         configuration.imagePadding = 8
-        configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -50, bottom: 0, trailing: 0)
 
         $0.configuration = configuration
+        $0.contentHorizontalAlignment = .leading
         
         $0.layer.cornerRadius = 8
         $0.layer.borderWidth = 2
