@@ -30,21 +30,27 @@ final class UserInfoEntryViewController: UIViewController, View {
         $0.textColor = UIColor.grayScale700
     }
     
-    private var nicknameHeaderView = UserInfoEntryHeaderView(title: "닉네임")
+    //nickname
+    private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임", isEssential: false, descriptionText: "최소 2자-최대10자", limitNumber: 10)
     private var nicknameTextField = CommomTextField(placeholderText: "임당이", textfieldType: .namePhonePad)
+    private var niknameFooterView = TextFieldFooterView()
     
-    private var birthHeaderView = UserInfoEntryHeaderView(title: "생년월일")
+    //birth
+    private var birthHeaderView = TextFieldHeaderView(title: "생년월일", isEssential: false)
     private var birthTextField = CommomTextField(placeholderText: "2000.01.01", textfieldType: .decimalPad)
+    private var birthFooterView = TextFieldFooterView()
     
-    private var genderHeaderView = UserInfoEntryHeaderView(title: "성별")
+    //gender
+    private var genderHeaderView = TextFieldHeaderView(title: "성별", isEssential: false)
     private var selectMaleButton = CommonButton(title: "남자", initialButtonType: .unselectedBorderStyle)
     private var selectFemaleButton = CommonButton(title: "여자", initialButtonType: .unselectedBorderStyle)
     
+    //button
     private var submitButton = CommonButton(title: "다음", initialButtonType: .disabled)
     
     private lazy var stackView = UIStackView().then {
         $0.isUserInteractionEnabled = false
-        [mainTitle, subTitle, nicknameHeaderView, nicknameTextField, birthHeaderView, birthTextField, genderHeaderView, selectMaleButton, selectFemaleButton, submitButton].forEach { view.addSubview($0) }
+        [mainTitle, subTitle, nicknameHeaderView, nicknameTextField, niknameFooterView, birthHeaderView, birthTextField, birthFooterView, genderHeaderView, selectMaleButton, selectFemaleButton, submitButton].forEach { view.addSubview($0) }
     }
     
     init(reactor: UserInfoEntryReactor) {
@@ -96,8 +102,14 @@ final class UserInfoEntryViewController: UIViewController, View {
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
         }
         
+        niknameFooterView.snp.makeConstraints {
+            $0.top.equalTo(nicknameTextField.snp.bottom).offset(8)
+            $0.height.equalTo(17)
+            $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
         birthHeaderView.snp.makeConstraints {
-            $0.top.equalTo(nicknameTextField.snp.bottom).offset(32)
+            $0.top.equalTo(niknameFooterView.snp.bottom).offset(24)
             $0.height.equalTo(20)
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
         }
@@ -108,8 +120,14 @@ final class UserInfoEntryViewController: UIViewController, View {
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
         }
         
+        birthFooterView.snp.makeConstraints {
+            $0.top.equalTo(birthTextField.snp.bottom).offset(8)
+            $0.height.equalTo(17)
+            $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
+        }
+        
         genderHeaderView.snp.makeConstraints {
-            $0.top.equalTo(birthTextField.snp.bottom).offset(32)
+            $0.top.equalTo(birthFooterView.snp.bottom).offset(24)
             $0.height.equalTo(20)
             $0.horizontalEdges.equalTo(stackView.snp.horizontalEdges)
         }
@@ -156,31 +174,48 @@ final class UserInfoEntryViewController: UIViewController, View {
             .drive(reactor.action)
             .disposed(by: disposeBag)
         
+        
         nicknameTextField.rx.controlEvent([.editingDidEnd])
             .asDriver()
             .map { [weak self] in
+
+                // 닉네임 미입력 오류 처리
                 guard let text = self?.nicknameTextField.text, !text.isEmpty else {
-                    self?.nicknameHeaderView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
-                    return Reactor.Action.changeNicknameTextFieldState(.error)
+                    self?.niknameFooterView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
+                    return .changeNicknameTextFieldState(.error)
                 }
+                
+                // 닉네임 글자 수 오류 처리
                 guard text.count >= 2 && text.count <= 10 else {
-                    self?.nicknameHeaderView.rx.textFieldErrorMessage.onNext("2자~10자로 입력해주세요.")
-                    return Reactor.Action.changeNicknameTextFieldState(.error)
+                    self?.niknameFooterView.rx.textFieldErrorMessage.onNext("2자~10자로 입력해주세요.")
+                    return .changeNicknameTextFieldState(.error)
                 }
-                return Reactor.Action.changeNicknameTextFieldState(.done)
+                
+                // 닉네임 입력 완료 상태
+                return .changeNicknameTextFieldState(.done)
+            }
+            .drive(reactor.action) // Reactor로 Action 전달
+            .disposed(by: disposeBag)
+
+
+        nicknameTextField.rx.text
+            .orEmpty
+            .bind { [weak self] text in
+                self?.nicknameHeaderView.setTextNumber(text.count)
+            }
+            .disposed(by: disposeBag)
+        
+        nicknameTextField.isClearButtonTapped
+            .asDriver(onErrorJustReturn: false)
+            .filter { $0 }
+            .map { [weak self] _ in
+                self?.nicknameHeaderView.setTextNumber(0)
+                self?.nicknameTextField.isClearButtonTapped.onNext(false)
+                return Reactor.Action.changeNicknameTextFieldState(.normal)
             }
             .drive(reactor.action)
             .disposed(by: disposeBag)
         
-        nicknameTextField.rx.text
-            .orEmpty
-            .map { text in
-                let limitedText = String(text.prefix(10))
-                let formattedText = self.formatText(limitedText)
-                return formattedText
-            }
-            .bind(to: nicknameTextField.rx.text)
-            .disposed(by: disposeBag)
         
         // birth
         birthTextField.rx.controlEvent(.primaryActionTriggered)
@@ -196,10 +231,29 @@ final class UserInfoEntryViewController: UIViewController, View {
         birthTextField.rx.controlEvent([.editingDidEnd])
             .asDriver()
             .map { [weak self] in
+                
+                // 미입력 오류
                 guard let text = self?.birthTextField.text, !text.isEmpty else {
-                    self?.birthHeaderView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
+                    self?.birthFooterView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
                     return Reactor.Action.changeBirthTextFieldState(.error)
                 }
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy.MM.dd"
+                
+                // 잘못된 날짜 형식 or 다른게 들어갔을때
+                if dateFormatter.date(from: text) == nil {
+                    self?.birthFooterView.rx.textFieldErrorMessage.onNext("잘못된 생년월일을 입력하셨어요.")
+                    return Reactor.Action.changeBirthTextFieldState(.error)
+                }
+                
+                // 과거 또는 오늘 날짜 체크
+                let currentDate = Date()
+                if let inputDate = dateFormatter.date(from: text), inputDate > currentDate {
+                    self?.birthFooterView.rx.textFieldErrorMessage.onNext("과거 또는 오늘 날짜를 입력해주세요.")
+                    return Reactor.Action.changeBirthTextFieldState(.error)
+                }
+                
                 // TODO: 유효한 날짜 추가 필요해보임
                 return Reactor.Action.changeBirthTextFieldState(.done)
             }
@@ -232,12 +286,15 @@ final class UserInfoEntryViewController: UIViewController, View {
             (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
         }).disposed(by: disposeBag)
         
+        bindingKeyboard()
+        
         reactor.state
             .map { $0.nicknameTextFieldState }
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] state in
                 self?.nicknameHeaderView.rx.textFieldState.onNext(state)
                 self?.nicknameTextField.setState(state)
+                self?.niknameFooterView.setState(state)
             })
             .disposed(by: disposeBag)
         
@@ -247,6 +304,7 @@ final class UserInfoEntryViewController: UIViewController, View {
             .subscribe(onNext: { [weak self] state in
                 self?.birthHeaderView.rx.textFieldState.onNext(state)
                 self?.birthTextField.setState(state)
+                self?.birthFooterView.setState(state)
             })
             .disposed(by: disposeBag)
         
@@ -299,4 +357,50 @@ final class UserInfoEntryViewController: UIViewController, View {
         return result
     }
     
+}
+
+// Keyboard event
+extension UserInfoEntryViewController {
+    
+    func keyboardHeight() -> Observable<CGFloat> {
+        return Observable
+            .from([
+                NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
+                    .map { notification -> CGFloat in
+                        (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height ?? 0
+                    },
+                NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
+                    .map { _ -> CGFloat in
+                        0
+                    }
+            ])
+            .merge()
+    }
+    
+    func bindingKeyboard() {
+        keyboardHeight()
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { keyboardHeight in
+                UIView.animate(withDuration: 0.1) {
+                    let safeAreaBottom = self.view.safeAreaInsets.bottom
+                    let height = keyboardHeight > 0.0 ? (keyboardHeight - safeAreaBottom) : safeAreaBottom
+                    self.updateNextBtnBottom(-height, keyboardHeight)
+                    self.view.layoutIfNeeded()
+                }
+            })
+            .disposed(by: disposeBag)
+        
+    }
+    
+    func updateNextBtnBottom(_ offset: CGFloat, _ keyboardHeight: CGFloat){
+        self.submitButton.snp.remakeConstraints {
+            if keyboardHeight > 0.0 {
+                $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(offset)
+            } else {
+                $0.bottom.equalTo(stackView.snp.bottom)
+            }
+            $0.horizontalEdges.equalTo(keyboardHeight > 0.0 ? 0 : stackView.snp.horizontalEdges)
+            $0.height.equalTo(56)
+        }
+    }
 }
