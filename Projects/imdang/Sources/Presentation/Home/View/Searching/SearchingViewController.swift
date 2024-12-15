@@ -70,6 +70,7 @@ class SearchingViewController: UIViewController {
         let item = NSCollectionLayoutItem(layoutSize: size)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: size, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 32, trailing: 0)
         return section
     }
 
@@ -83,14 +84,16 @@ class SearchingViewController: UIViewController {
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .none
         
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(50))
+        // [FIXME] 원래 크기대로하면 이상해져서 눈에 젤 괜찮은걸로 일단 해둔것
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(77))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         
         let separatorSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(8))
         let separator = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: separatorSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
         
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 20, trailing: 0)
-        header.contentInsets = NSDirectionalEdgeInsets(top: -32, leading: 0, bottom: 0, trailing: 20)
+        // [FIXME] 원래 크기대로하면 이상해져서 눈에 젤 괜찮은걸로 일단 해둔것
+        section.contentInsets = NSDirectionalEdgeInsets(top: 24, leading: 20, bottom: 20, trailing: 0)
+        header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20)
         separator.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -20, bottom: 0, trailing: 0)
         
         section.boundarySupplementaryItems = [header, separator]
@@ -185,12 +188,12 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             case 0:
                 return UICollectionReusableView()
             case 1:
-                headerView.configure(with: "내가 작성한 단지 인사이트", type: .notTopten)
+                headerView.configure(with: "내가 작성한 단지 인사이트", type: .notTopten, showHorizontalCollection: true)
             case 2:
-                headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten)
+                headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
             case 3:
-                headerView.configure(with: "추천수 TOP 10 인사이트", type: .topten)
-                headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
+                headerView.configure(with: "추천수 TOP 10 인사이트", type: .topten, showHorizontalCollection: false)
+                headerView.bind(input: currentrPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
             default:
                 return UICollectionReusableView()
             }
