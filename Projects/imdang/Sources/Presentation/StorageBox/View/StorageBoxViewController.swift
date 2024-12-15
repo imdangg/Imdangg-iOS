@@ -66,7 +66,6 @@ final class StorageBoxViewController: UIViewController {
         }
         
         navigationTitleLabel.snp.makeConstraints {
-            $0.width.equalTo(63)
             $0.height.equalTo(34)
             $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
         }
@@ -243,6 +242,14 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
             
             return cell
+        }
+    }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let headerHeight: CGFloat = 220
+        if scrollView.contentOffset.y >= headerHeight {
+            navigationTitleLabel.text = "신논현동"
+        } else {
+            navigationTitleLabel.text = "보관함"
         }
     }
 }
