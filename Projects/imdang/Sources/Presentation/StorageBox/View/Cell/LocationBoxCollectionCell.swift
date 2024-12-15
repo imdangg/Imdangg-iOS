@@ -159,17 +159,13 @@ class LocationBoxCollectionCell: UICollectionViewCell {
         input
             .subscribe(onNext: { [weak self] currentPage in
                 if pageIndex == currentPage {
-                    UIView.animate(withDuration: 0.1) {
-                        self?.backgroundColor = .mainOrange500
-                        self?.zoneStackView.backgroundColor = .mainOrange400
-                        self?.insightStackView.backgroundColor = .mainOrange400
-                    }
+                    self?.backgroundColor = .mainOrange500
+                    self?.zoneStackView.backgroundColor = .mainOrange400
+                    self?.insightStackView.backgroundColor = .mainOrange400
                 } else {
-                    UIView.animate(withDuration: 0.1) {
-                        self?.backgroundColor = .grayScale100
-                        self?.zoneStackView.backgroundColor = .grayScale50
-                        self?.insightStackView.backgroundColor = .grayScale50
-                    }
+                    self?.backgroundColor = .grayScale100
+                    self?.zoneStackView.backgroundColor = .grayScale50
+                    self?.insightStackView.backgroundColor = .grayScale50
                 }
             })
             .disposed(by: disposeBag)
