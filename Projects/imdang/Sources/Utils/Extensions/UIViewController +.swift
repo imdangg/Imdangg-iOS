@@ -27,4 +27,22 @@ extension UIViewController {
         navigationController?.navigationBar.standardAppearance = navigationBarAppearance
         navigationController?.navigationBar.scrollEdgeAppearance = navigationBarAppearance
     }
+    
+    func configNavigationBackButton() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.shadowColor = .clear
+        appearance.shadowImage = UIImage()
+        
+        let customBackImage = ImdangImages.Image(resource: .backButton)
+        appearance.setBackIndicatorImage(customBackImage, transitionMaskImage: customBackImage)
+        
+        self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        self.navigationItem.backBarButtonItem?.tintColor = .black
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance    }
+    
+    func hideNavigationBackButton() {
+        self.navigationItem.hidesBackButton = true
+    }
 }

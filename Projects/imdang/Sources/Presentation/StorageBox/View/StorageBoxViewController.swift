@@ -194,6 +194,15 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             case 0:
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: InsightHeaderView.reuseIdentifier, for: indexPath) as! InsightHeaderView
                 headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
+                
+                headerView.fullViewBotton.rx.tap
+                    .subscribe(onNext: { [weak self] _ in
+                        let vc = AreaListViewController()
+                        vc.hidesBottomBarWhenPushed = true
+                        self?.navigationController?.pushViewController(vc, animated: true)
+                    })
+                    .disposed(by: disposeBag)
+                
                 return headerView
             case 1:
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LocationBoxHeaderCell.reuseIdentifier, for: indexPath) as! LocationBoxHeaderCell

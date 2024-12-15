@@ -20,21 +20,21 @@ class InsightHeaderView: UICollectionReusableView {
         }
     }
     
-    private let fullViewBotton = UIButton().then {
-        $0.setTitle("전체보기", for: .normal)
-        $0.titleLabel?.font = .pretenRegular(14)
-        $0.setTitleColor(.grayScale700, for: .normal)
-    }
-    
     private let pageLabel = UILabel().then {
         $0.text = "1 / 4"
-        $0.font = .pretenRegular(14)
+        $0.font = .pretenSemiBold(14)
         $0.textAlignment = .center
         $0.textColor = .mainOrange500
         $0.backgroundColor = .mainOrange50
         
         $0.layer.cornerRadius = 14
         $0.clipsToBounds = true
+    }
+    
+    let fullViewBotton = UIButton().then {
+        $0.setTitle("전체보기", for: .normal)
+        $0.titleLabel?.font = .pretenRegular(14)
+        $0.setTitleColor(.grayScale700, for: .normal)
     }
     
     override init(frame: CGRect) {
