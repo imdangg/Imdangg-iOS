@@ -14,36 +14,37 @@ class LocationBoxHeaderCell: UICollectionReusableView {
     static let reuseIdentifier = "LocationBoxHeaderCell"
     private let disposeBag = DisposeBag()
     
-    private let fullViewBotton = UIButton().then {
-        $0.setTitle("전체보기", for: .normal)
-        $0.titleLabel?.font = .pretenRegular(14)
-        $0.setTitleColor(.white, for: .normal)
-        
+    private let isClicked: UIButton.Configuration = {
         var config = UIButton.Configuration.plain()
+        config.title = "전체"
+        config.attributedTitle?.font = .pretenSemiBold(14)
+        config.baseForegroundColor = .white
         config.titleAlignment = .center
         config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
         config.cornerStyle = .capsule
         config.background.backgroundColor = .mainOrange500
-        config.background.strokeWidth = 1
+        config.background.strokeWidth = 0
         config.background.strokeColor = UIColor.grayScale100
-        
-        $0.configuration = config
-    }
+        return config
+    }()
     
-    private let kindViewButton = UIButton().then {
-        $0.setTitle("단지별 보기", for: .normal)
-        $0.titleLabel?.font = .pretenRegular(14)
-        $0.setTitleColor(.grayScale700, for: .normal)
-        
+    private let isNoClicked: UIButton.Configuration = {
         var config = UIButton.Configuration.plain()
+        config.title = "전체"
+        config.attributedTitle?.font = .pretenSemiBold(14)
+        config.baseForegroundColor = .grayScale500
         config.titleAlignment = .center
         config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
         config.cornerStyle = .capsule
+        config.background.backgroundColor = .white
         config.background.strokeWidth = 1
         config.background.strokeColor = UIColor.grayScale100
-        
-        $0.configuration = config
-    }
+        return config
+    }()
+    
+    private let fullViewBotton = UIButton()
+    
+    private let kindViewButton = UIButton()
     
     private let myInsightLabel = UILabel().then {
         $0.text = "내 인사이트만 보기"
@@ -74,6 +75,7 @@ class LocationBoxHeaderCell: UICollectionReusableView {
         
         addSubViews()
         makeConstraints()
+        setUpButtons()
         bindActions()
     }
     
@@ -91,6 +93,18 @@ class LocationBoxHeaderCell: UICollectionReusableView {
         [firstLineView, secondLineView].forEach {
             addSubview($0)
         }
+    }
+    private func setUpButtons() {
+        var click = isClicked
+        var noClick = isNoClicked
+        
+        click.title = "전체"
+        click.attributedTitle?.font = .pretenSemiBold(14)
+        fullViewBotton.configuration = click
+        
+        noClick.title = "신논현 더 센트럴 푸르지오"
+        noClick.attributedTitle?.font = .pretenSemiBold(14)
+        kindViewButton.configuration = noClick
     }
     
     private func makeConstraints() {
@@ -110,11 +124,13 @@ class LocationBoxHeaderCell: UICollectionReusableView {
         fullViewBotton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().offset(20)
+            $0.height.equalTo(36)
         }
         
         kindViewButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalTo(fullViewBotton.snp.trailing).offset(8)
+            $0.height.equalTo(36)
         }
         
         myInsightLabel.snp.makeConstraints {
@@ -129,25 +145,31 @@ class LocationBoxHeaderCell: UICollectionReusableView {
     }
     
     func bindActions() {
+        var click = isClicked
+        var noClick = isNoClicked
+        
+        
         fullViewBotton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                self?.fullViewBotton.configuration?.background.backgroundColor = .mainOrange500
-                self?.kindViewButton.configuration?.background.backgroundColor = .white
-                
-                self?.fullViewBotton.setTitleColor(.white, for: .normal)
-                self?.kindViewButton.setTitleColor(.grayScale500, for: .normal)
+                click.title = "전체"
+                noClick.title = "신논현 더 센트럴 푸르지오"
+                click.attributedTitle?.font = .pretenSemiBold(14)
+                noClick.attributedTitle?.font = .pretenSemiBold(14)
+                self?.fullViewBotton.configuration = click
+                self?.kindViewButton.configuration = noClick
             })
             .disposed(by: disposeBag)
-        
+
         kindViewButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                self?.fullViewBotton.configuration?.background.backgroundColor = .white
-                self?.kindViewButton.configuration?.background.backgroundColor = .mainOrange500
-                self?.kindViewButton.setTitle("ㅁㄴㅇㅁㄴㅇ ㅁㄴㅇ", for: .normal)
-                
-                self?.fullViewBotton.setTitleColor(.grayScale500, for: .normal)
-                self?.kindViewButton.setTitleColor(.white, for: .normal)
+                click.title = "신논현 더 센트럴 푸르지오"
+                noClick.title = "전체"
+                click.attributedTitle?.font = .pretenSemiBold(14)
+                noClick.attributedTitle?.font = .pretenSemiBold(14)
+                self?.fullViewBotton.configuration = noClick
+                self?.kindViewButton.configuration = click
             })
             .disposed(by: disposeBag)
     }
+
 }

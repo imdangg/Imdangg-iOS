@@ -193,7 +193,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
             case 3:
                 headerView.configure(with: "추천수 TOP 10 인사이트", type: .topten, showHorizontalCollection: false)
-                headerView.bind(input: currentrPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
+                headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
             default:
                 return UICollectionReusableView()
             }
