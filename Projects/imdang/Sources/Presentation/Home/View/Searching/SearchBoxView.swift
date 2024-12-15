@@ -9,16 +9,11 @@ import UIKit
 import SnapKit
 
 class SearchBoxView: UIView {
-    private let searchButton = UIButton().then {
-        var configuration = UIButton.Configuration.plain()
-        configuration.image = ImdangImages.Image(resource: .magnifier)
-        configuration.title = "어떤 지역의 인사이트를 찾으시나요?"
-        configuration.attributedTitle?.font = .pretenMedium(14)
-        configuration.attributedTitle?.foregroundColor = .grayScale500
-        configuration.imagePadding = 8
-
-        $0.configuration = configuration
-        $0.contentHorizontalAlignment = .leading
+    private let searchButton = ImageTextButton(imagePadding: 12, textPadding: 8).then {
+        $0.iconImageView.image = ImdangImages.Image(resource: .magnifier)
+        $0.textLabel.text = "어떤 지역의 인사이트를 찾으시나요?"
+        $0.textLabel.font = .pretenMedium(14)
+        $0.textLabel.textColor = .grayScale500
         
         $0.layer.cornerRadius = 8
         $0.layer.borderWidth = 2

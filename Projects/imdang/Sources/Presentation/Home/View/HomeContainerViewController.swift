@@ -62,7 +62,7 @@ class HomeContainerViewController: UIViewController {
         super.viewWillAppear(animated)
         
         configNavigationBarItem()
-        presentModal()
+//        presentModal()
     }
     
     private func presentModal() {

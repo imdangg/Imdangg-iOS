@@ -14,29 +14,35 @@ import UIKit
 
 final class StorageBoxViewController: UIViewController {
     private var collectionView: UICollectionView!
+    private let disposeBag = DisposeBag()
+    private let currentPage = PublishSubject<Int>()
+    
+    private let navigationLineView = UIView().then {
+        $0.backgroundColor = .grayScale100
+    }
+    
     private let navigationTitleLabel = UILabel().then {
         $0.text = "보관함"
         $0.font = .pretenBold(24)
         $0.textColor = .grayScale900
     }
     
-    private let mapButton = UIButton().then {
-//        let image = ImdangImages.Image(resource: .mapButtonGray)
-//        image.renderingMode = .alwaysTemplate
-        $0.setTitle("지도", for: .normal)
-        $0.setImage(ImdangImages.Image(resource: .mapButtonGray), for: .normal)
-        $0.setTitleColor(.grayScale700, for: .normal)
+    private let mapButton = ImageTextButton(imagePadding: 8, textPadding: 4).then {
+        $0.iconImageView.image = ImdangImages.Image(resource: .mapButtonGray)
+        $0.textLabel.text = "지도"
+        $0.textLabel.font = .pretenMedium(12)
+        $0.textLabel.textColor = .grayScale700
         
-        $0.layer.cornerRadius = 8
+        $0.layer.cornerRadius = 4
         $0.layer.borderWidth = 1
         $0.layer.borderColor = UIColor.grayScale200.cgColor
     }
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureCollectionView()
+        configNavigationBgColor(backgroundColor: .white)
         setNavigationItem()
+        configureCollectionView()
     }
     
     private func setNavigationItem() {
@@ -51,21 +57,24 @@ final class StorageBoxViewController: UIViewController {
         self.navigationItem.leftBarButtonItem = leftView
         self.navigationItem.rightBarButtonItem = rightView
         
-        leftContainerView.snp.makeConstraints {
-            $0.height.equalTo(40)
+        view.addSubview(navigationLineView)
+        
+        navigationLineView.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            $0.height.equalTo(1)
+            $0.horizontalEdges.equalToSuperview()
         }
-        rightContainerView.snp.makeConstraints {
-            $0.height.equalTo(40)
-        }
+        
         navigationTitleLabel.snp.makeConstraints {
             $0.width.equalTo(63)
             $0.height.equalTo(34)
-            $0.top.equalToSuperview().offset(16)
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
         }
+        
         mapButton.snp.makeConstraints {
             $0.width.equalTo(57)
             $0.height.equalTo(32)
-            $0.top.equalToSuperview().offset(16)
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 6))
         }
     }
     
@@ -84,9 +93,14 @@ final class StorageBoxViewController: UIViewController {
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
                                 withReuseIdentifier: SectionSeparatorView.reuseIdentifier)
         
+        collectionView.register(InsightHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: InsightHeaderView.reuseIdentifier)
         collectionView.register(LocationBoxHeaderCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: LocationBoxHeaderCell.reuseIdentifier)
         
         view.addSubview(collectionView)
+        collectionView.snp.makeConstraints {
+            $0.top.equalTo(navigationLineView.snp.bottom)
+            $0.horizontalEdges.bottom.equalToSuperview()
+        }
     }
     
     // MARK: - Compositional Layout
@@ -115,26 +129,29 @@ final class StorageBoxViewController: UIViewController {
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .groupPaging
         section.interGroupSpacing = 12
-        section.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 20, bottom: 20, trailing: 0)
         
-//        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-//                                                heightDimension: .absolute(50))
-//        let header = NSCollectionLayoutBoundarySupplementaryItem(
-//            layoutSize: headerSize,
-//            elementKind: UICollectionView.elementKindSectionHeader,
-//            alignment: .top
-//        )
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(28))
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         
         let separatorSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(8))
-        let separator = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: separatorSize,
-            elementKind: UICollectionView.elementKindSectionFooter,
-            alignment: .bottom
-        )
+        let separator = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: separatorSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
+        
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 20, trailing: 0)
         separator.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -20, bottom: 0, trailing: 0)
+        header.contentInsets = NSDirectionalEdgeInsets(top: -32, leading: 0, bottom: 0, trailing: 20)
         
-        section.boundarySupplementaryItems = [/*header, */separator]
+        section.orthogonalScrollingBehavior = .groupPaging
+        section.visibleItemsInvalidationHandler = { [weak self] _, contentOffset, environment in
+            let containerWidth = environment.container.contentSize.width
+            let itemWidth = environment.container.contentSize.width
+            let pageIndex = Int(max(0, round(contentOffset.x / itemWidth)))
+
+            if containerWidth > 0 {
+                self?.currentPage.onNext(pageIndex)
+            }
+        }
         
+        section.boundarySupplementaryItems = [header, separator]
         return section
     }
     
@@ -152,11 +169,7 @@ final class StorageBoxViewController: UIViewController {
         
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                 heightDimension: .absolute(122))
-        let header = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top
-        )
+        let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -20, bottom: 0, trailing: 0)
         header.pinToVisibleBounds = true // 헤더 고정
         
@@ -179,7 +192,9 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             
             switch indexPath.section {
             case 0:
-                return UICollectionReusableView()
+                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: InsightHeaderView.reuseIdentifier, for: indexPath) as! InsightHeaderView
+                headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
+                return headerView
             case 1:
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LocationBoxHeaderCell.reuseIdentifier, for: indexPath) as! LocationBoxHeaderCell
                 return headerView
@@ -203,7 +218,10 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
         switch indexPath.section {
         case 0:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: LocationBoxCollectionCell.self)
-            
+            cell.bind(input: currentPage.asObservable(), pageIndex: indexPath.item)
+            if indexPath.item == 0 {
+                cell.backgroundColor = .mainOrange500
+            }
             return cell
         case 1:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)

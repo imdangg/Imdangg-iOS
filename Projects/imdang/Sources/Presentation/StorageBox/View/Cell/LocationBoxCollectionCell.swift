@@ -8,12 +8,17 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
+import RxCocoa
 
 class LocationBoxCollectionCell: UICollectionViewCell {
     static let identifier = "LocationBoxCollectionCell"
+    private var pageIndex = 0
     
+    private let disposeBag = DisposeBag()
     private let locationImage = UIImageView().then {
-        $0.image = ImdangImages.Image(resource: .location)
+        $0.image = ImdangImages.Image(resource: .location).withRenderingMode(.alwaysTemplate)
+        $0.tintColor = .white
     }
     
     private let locationnLabel = UILabel().then {
@@ -67,7 +72,7 @@ class LocationBoxCollectionCell: UICollectionViewCell {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .mainOrange500
+        self.backgroundColor = .grayScale100
         self.layer.cornerRadius = 10
         
         addSubview()
@@ -146,5 +151,27 @@ class LocationBoxCollectionCell: UICollectionViewCell {
 
     func configure() {
         
+    }
+    
+    func bind(input: Observable<Int>, pageIndex: Int) {
+        self.pageIndex = pageIndex
+        
+        input
+            .subscribe(onNext: { [weak self] currentPage in
+                if pageIndex == currentPage {
+                    UIView.animate(withDuration: 0.1) {
+                        self?.backgroundColor = .mainOrange500
+                        self?.zoneStackView.backgroundColor = .mainOrange400
+                        self?.insightStackView.backgroundColor = .mainOrange400
+                    }
+                } else {
+                    UIView.animate(withDuration: 0.1) {
+                        self?.backgroundColor = .grayScale100
+                        self?.zoneStackView.backgroundColor = .grayScale50
+                        self?.insightStackView.backgroundColor = .grayScale50
+                    }
+                }
+            })
+            .disposed(by: disposeBag)
     }
 }

@@ -13,7 +13,7 @@ import RxCocoa
 
 
 class SearchingViewController: UIViewController {
-    private let currentrPage = PublishSubject<Int>()
+    private let currentPage = PublishSubject<Int>()
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout()).then {
         $0.backgroundColor = .white
         $0.register(cell: InsightCollectionCell.self)
@@ -141,7 +141,7 @@ class SearchingViewController: UIViewController {
             let pageIndex = Int(max(0, round(contentOffset.x / itemWidth)))
 
             if containerWidth > 0 {
-                self?.currentrPage.onNext(pageIndex)
+                self?.currentPage.onNext(pageIndex)
             }
         }
 
@@ -190,7 +190,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten)
             case 3:
                 headerView.configure(with: "추천수 TOP 10 인사이트", type: .topten)
-                headerView.bind(input: currentrPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
+                headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
             default:
                 return UICollectionReusableView()
             }
@@ -208,7 +208,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 return footerView
             case 3:
                 let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: PagingFooterView.reuseIdentifier, for: indexPath) as! PagingFooterView
-                footerView.bind(input: currentrPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
+                footerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
                 return footerView
             default:
                 return UICollectionReusableView()
