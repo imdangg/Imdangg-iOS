@@ -32,6 +32,15 @@ class SearchingSectionHeaderView: UICollectionReusableView {
         }
     }
     
+    private var isShowHorizontalCollectionChipView: Bool? = false {
+        didSet {
+            resetConstraints()
+            if let headerType = headerType {
+                configureLayout(type: headerType)
+            }
+        }
+    }
+    
     private let titleLabel = UILabel().then {
         $0.font = .pretenSemiBold(18)
         $0.textColor = .grayScale900
@@ -58,6 +67,9 @@ class SearchingSectionHeaderView: UICollectionReusableView {
         $0.textAlignment = .center
     }
     
+    private var horizontalCollectionView: HorizontalCollectionChipView?
+        
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
     }
@@ -77,8 +89,31 @@ class SearchingSectionHeaderView: UICollectionReusableView {
     private func configureLayout(type: HeaderType) {
         
         addSubview(titleLabel)
-        titleLabel.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+        
+        // [FIXME]
+        if let shouldShowHorizontal = isShowHorizontalCollectionChipView, shouldShowHorizontal {
+            let collectionView = HorizontalCollectionChipView()
+            horizontalCollectionView = collectionView
+            
+            addSubview(collectionView)
+            
+            titleLabel.snp.makeConstraints {
+                $0.top.equalToSuperview()
+                $0.leading.equalToSuperview()
+                $0.trailing.equalToSuperview()
+                $0.bottom.equalTo(collectionView.snp.top)
+            }
+            
+            collectionView.snp.makeConstraints {
+                $0.top.equalTo(titleLabel.snp.bottom)
+                $0.horizontalEdges.equalToSuperview().inset(-20) //바깥 여백 없애기
+                $0.height.equalTo(36)
+                $0.bottom.equalToSuperview()
+            }
+        } else {
+            titleLabel.snp.makeConstraints {
+                $0.edges.equalToSuperview()
+            }
         }
         
         switch type {
@@ -86,25 +121,26 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             addSubview(totalPageLabel)
             addSubview(currentPageLabel)
             totalPageLabel.snp.makeConstraints {
-                $0.centerY.equalToSuperview()
+                $0.centerY.equalTo(titleLabel.snp.centerY)
                 $0.trailing.equalToSuperview()
             }
             currentPageLabel.snp.makeConstraints {
-                $0.centerY.equalToSuperview()
+                $0.centerY.equalTo(titleLabel.snp.centerY)
                 $0.trailing.equalTo(totalPageLabel.snp.leading)
             }
         case .notTopten:
             addSubview(fullViewBotton)
             fullViewBotton.snp.makeConstraints {
-                $0.centerY.equalToSuperview()
+                $0.centerY.equalTo(titleLabel.snp.centerY)
                 $0.trailing.equalToSuperview()
             }
         }
     }
     
-    func configure(with title: String, type: HeaderType) {
+    func configure(with title: String, type: HeaderType, showHorizontalCollection: Bool) {
         titleLabel.text = title
         headerType = type
+        isShowHorizontalCollectionChipView = showHorizontalCollection
         
         if type == .topten {
             let attributedString = NSMutableAttributedString(string: title)
@@ -125,4 +161,5 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             .disposed(by: disposeBag)
 
     }
+
 }
