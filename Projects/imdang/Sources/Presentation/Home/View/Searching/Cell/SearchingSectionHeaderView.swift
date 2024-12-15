@@ -101,14 +101,13 @@ class SearchingSectionHeaderView: UICollectionReusableView {
                 $0.top.equalToSuperview()
                 $0.leading.equalToSuperview()
                 $0.trailing.equalToSuperview()
-                $0.bottom.equalTo(collectionView.snp.top)
+                $0.height.equalTo(25)
             }
             
             collectionView.snp.makeConstraints {
-                $0.top.equalTo(titleLabel.snp.bottom)
+                $0.top.equalTo(titleLabel.snp.bottom).offset(16)
                 $0.horizontalEdges.equalToSuperview().inset(-20) //바깥 여백 없애기
                 $0.height.equalTo(36)
-                $0.bottom.equalToSuperview()
             }
         } else {
             titleLabel.snp.makeConstraints {
