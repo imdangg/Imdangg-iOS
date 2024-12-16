@@ -67,7 +67,7 @@ class AreaListViewController: UIViewController {
         
         backButton.snp.makeConstraints {
             $0.width.height.equalTo(20)
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 4, bottom: 0, right: 0))
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
         }
         
         titleLabel.snp.makeConstraints {

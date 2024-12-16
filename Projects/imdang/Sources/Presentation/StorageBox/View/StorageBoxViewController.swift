@@ -21,7 +21,7 @@ final class StorageBoxViewController: UIViewController {
         $0.backgroundColor = .grayScale100
     }
     
-    private let navigationTitleButton = ImageTextButton(type: .textFirst, horizonPadding: 8, spacing: 8).then {
+    private let navigationTitleButton = ImageTextButton(type: .textFirst, horizonPadding: 6, spacing: 8).then {
         $0.customText.text = "보관함"
         $0.customText.textColor = .grayScale900
         $0.customText.font = .pretenBold(24)
@@ -72,8 +72,7 @@ final class StorageBoxViewController: UIViewController {
         
         navigationTitleButton.snp.makeConstraints {
             $0.height.equalTo(34)
-            // TODO: 텍스트 길이로 가로 조절해야함
-            $0.width.equalTo(200)
+            $0.width.equalTo(100)
             $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0))
         }
         
@@ -257,17 +256,12 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let headerHeight: CGFloat = 220
-        if scrollView.contentOffset.y >= headerHeight {
-            navigationTitleButton.customText.text = "신논현동"
-            navigationTitleButton.customImage.isHidden = false
-            navigationTitleButton.isEnabled = true
-            navigationTitleButton.updateConstraint()
-        } else {
-            navigationTitleButton.customText.text = "보관함"
-            navigationTitleButton.customImage.isHidden = true
-            navigationTitleButton.isEnabled = false
-            navigationTitleButton.updateConstraint()
-        }
+        let isScrolledPastHeader = scrollView.contentOffset.y >= headerHeight
+
+        navigationTitleButton.customText.text = isScrolledPastHeader ? "신논현동" : "보관함"
+        navigationTitleButton.customImage.isHidden = !isScrolledPastHeader
+        navigationTitleButton.isEnabled = isScrolledPastHeader
+        navigationTitleButton.updateConstraint()
     }
 }
 
