@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 class SearchBoxView: UIView {
-    private let searchButton = ImageTextButton(imagePadding: 12, textPadding: 8).then {
+    private let searchButton = ImageTextButton(type: .imageFirst, imagePadding: 12, textPadding: 8).then {
         $0.iconImageView.image = ImdangImages.Image(resource: .magnifier)
         $0.textLabel.text = "어떤 지역의 인사이트를 찾으시나요?"
         $0.textLabel.font = .pretenMedium(14)

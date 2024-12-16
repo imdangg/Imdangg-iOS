@@ -9,13 +9,20 @@ import UIKit
 import Then
 import SnapKit
 
+enum PriorityType {
+    case imageFirst
+    case textFirst
+}
+
 class ImageTextButton: UIButton {
     let iconImageView = UIImageView()
     let textLabel = UILabel()
+    let type: PriorityType
     var imagePadding: Int
     var textPadding: Int
 
-    init(frame: CGRect = .zero, imagePadding: Int, textPadding: Int) {
+    init(frame: CGRect = .zero, type: PriorityType, imagePadding: Int, textPadding: Int) {
+        self.type = type
         self.imagePadding = imagePadding
         self.textPadding = textPadding
         super.init(frame: frame)
@@ -33,14 +40,26 @@ class ImageTextButton: UIButton {
     }
     
     func makeConstraints() {
-        iconImageView.snp.makeConstraints {
-            $0.centerY.equalToSuperview()
-            $0.leading.equalToSuperview().offset(imagePadding)
-        }
-        
-        textLabel.snp.makeConstraints {
-            $0.centerY.equalToSuperview()
-            $0.leading.equalTo(iconImageView.snp.trailing).offset(textPadding)
+        if type == .imageFirst {
+            iconImageView.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.leading.equalToSuperview().offset(imagePadding)
+            }
+            
+            textLabel.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.leading.equalTo(iconImageView.snp.trailing).offset(textPadding)
+            }
+        } else {
+            textLabel.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.leading.equalToSuperview().offset(textPadding)
+            }
+            
+            iconImageView.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.leading.equalTo(textLabel.snp.trailing).offset(imagePadding)
+            }
         }
     }
 }

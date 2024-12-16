@@ -21,13 +21,16 @@ final class StorageBoxViewController: UIViewController {
         $0.backgroundColor = .grayScale100
     }
     
-    private let navigationTitleLabel = UILabel().then {
-        $0.text = "보관함"
-        $0.font = .pretenBold(24)
-        $0.textColor = .grayScale900
+    private let navigationTitleLabel = ImageTextButton(type: .textFirst, imagePadding: 8, textPadding: 0).then {
+        $0.textLabel.text = "보관함"
+        $0.textLabel.textColor = .grayScale900
+        $0.textLabel.font = .pretenBold(24)
+        $0.iconImageView.image = UIImage(systemName: "chevron.down")
+        $0.iconImageView.tintColor = .grayScale900
+        $0.iconImageView.isHidden = true
     }
     
-    private let mapButton = ImageTextButton(imagePadding: 8, textPadding: 4).then {
+    private let mapButton = ImageTextButton(type: .imageFirst, imagePadding: 8, textPadding: 4).then {
         $0.iconImageView.image = ImdangImages.Image(resource: .mapButtonGray)
         $0.textLabel.text = "지도"
         $0.textLabel.font = .pretenMedium(12)
@@ -43,6 +46,7 @@ final class StorageBoxViewController: UIViewController {
         configNavigationBgColor(backgroundColor: .white)
         setNavigationItem()
         configureCollectionView()
+        bindAction()
     }
     
     private func setNavigationItem() {
@@ -67,6 +71,8 @@ final class StorageBoxViewController: UIViewController {
         
         navigationTitleLabel.snp.makeConstraints {
             $0.height.equalTo(34)
+            // TODO: 텍스트 길이로 가로 조절해야함
+            $0.width.equalTo(100)
             $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
         }
         
@@ -175,6 +181,16 @@ final class StorageBoxViewController: UIViewController {
         section.boundarySupplementaryItems = [header]
         return section
     }
+    
+    func bindAction() {
+        navigationTitleLabel.rx.tap
+            .subscribe(onNext: { [weak self] in
+                let vc = AreaListViewController()
+                vc.hidesBottomBarWhenPushed = true
+                self?.navigationController?.pushViewController(vc, animated: true)
+            })
+            .disposed(by: disposeBag)
+    }
 }
 
 extension StorageBoxViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -193,14 +209,7 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             case 0:
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: InsightHeaderView.reuseIdentifier, for: indexPath) as! InsightHeaderView
                 headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
-                
-                headerView.fullViewBotton.rx.tap
-                    .subscribe(onNext: { [weak self] _ in
-                        let vc = AreaListViewController()
-                        vc.hidesBottomBarWhenPushed = true
-                        self?.navigationController?.pushViewController(vc, animated: true)
-                    })
-                    .disposed(by: disposeBag)
+                headerView.delegate = self
                 
                 return headerView
             case 1:
@@ -244,12 +253,25 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             return cell
         }
     }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let headerHeight: CGFloat = 220
         if scrollView.contentOffset.y >= headerHeight {
-            navigationTitleLabel.text = "신논현동"
+            navigationTitleLabel.textLabel.text = "신논현동"
+            navigationTitleLabel.iconImageView.isHidden = false
+            navigationTitleLabel.isEnabled = true
         } else {
-            navigationTitleLabel.text = "보관함"
+            navigationTitleLabel.textLabel.text = "보관함"
+            navigationTitleLabel.iconImageView.isHidden = true
+            navigationTitleLabel.isEnabled = false
         }
+    }
+}
+
+extension StorageBoxViewController: ReusableViewDelegate {
+    func didTapFullViewButton() {
+        let vc = AreaListViewController()
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
     }
 }

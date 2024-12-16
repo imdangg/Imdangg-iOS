@@ -10,9 +10,14 @@ import Then
 import RxSwift
 import RxCocoa
 
+protocol ReusableViewDelegate: AnyObject {
+    func didTapFullViewButton()
+}
+
 class InsightHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "InsightHeaderView"
-    private let disposeBag = DisposeBag()
+    weak var delegate: ReusableViewDelegate?
+    private var disposeBag = DisposeBag()
     private var collectionView: UICollectionView?
     private var currentPage = 1 {
         didSet {
@@ -50,6 +55,20 @@ class InsightHeaderView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
+        
+        currentPage = 1
+        pageLabel.text = "1 / 4"
+        
+        delegate = nil
+        collectionView = nil
+        bindActions()
+    }
+
+    
+    
     func addSubViews() {
         [pageLabel, fullViewBotton].forEach {
             addSubview($0)
@@ -78,6 +97,7 @@ class InsightHeaderView: UICollectionReusableView {
     func bindActions() {
         fullViewBotton.rx.tap
             .subscribe(onNext: { [weak self] _ in
+                self?.delegate?.didTapFullViewButton()
             })
             .disposed(by: disposeBag)
     }
