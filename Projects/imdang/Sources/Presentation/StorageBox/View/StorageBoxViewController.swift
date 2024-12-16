@@ -99,7 +99,7 @@ final class StorageBoxViewController: UIViewController {
                                 withReuseIdentifier: SectionSeparatorView.reuseIdentifier)
         
         collectionView.register(InsightHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: InsightHeaderView.reuseIdentifier)
-        collectionView.register(LocationBoxHeaderCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: LocationBoxHeaderCell.reuseIdentifier)
+        collectionView.register(LocationBoxHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: LocationBoxHeaderView.reuseIdentifier)
         
         view.addSubview(collectionView)
         collectionView.snp.makeConstraints {
@@ -199,7 +199,7 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return section == 0 ? 10 : 20
+        return section == 0 ? 4 : 10
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -207,13 +207,14 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             
             switch indexPath.section {
             case 0:
-                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: InsightHeaderView.reuseIdentifier, for: indexPath) as! InsightHeaderView
+                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LocationBoxHeaderView.reuseIdentifier, for: indexPath) as! LocationBoxHeaderView
                 headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
                 headerView.delegate = self
                 
                 return headerView
             case 1:
-                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LocationBoxHeaderCell.reuseIdentifier, for: indexPath) as! LocationBoxHeaderCell
+                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: InsightHeaderView.reuseIdentifier, for: indexPath) as! InsightHeaderView
+                headerView.delegate = self
                 return headerView
             default:
                 return UICollectionReusableView()
@@ -270,5 +271,12 @@ extension StorageBoxViewController: ReusableViewDelegate {
         let vc = AreaListViewController()
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func didTapAreaSeletButton() {
+        let modalVC = AreaModalViewController()
+        modalVC.modalPresentationStyle = .pageSheet
+        modalVC.modalTransitionStyle = .coverVertical
+        self.present(modalVC, animated: true, completion: nil)
     }
 }

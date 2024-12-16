@@ -12,40 +12,65 @@ import RxCocoa
 
 protocol ReusableViewDelegate: AnyObject {
     func didTapFullViewButton()
+    func didTapAreaSeletButton()
 }
 
 class InsightHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "InsightHeaderView"
     weak var delegate: ReusableViewDelegate?
-    private var disposeBag = DisposeBag()
-    private var collectionView: UICollectionView?
-    private var currentPage = 1 {
-        didSet {
-            updatePageLabel()
-        }
-    }
+    private let disposeBag = DisposeBag()
     
-    private let pageLabel = UILabel().then {
-        $0.text = "1 / 4"
-        $0.font = .pretenSemiBold(14)
-        $0.textAlignment = .center
-        $0.textColor = .mainOrange500
-        $0.backgroundColor = .mainOrange50
+    private let viewAllButton = UIButton().then {
+        $0.setTitle("전체", for: .normal)
+        $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = .pretenSemiBold(14)
+        $0.backgroundColor = .mainOrange500
         
-        $0.layer.cornerRadius = 14
-        $0.clipsToBounds = true
+        $0.layer.borderWidth = 0
+        $0.layer.borderColor = UIColor.grayScale100.cgColor
+        $0.layer.cornerRadius = 18
     }
     
-    let fullViewBotton = UIButton().then {
-        $0.setTitle("전체보기", for: .normal)
-        $0.titleLabel?.font = .pretenRegular(14)
-        $0.setTitleColor(.grayScale700, for: .normal)
+    private let areaSeletButton = ImageTextButton(type: .textFirst, horizonPadding: 16, spacing: 8).then {
+        $0.customText.text = "단지별 보기"
+        $0.customText.font = .pretenSemiBold(14)
+        $0.customText.textColor = .grayScale500
+        
+        $0.customImage.image = ImdangImages.Image(resource: .chevronDown).withRenderingMode(.alwaysTemplate)
+        $0.imageSize = 12
+        $0.customImage.tintColor = .grayScale500
+        
+        $0.layer.borderWidth = 1
+        $0.layer.borderColor = UIColor.grayScale100.cgColor
+        $0.layer.cornerRadius = 18
+    }
+    
+    private let myInsightLabel = UILabel().then {
+        $0.text = "내 인사이트만 보기"
+        $0.textColor = .grayScale700
+        $0.font = .pretenMedium(14)
+    }
+    
+    private let insightCount = UILabel().then {
+        $0.text = "33개"
+        $0.textColor = .grayScale900
+        $0.font = .pretenSemiBold(16)
+    }
+    
+    private let secondLineView = UIView().then {
+        $0.backgroundColor = .white
+        
+        $0.layer.borderWidth = 1
+        $0.layer.borderColor = UIColor.grayScale100.cgColor
+    }
+    
+    private let firstLineView = UIView().then {
+        $0.backgroundColor = .white
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .white
-        
         addSubViews()
         makeConstraints()
         bindActions()
@@ -55,60 +80,86 @@ class InsightHeaderView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        disposeBag = DisposeBag()
-        
-        currentPage = 1
-        pageLabel.text = "1 / 4"
-        
-        delegate = nil
-        collectionView = nil
-        bindActions()
-    }
-
-    
-    
     func addSubViews() {
-        [pageLabel, fullViewBotton].forEach {
+        [viewAllButton, areaSeletButton].forEach {
+            firstLineView.addSubview($0)
+        }
+        [myInsightLabel, insightCount].forEach {
+            secondLineView.addSubview($0)
+        }
+        [firstLineView, secondLineView].forEach {
             addSubview($0)
         }
     }
     
     private func makeConstraints() {
+        firstLineView.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(68)
+        }
         
-        pageLabel.snp.makeConstraints {
-            $0.centerY.equalToSuperview()
+        secondLineView.snp.makeConstraints {
+            $0.top.equalTo(firstLineView.snp.bottom)
             $0.leading.equalToSuperview()
-            $0.width.equalTo(44)
-            $0.height.equalTo(28)
+            $0.trailing.equalToSuperview()
+            $0.height.equalTo(54)
         }
         
-        fullViewBotton.snp.makeConstraints {
+        viewAllButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.trailing.equalToSuperview()
+            $0.leading.equalToSuperview().offset(20)
+            $0.width.equalTo(57)
+            $0.height.equalTo(36)
         }
-    }
-    
-    private func updatePageLabel() {
-        pageLabel.text = "\(currentPage) / 4"
+        
+        areaSeletButton.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.leading.equalTo(viewAllButton.snp.trailing).offset(8)
+            $0.height.equalTo(36)
+        }
+        
+        myInsightLabel.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.leading.equalToSuperview().offset(20)
+        }
+        
+        insightCount.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalToSuperview().offset(-20)
+        }
     }
     
     func bindActions() {
-        fullViewBotton.rx.tap
+        viewAllButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                self?.delegate?.didTapFullViewButton()
+                guard let self = self else { return }
+                viewAllButton.setTitleColor(.white, for: .normal)
+                viewAllButton.backgroundColor = .mainOrange500
+                viewAllButton.layer.borderWidth = 0
+                
+                areaSeletButton.customText.textColor = .grayScale500
+                areaSeletButton.customImage.tintColor = .grayScale500
+                areaSeletButton.backgroundColor = .white
+                areaSeletButton.layer.borderWidth = 1
+            })
+            .disposed(by: disposeBag)
+
+        areaSeletButton.rx.tap
+            .subscribe(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                viewAllButton.setTitleColor(.grayScale500, for: .normal)
+                viewAllButton.backgroundColor = .white
+                viewAllButton.layer.borderWidth = 1
+                
+                areaSeletButton.customText.textColor = .white
+                areaSeletButton.customImage.tintColor = .white
+                areaSeletButton.backgroundColor = .mainOrange500
+                areaSeletButton.layer.borderWidth = 0
+                
+                delegate?.didTapAreaSeletButton()
             })
             .disposed(by: disposeBag)
     }
-    
-    func bind(input: Observable<Int>, indexPath: IndexPath, collectionView: UICollectionView) {
-        self.collectionView = collectionView
-        
-        input
-            .subscribe(onNext: { [weak self] currentPage in
-                self?.currentPage = currentPage + 1
-            })
-            .disposed(by: disposeBag)
-    }
+
 }
