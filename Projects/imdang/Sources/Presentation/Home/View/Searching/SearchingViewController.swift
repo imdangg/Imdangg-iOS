@@ -19,6 +19,9 @@ class SearchingViewController: UIViewController {
         $0.register(cell: InsightCollectionCell.self)
         $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "BannerCell")
     }
+    private let navigationLineView = UIView().then {
+        $0.backgroundColor = .grayScale100
+    }
     private let bannerImageView = BannerView()
     private let searchBoxView = SearchBoxView()
     
@@ -41,13 +44,22 @@ class SearchingViewController: UIViewController {
         
         view.addSubview(collectionView)
         view.addSubview(searchBoxView)
+        view.addSubview(navigationLineView)
+        
         searchBoxView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(24)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(50)
         }
-        collectionView.snp.makeConstraints {
+        
+        navigationLineView.snp.makeConstraints {
             $0.top.equalTo(searchBoxView.snp.bottom).offset(16)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(1)
+        }
+        
+        collectionView.snp.makeConstraints {
+            $0.top.equalTo(navigationLineView.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
