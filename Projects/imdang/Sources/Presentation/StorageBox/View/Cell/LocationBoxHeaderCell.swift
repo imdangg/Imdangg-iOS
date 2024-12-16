@@ -14,37 +14,30 @@ class LocationBoxHeaderCell: UICollectionReusableView {
     static let reuseIdentifier = "LocationBoxHeaderCell"
     private let disposeBag = DisposeBag()
     
-    private let isClicked: UIButton.Configuration = {
-        var config = UIButton.Configuration.plain()
-        config.title = "전체"
-        config.attributedTitle?.font = .pretenSemiBold(14)
-        config.baseForegroundColor = .white
-        config.titleAlignment = .center
-        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
-        config.cornerStyle = .capsule
-        config.background.backgroundColor = .mainOrange500
-        config.background.strokeWidth = 0
-        config.background.strokeColor = UIColor.grayScale100
-        return config
-    }()
+    private let viewAllButton = UIButton().then {
+        $0.setTitle("전체", for: .normal)
+        $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = .pretenSemiBold(14)
+        $0.backgroundColor = .mainOrange500
+        
+        $0.layer.borderWidth = 0
+        $0.layer.borderColor = UIColor.grayScale100.cgColor
+        $0.layer.cornerRadius = 18
+    }
     
-    private let isNoClicked: UIButton.Configuration = {
-        var config = UIButton.Configuration.plain()
-        config.title = "전체"
-        config.attributedTitle?.font = .pretenSemiBold(14)
-        config.baseForegroundColor = .grayScale500
-        config.titleAlignment = .center
-        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
-        config.cornerStyle = .capsule
-        config.background.backgroundColor = .white
-        config.background.strokeWidth = 1
-        config.background.strokeColor = UIColor.grayScale100
-        return config
-    }()
-    
-    private let fullViewBotton = UIButton()
-    
-    private let kindViewButton = UIButton()
+    private let areaSeletButton = ImageTextButton(type: .textFirst, horizonPadding: 16, spacing: 8).then {
+        $0.customText.text = "신논현 더 센트럴 푸르지오"
+        $0.customText.font = .pretenSemiBold(14)
+        $0.customText.textColor = .grayScale500
+        
+        $0.customImage.image = ImdangImages.Image(resource: .chevronDown).withRenderingMode(.alwaysTemplate)
+        $0.imageSize = 12
+        $0.customImage.tintColor = .grayScale500
+        
+        $0.layer.borderWidth = 1
+        $0.layer.borderColor = UIColor.grayScale100.cgColor
+        $0.layer.cornerRadius = 18
+    }
     
     private let myInsightLabel = UILabel().then {
         $0.text = "내 인사이트만 보기"
@@ -72,10 +65,8 @@ class LocationBoxHeaderCell: UICollectionReusableView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .white
-        
         addSubViews()
         makeConstraints()
-        setUpButtons()
         bindActions()
     }
     
@@ -84,7 +75,7 @@ class LocationBoxHeaderCell: UICollectionReusableView {
     }
     
     func addSubViews() {
-        [fullViewBotton, kindViewButton].forEach {
+        [viewAllButton, areaSeletButton].forEach {
             firstLineView.addSubview($0)
         }
         [myInsightLabel, insightCount].forEach {
@@ -93,18 +84,6 @@ class LocationBoxHeaderCell: UICollectionReusableView {
         [firstLineView, secondLineView].forEach {
             addSubview($0)
         }
-    }
-    private func setUpButtons() {
-        var click = isClicked
-        var noClick = isNoClicked
-        
-        click.title = "전체"
-        click.attributedTitle?.font = .pretenSemiBold(14)
-        fullViewBotton.configuration = click
-        
-        noClick.title = "신논현 더 센트럴 푸르지오"
-        noClick.attributedTitle?.font = .pretenSemiBold(14)
-        kindViewButton.configuration = noClick
     }
     
     private func makeConstraints() {
@@ -121,15 +100,16 @@ class LocationBoxHeaderCell: UICollectionReusableView {
             $0.height.equalTo(54)
         }
         
-        fullViewBotton.snp.makeConstraints {
+        viewAllButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().offset(20)
+            $0.width.equalTo(57)
             $0.height.equalTo(36)
         }
         
-        kindViewButton.snp.makeConstraints {
+        areaSeletButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.leading.equalTo(fullViewBotton.snp.trailing).offset(8)
+            $0.leading.equalTo(viewAllButton.snp.trailing).offset(8)
             $0.height.equalTo(36)
         }
         
@@ -145,29 +125,31 @@ class LocationBoxHeaderCell: UICollectionReusableView {
     }
     
     func bindActions() {
-        var click = isClicked
-        var noClick = isNoClicked
-        
-        
-        fullViewBotton.rx.tap
+        viewAllButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                click.title = "전체"
-                noClick.title = "신논현 더 센트럴 푸르지오"
-                click.attributedTitle?.font = .pretenSemiBold(14)
-                noClick.attributedTitle?.font = .pretenSemiBold(14)
-                self?.fullViewBotton.configuration = click
-                self?.kindViewButton.configuration = noClick
+                guard let self = self else { return }
+                viewAllButton.setTitleColor(.white, for: .normal)
+                viewAllButton.backgroundColor = .mainOrange500
+                viewAllButton.layer.borderWidth = 0
+                
+                areaSeletButton.customText.textColor = .grayScale500
+                areaSeletButton.customImage.tintColor = .grayScale500
+                areaSeletButton.backgroundColor = .white
+                areaSeletButton.layer.borderWidth = 1
             })
             .disposed(by: disposeBag)
 
-        kindViewButton.rx.tap
+        areaSeletButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                click.title = "신논현 더 센트럴 푸르지오"
-                noClick.title = "전체"
-                click.attributedTitle?.font = .pretenSemiBold(14)
-                noClick.attributedTitle?.font = .pretenSemiBold(14)
-                self?.fullViewBotton.configuration = noClick
-                self?.kindViewButton.configuration = click
+                guard let self = self else { return }
+                viewAllButton.setTitleColor(.grayScale500, for: .normal)
+                viewAllButton.backgroundColor = .white
+                viewAllButton.layer.borderWidth = 1
+                
+                areaSeletButton.customText.textColor = .white
+                areaSeletButton.customImage.tintColor = .white
+                areaSeletButton.backgroundColor = .mainOrange500
+                areaSeletButton.layer.borderWidth = 0
             })
             .disposed(by: disposeBag)
     }

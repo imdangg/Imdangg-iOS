@@ -21,20 +21,21 @@ final class StorageBoxViewController: UIViewController {
         $0.backgroundColor = .grayScale100
     }
     
-    private let navigationTitleLabel = ImageTextButton(type: .textFirst, imagePadding: 8, textPadding: 0).then {
-        $0.textLabel.text = "보관함"
-        $0.textLabel.textColor = .grayScale900
-        $0.textLabel.font = .pretenBold(24)
-        $0.iconImageView.image = UIImage(systemName: "chevron.down")
-        $0.iconImageView.tintColor = .grayScale900
-        $0.iconImageView.isHidden = true
+    private let navigationTitleButton = ImageTextButton(type: .textFirst, horizonPadding: 8, spacing: 8).then {
+        $0.customText.text = "보관함"
+        $0.customText.textColor = .grayScale900
+        $0.customText.font = .pretenBold(24)
+        $0.customImage.image = ImdangImages.Image(resource: .chevronDown).withRenderingMode(.alwaysTemplate)
+        $0.imageSize = 20
+        $0.customImage.tintColor = .grayScale900
+        $0.customImage.isHidden = true
     }
     
-    private let mapButton = ImageTextButton(type: .imageFirst, imagePadding: 8, textPadding: 4).then {
-        $0.iconImageView.image = ImdangImages.Image(resource: .mapButtonGray)
-        $0.textLabel.text = "지도"
-        $0.textLabel.font = .pretenMedium(12)
-        $0.textLabel.textColor = .grayScale700
+    private let mapButton = ImageTextButton(type: .imageFirst, horizonPadding: 8, spacing: 4).then {
+        $0.customImage.image = ImdangImages.Image(resource: .mapButtonGray)
+        $0.customText.text = "지도"
+        $0.customText.font = .pretenMedium(12)
+        $0.customText.textColor = .grayScale700
         
         $0.layer.cornerRadius = 4
         $0.layer.borderWidth = 1
@@ -51,7 +52,7 @@ final class StorageBoxViewController: UIViewController {
     
     private func setNavigationItem() {
         let leftContainerView = UIView()
-        leftContainerView.addSubview(navigationTitleLabel)
+        leftContainerView.addSubview(navigationTitleButton)
         let leftView = UIBarButtonItem(customView: leftContainerView)
         
         let rightContainerView = UIView()
@@ -69,17 +70,17 @@ final class StorageBoxViewController: UIViewController {
             $0.horizontalEdges.equalToSuperview()
         }
         
-        navigationTitleLabel.snp.makeConstraints {
+        navigationTitleButton.snp.makeConstraints {
             $0.height.equalTo(34)
             // TODO: 텍스트 길이로 가로 조절해야함
-            $0.width.equalTo(100)
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
+            $0.width.equalTo(200)
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0))
         }
         
         mapButton.snp.makeConstraints {
             $0.width.equalTo(57)
             $0.height.equalTo(32)
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 6))
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0))
         }
     }
     
@@ -183,7 +184,7 @@ final class StorageBoxViewController: UIViewController {
     }
     
     func bindAction() {
-        navigationTitleLabel.rx.tap
+        navigationTitleButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 let vc = AreaListViewController()
                 vc.hidesBottomBarWhenPushed = true
@@ -257,13 +258,15 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let headerHeight: CGFloat = 220
         if scrollView.contentOffset.y >= headerHeight {
-            navigationTitleLabel.textLabel.text = "신논현동"
-            navigationTitleLabel.iconImageView.isHidden = false
-            navigationTitleLabel.isEnabled = true
+            navigationTitleButton.customText.text = "신논현동"
+            navigationTitleButton.customImage.isHidden = false
+            navigationTitleButton.isEnabled = true
+            navigationTitleButton.updateConstraint()
         } else {
-            navigationTitleLabel.textLabel.text = "보관함"
-            navigationTitleLabel.iconImageView.isHidden = true
-            navigationTitleLabel.isEnabled = false
+            navigationTitleButton.customText.text = "보관함"
+            navigationTitleButton.customImage.isHidden = true
+            navigationTitleButton.isEnabled = false
+            navigationTitleButton.updateConstraint()
         }
     }
 }
