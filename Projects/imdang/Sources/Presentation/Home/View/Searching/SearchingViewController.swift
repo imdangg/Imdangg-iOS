@@ -13,11 +13,14 @@ import RxCocoa
 
 
 class SearchingViewController: UIViewController {
-    private let currentrPage = PublishSubject<Int>()
+    private let currentPage = PublishSubject<Int>()
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout()).then {
         $0.backgroundColor = .white
         $0.register(cell: InsightCollectionCell.self)
         $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "BannerCell")
+    }
+    private let navigationLineView = UIView().then {
+        $0.backgroundColor = .grayScale100
     }
     private let bannerImageView = BannerView()
     private let searchBoxView = SearchBoxView()
@@ -41,13 +44,22 @@ class SearchingViewController: UIViewController {
         
         view.addSubview(collectionView)
         view.addSubview(searchBoxView)
+        view.addSubview(navigationLineView)
+        
         searchBoxView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(24)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(50)
         }
-        collectionView.snp.makeConstraints {
+        
+        navigationLineView.snp.makeConstraints {
             $0.top.equalTo(searchBoxView.snp.bottom).offset(16)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(1)
+        }
+        
+        collectionView.snp.makeConstraints {
+            $0.top.equalTo(navigationLineView.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
@@ -144,7 +156,7 @@ class SearchingViewController: UIViewController {
             let pageIndex = Int(max(0, round(contentOffset.x / itemWidth)))
 
             if containerWidth > 0 {
-                self?.currentrPage.onNext(pageIndex)
+                self?.currentPage.onNext(pageIndex)
             }
         }
 
@@ -193,7 +205,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
             case 3:
                 headerView.configure(with: "추천수 TOP 10 인사이트", type: .topten, showHorizontalCollection: false)
-                headerView.bind(input: currentrPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
+                headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
             default:
                 return UICollectionReusableView()
             }
@@ -211,7 +223,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 return footerView
             case 3:
                 let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: PagingFooterView.reuseIdentifier, for: indexPath) as! PagingFooterView
-                footerView.bind(input: currentrPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
+                footerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
                 return footerView
             default:
                 return UICollectionReusableView()

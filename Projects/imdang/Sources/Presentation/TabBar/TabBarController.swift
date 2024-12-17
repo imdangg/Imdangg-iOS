@@ -14,6 +14,7 @@ class TabBarController: UITabBarController {
         setValue(CustomTabBar(), forKey: "tabBar")
         UITabBar.appearance().backgroundColor = .white
         self.navigationItem.hidesBackButton = true
+        delegate = self
         
         configureTabBar()
         makeBoundaryLine()
@@ -34,7 +35,7 @@ class TabBarController: UITabBarController {
     private func configureTabBar() {
         let firstViewController = HomeContainerViewController()
         let secondViewController = EmptyViewController(labelText: "작성뷰")
-        let thirdViewController = EmptyViewController(labelText: "보관함")
+        let thirdViewController = StorageBoxViewController()
         
         let firstNav = UINavigationController(rootViewController: firstViewController)
         let secondNav = UINavigationController(rootViewController: secondViewController)
@@ -74,5 +75,18 @@ class CustomTabBar: UITabBar {
         var size = super.sizeThatFits(size)
         size.height = 92
         return size
+    }
+}
+
+extension TabBarController: UITabBarControllerDelegate {
+     public func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        guard let fromView = tabBarController.selectedViewController?.view,
+              let toView = viewController.view else { return false }
+        if fromView == toView {
+            return false
+        } else {
+            UIView.transition(from: fromView, to: toView, duration: 0, options: .transitionCrossDissolve)
+            return true
+        }
     }
 }
