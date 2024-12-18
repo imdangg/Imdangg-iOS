@@ -66,9 +66,13 @@ final class UserInfoEntryViewController: UIViewController, View {
         super.viewDidLoad()
         view.backgroundColor = UIColor.grayScale25
         view.addSubview(stackView)
-        setup()
+       setup()
+   }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
     }
-
+    
     func setup() {
         attriubute()
         layout()
