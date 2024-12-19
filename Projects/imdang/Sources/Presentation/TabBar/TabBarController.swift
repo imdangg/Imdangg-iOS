@@ -34,7 +34,7 @@ class TabBarController: UITabBarController {
     
     private func configureTabBar() {
         let firstViewController = HomeContainerViewController()
-        let secondViewController = EmptyViewController(labelText: "작성뷰")
+        let secondViewController = InsightViewController()
         let thirdViewController = StorageBoxViewController()
         
         let firstNav = UINavigationController(rootViewController: firstViewController)
@@ -78,13 +78,25 @@ class CustomTabBar: UITabBar {
     }
 }
 
+
+
 extension TabBarController: UITabBarControllerDelegate {
-     public func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+    public func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         guard let fromView = tabBarController.selectedViewController?.view,
               let toView = viewController.view else { return false }
+        
         if fromView == toView {
             return false
-        } else {
+        } else if tabBarController.viewControllers?.firstIndex(of: viewController) == 1{
+            let vc = InsightViewController()
+            vc.hidesBottomBarWhenPushed = true
+            
+            if let fromView = selectedViewController as? UINavigationController {
+                fromView.pushViewController(vc, animated: true)
+            }
+            return false
+        }
+        else {
             UIView.transition(from: fromView, to: toView, duration: 0, options: .transitionCrossDissolve)
             return true
         }
