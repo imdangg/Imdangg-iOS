@@ -115,7 +115,7 @@ class HomeContainerViewController: BaseViewController {
         }
         
         searchButton.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview()
             $0.centerY.equalToSuperview()
             $0.height.equalTo(34)
         }
@@ -127,7 +127,7 @@ class HomeContainerViewController: BaseViewController {
         }
         
         myPageButton.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-20)
+            $0.trailing.equalToSuperview()
             $0.centerY.equalToSuperview()
             $0.width.height.equalTo(40)
         }

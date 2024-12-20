@@ -94,16 +94,14 @@ class BaseViewController: UIViewController {
         
         leftNavigtaionView.snp.makeConstraints {
             $0.width.equalTo(view.frame.width / 2)
-            $0.height.equalTo(34)
             $0.top.equalToSuperview().offset(topPadding)
-            $0.leading.equalToSuperview()
+            $0.leading.equalToSuperview().offset(20)
         }
         
         rightNavigtaionView.snp.makeConstraints {
             $0.width.equalTo(view.frame.width / 2)
-            $0.height.equalTo(34)
             $0.top.equalToSuperview().offset(topPadding)
-            $0.trailing.equalToSuperview()
+            $0.trailing.equalToSuperview().offset(-20)
         }
         
         leftNaviItemView.snp.makeConstraints {
@@ -123,9 +121,10 @@ class BaseViewController: UIViewController {
         }
         
         customBackButton.snp.makeConstraints {
-            $0.width.height.equalTo(20)
+            $0.width.equalTo(20)
+            $0.height.equalTo(34)
             $0.centerY.equalTo(leftNaviItemView.snp.centerY)
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview()
         }
     }
     

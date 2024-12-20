@@ -57,14 +57,14 @@ final class StorageBoxViewController: BaseViewController {
             $0.height.equalTo(34)
             $0.width.equalTo(63)
             $0.centerY.equalToSuperview()
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview()
         }
         
         mapButton.snp.makeConstraints {
             $0.width.equalTo(57)
             $0.height.equalTo(32)
             $0.centerY.equalToSuperview()
-            $0.trailing.equalToSuperview().offset(-20)
+            $0.trailing.equalToSuperview()
         }
     }
     

@@ -56,7 +56,7 @@ class AreaListViewController: BaseViewController {
         leftNaviItemView.addSubview(titleLabel)
         
         titleLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(8)
+            $0.leading.equalToSuperview().offset(12)
             $0.centerY.equalToSuperview()
         }
     }
