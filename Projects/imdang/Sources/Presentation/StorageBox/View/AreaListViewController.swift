@@ -40,6 +40,7 @@ class AreaListViewController: BaseViewController {
     
     private func setupTableView() {
         tableView = UITableView(frame: view.bounds, style: .plain)
+        tableView.backgroundColor = .white
         tableView.rowHeight = 80
         
         tableView.delegate = self
