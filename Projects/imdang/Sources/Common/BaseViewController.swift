@@ -79,6 +79,7 @@ class BaseViewController: UIViewController {
     }
     
     private func configCustomNavigationBar() {
+        let topPadding = UIDevice.current.haveTouchId ? 34 : 64
         [customBackButton, leftNaviItemView].forEach {
             leftNavigtaionView.addArrangedSubview($0)
         }
@@ -94,14 +95,14 @@ class BaseViewController: UIViewController {
         leftNavigtaionView.snp.makeConstraints {
             $0.width.equalTo(view.frame.width / 2)
             $0.height.equalTo(34)
-            $0.top.equalToSuperview().offset(64)
+            $0.top.equalToSuperview().offset(topPadding)
             $0.leading.equalToSuperview()
         }
         
         rightNavigtaionView.snp.makeConstraints {
             $0.width.equalTo(view.frame.width / 2)
             $0.height.equalTo(34)
-            $0.top.equalToSuperview().offset(64)
+            $0.top.equalToSuperview().offset(topPadding)
             $0.trailing.equalToSuperview()
         }
         
