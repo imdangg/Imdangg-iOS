@@ -117,7 +117,7 @@ class BaseViewController: UIViewController {
         }
         
         navigationViewBottomShadow.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(116)
+            $0.top.equalToSuperview().offset(UIDevice.current.haveTouchId ? 86 : 116)
             $0.height.equalTo(1)
             $0.horizontalEdges.equalToSuperview()
         }
