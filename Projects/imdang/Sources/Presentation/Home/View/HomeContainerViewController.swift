@@ -92,7 +92,7 @@ class HomeContainerViewController: BaseViewController {
         }
         
         exchangeView.snp.makeConstraints {
-            $0.topEqualToNavigationBottom(vc: self)
+            $0.top.equalTo(myPageButton.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
