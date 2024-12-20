@@ -33,9 +33,9 @@ import RxCocoa
          // 오른쪽 네비게이션 아이템 추가
          rightNaviItemView.addSubview(item)
          
-         // 상단 레이아웃 적용방법
+         // 네비게이션바 하단에 레이아웃 적용방법
          tableView.snp.makeConstraints {
-             $0.top.equalTo(navigationViewBottomShadow.snp.bottom)
+             $0.topEqualToNavigationBottom(vc: self)
          }
      }
  }

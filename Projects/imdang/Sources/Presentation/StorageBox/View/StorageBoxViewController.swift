@@ -12,16 +12,12 @@ import RxCocoa
 import Then
 import UIKit
 
-final class StorageBoxViewController: UIViewController {
+final class StorageBoxViewController: BaseViewController {
     private var collectionView: UICollectionView!
     private let disposeBag = DisposeBag()
     private let currentPage = PublishSubject<Int>()
     
-    private let navigationLineView = UIView().then {
-        $0.backgroundColor = .grayScale100
-    }
-    
-    private let navigationTitleButton = ImageTextButton(type: .textFirst, horizonPadding: 6, spacing: 8).then {
+    private let navigationTitleButton = ImageTextButton(type: .textFirst, horizonPadding: 0, spacing: 8).then {
         $0.customText.text = "보관함"
         $0.customText.textColor = .grayScale900
         $0.customText.font = .pretenBold(24)
@@ -42,44 +38,33 @@ final class StorageBoxViewController: UIViewController {
         $0.layer.borderColor = UIColor.grayScale200.cgColor
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        configNavigationBgColor(backgroundColor: .white)
         setNavigationItem()
         configureCollectionView()
         bindAction()
     }
     
     private func setNavigationItem() {
-        let leftContainerView = UIView()
-        leftContainerView.addSubview(navigationTitleButton)
-        let leftView = UIBarButtonItem(customView: leftContainerView)
-        
-        let rightContainerView = UIView()
-        rightContainerView.addSubview(mapButton)
-        let rightView = UIBarButtonItem(customView: rightContainerView)
-          
-        self.navigationItem.leftBarButtonItem = leftView
-        self.navigationItem.rightBarButtonItem = rightView
-        
-        view.addSubview(navigationLineView)
-        
-        navigationLineView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            $0.height.equalTo(1)
-            $0.horizontalEdges.equalToSuperview()
-        }
+        leftNaviItemView.addSubview(navigationTitleButton)
+        rightNaviItemView.addSubview(mapButton)
         
         navigationTitleButton.snp.makeConstraints {
             $0.height.equalTo(34)
-            $0.width.equalTo(100)
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0))
+            $0.width.equalTo(63)
+            $0.centerY.equalToSuperview()
+            $0.leading.equalToSuperview().offset(20)
         }
         
         mapButton.snp.makeConstraints {
             $0.width.equalTo(57)
             $0.height.equalTo(32)
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 0))
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalToSuperview().offset(-20)
         }
     }
     
@@ -103,7 +88,7 @@ final class StorageBoxViewController: UIViewController {
         
         view.addSubview(collectionView)
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(navigationLineView.snp.bottom)
+            $0.topEqualToNavigationBottom(vc: self)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
