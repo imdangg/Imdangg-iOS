@@ -22,7 +22,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         viewController.view.backgroundColor = .white
 
         let navigationController = UINavigationController(rootViewController: viewController)
-        navigationController.hideKeyboardwhenTappedAround()
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
