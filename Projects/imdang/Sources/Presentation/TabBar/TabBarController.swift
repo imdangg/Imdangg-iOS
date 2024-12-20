@@ -22,10 +22,10 @@ class TabBarController: UITabBarController {
         if let items = tabBar.items {
             for (index, item) in items.enumerated() {
                 if index == 1 {
-                    item.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: -34, right: 0)
+                    item.imageInsets = UIEdgeInsets(top: UIDevice.current.haveTouchId ? 6 : 16, left: 0, bottom: UIDevice.current.haveTouchId ? -6 : -16, right: 0)
                 } else {
-                    item.titlePositionAdjustment = UIOffset(horizontal: index == 0 ? 20 : -20, vertical: 4)
-                    item.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: -16, right: 0)
+                    item.titlePositionAdjustment = UIOffset(horizontal: index == 0 ? 20 : -20, vertical: UIDevice.current.haveTouchId ? -20 : 6)
+                    item.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: UIDevice.current.haveTouchId ? 0 : -19.5, right: 0)
                     item.setTitleTextAttributes([.font: UIFont.pretenRegular(12)], for: .normal)
                 }
             }
@@ -57,6 +57,11 @@ class TabBarController: UITabBarController {
     }
     
     private func makeBoundaryLine() {
+        if UIDevice.current.haveTouchId {
+            tabBar.shadowImage = UIImage()
+            tabBar.backgroundImage = UIImage()
+        }
+        
         let topBorder = UIView()
         topBorder.backgroundColor = UIColor.lightGray.withAlphaComponent(0.2)
         
