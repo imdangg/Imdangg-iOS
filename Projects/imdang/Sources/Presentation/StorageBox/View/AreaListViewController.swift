@@ -10,7 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class AreaListViewController: UIViewController {
+class AreaListViewController: BaseViewController {
     private var tableView: UITableView!
     private let disposeBag = DisposeBag()
     
@@ -26,16 +26,9 @@ class AreaListViewController: UIViewController {
         $0.textColor = .grayScale900
     }
     
-    private let backButton = UIButton().then {
-        $0.setImage(ImdangImages.Image(resource: .backButton), for: .normal)
-    }
-    private let navigationLineView = UIView().then {
-        $0.backgroundColor = .grayScale100
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        customBackButton.isHidden = false
         
         setupTableView()
         bindAction()
@@ -60,40 +53,23 @@ class AreaListViewController: UIViewController {
     }
     
     private func configNavigationBarItem() {
-        let backgroundView = UIView()
-        
-        [backButton, titleLabel].forEach {
-            backgroundView.addSubview($0)
-        }
-        
-        backButton.snp.makeConstraints {
-            $0.width.height.equalTo(20)
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
-        }
+        leftNaviItemView.addSubview(titleLabel)
         
         titleLabel.snp.makeConstraints {
-            $0.leading.equalTo(backButton.snp.trailing).offset(8)
-            $0.centerY.equalTo(backButton.snp.centerY)
+            $0.leading.equalToSuperview().offset(12)
+            $0.centerY.equalToSuperview()
         }
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backgroundView)
     }
     
     private func addSubViews() {
         
         view.addSubview(tableView)
         view.addSubview(confirmButton)
-        view.addSubview(navigationLineView)
     }
     
     private func makeConstraints() {
-        navigationLineView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            $0.height.equalTo(1)
-            $0.horizontalEdges.equalToSuperview()
-        }
         tableView.snp.makeConstraints {
-            $0.top.equalTo(navigationLineView.snp.bottom)
+            $0.topEqualToNavigationBottom(vc: self)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalTo(confirmButton.snp.top)
         }
@@ -106,12 +82,6 @@ class AreaListViewController: UIViewController {
     }
     
     private func bindAction() {
-        backButton.rx.tap
-            .subscribe(onNext: { [weak self] _ in
-                self?.navigationController?.popViewController(animated: true)
-            })
-            .disposed(by: disposeBag)
-        
         confirmButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 self?.navigationController?.popViewController(animated: true)

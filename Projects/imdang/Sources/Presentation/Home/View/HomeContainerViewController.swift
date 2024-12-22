@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 import Then
 
-class HomeContainerViewController: UIViewController {
+class HomeContainerViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     
     private let searchViewController = SearchingViewController()
@@ -49,19 +49,17 @@ class HomeContainerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        configNavigationBgColor(backgroundColor: .white)
         
         addSubviews()
-        makeConstraints()
         configNavigationBarItem()
+        makeConstraints()
         bindActions()
+        
+        navigationViewBottomShadow.isHidden = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        configNavigationBarItem()
 //        presentModal()
     }
     
@@ -88,15 +86,15 @@ class HomeContainerViewController: UIViewController {
     private func makeConstraints() {
         
         searchView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.top.equalTo(myPageButton.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
-            $0.leading.trailing.equalToSuperview()
         }
         
         exchangeView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.topEqualToNavigationBottom(vc: self)
+            $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
-            $0.leading.trailing.equalToSuperview()
         }
         
         searchViewController.view.snp.makeConstraints {
@@ -109,46 +107,36 @@ class HomeContainerViewController: UIViewController {
     }
     
     private func configNavigationBarItem() {
-        let leftStackView = UIStackView(arrangedSubviews: [searchButton, exchangeButton]).then {
-            $0.distribution = .equalSpacing
-            $0.axis = .horizontal
-            $0.alignment = .center
-            $0.spacing = 26
+        [searchButton, exchangeButton].forEach {
+            leftNaviItemView.addSubview($0)
+        }
+        [alramButton, myPageButton].forEach {
+            rightNaviItemView.addSubview($0)
         }
         
-        let rightStackView = UIStackView(arrangedSubviews: [alramButton, myPageButton]).then {
-            $0.distribution = .equalSpacing
-            $0.axis = .horizontal
-            $0.alignment = .center
-            $0.spacing = 18
-        }
-        
-        let leftContainerView = UIView()
-        let rightContainerView = UIView()
-        
-        leftContainerView.addSubview(leftStackView)
-        rightContainerView.addSubview(rightStackView)
-        
-        alramButton.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+        searchButton.snp.makeConstraints {
+            $0.leading.equalToSuperview()
+            $0.centerY.equalToSuperview()
+            $0.height.equalTo(34)
         }
 
+        exchangeButton.snp.makeConstraints {
+            $0.leading.equalTo(searchButton.snp.trailing).offset(24)
+            $0.centerY.equalToSuperview()
+            $0.height.equalTo(34)
+        }
+        
         myPageButton.snp.makeConstraints {
+            $0.trailing.equalToSuperview()
+            $0.centerY.equalToSuperview()
             $0.width.height.equalTo(40)
         }
 
-        leftStackView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
+        alramButton.snp.makeConstraints {
+            $0.trailing.equalTo(myPageButton.snp.leading).offset(-16)
+            $0.centerY.equalToSuperview()
+            $0.width.height.equalTo(24)
         }
-        rightStackView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 0, bottom: 0, right: 6))
-        }
-        
-        let leftView = UIBarButtonItem(customView: leftContainerView)
-        let rightView = UIBarButtonItem(customView: rightContainerView)
-        
-        navigationItem.leftBarButtonItems = [leftView]
-        navigationItem.rightBarButtonItems = [rightView]
     }
     
     private func bindActions() {
