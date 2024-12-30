@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 
 class LocationBoxHeaderView: UICollectionReusableView {
-    static let reuseIdentifier = "LocationBoxHeaderCell"
+    static let reuseIdentifier = "LocationBoxHeaderView"
     weak var delegate: ReusableViewDelegate?
     private var disposeBag = DisposeBag()
     private var collectionView: UICollectionView?

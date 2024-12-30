@@ -25,8 +25,30 @@ extension UICollectionView {
         }
         return cell
     }
+    
+    func dequeueReusableHeader<T: UICollectionReusableView>(forIndexPath indexPath: IndexPath, headerType: T.Type = T.self) -> T {
+        guard let header = dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: T.reuseIdentifier, for: indexPath) as? T else {
+            fatalError("Could not dequeue header with identifier: \(T.reuseIdentifier)")
+        }
+        return header
+    }
+    
+    func dequeueReusableFooter<T: UICollectionReusableView>(forIndexPath indexPath: IndexPath, footerType: T.Type = T.self) -> T {
+        guard let footer = dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: T.reuseIdentifier, for: indexPath) as? T else {
+            fatalError("Could not dequeue footer with identifier: \(T.reuseIdentifier)")
+        }
+        return footer
+    }
 
     func register<T>(cell: T.Type) where T: UICollectionViewCell {
         register(cell, forCellWithReuseIdentifier: cell.reuseIdentifier)
+    }
+    
+    func register<T>(header: T.Type) where T: UICollectionReusableView {
+        register(header, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: header.reuseIdentifier)
+    }
+    
+    func register<T>(footer: T.Type) where T: UICollectionReusableView {
+        register(footer, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: footer.reuseIdentifier)
     }
 }

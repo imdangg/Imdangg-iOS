@@ -52,10 +52,10 @@ class InsightViewController: UIViewController {
 
     lazy var insightSubView: [UIViewController] = [
         EmptyViewController(labelText: "기본 정보"),
-        EmptyViewController(labelText: "인프라"),
-        EmptyViewController(labelText: "단지 환경"),
-        EmptyViewController(labelText: "단지 시설"),
-        EmptyViewController(labelText: "호재")
+        WriteInsightEtc(info: InsightEtcInfo.infrastructure),
+        WriteInsightEtc(info: InsightEtcInfo.environment),
+        WriteInsightEtc(info: InsightEtcInfo.facility),
+        WriteInsightEtc(info: InsightEtcInfo.goodNews)
     ]
 
     override func viewDidLoad() {
