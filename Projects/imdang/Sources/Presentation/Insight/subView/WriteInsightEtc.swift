@@ -11,7 +11,6 @@ class WriteInsightEtc: UIViewController {
     let insightInfo: [InsightSectionInfo]
     private var collectionView: UICollectionView!
     
-    
     init(info: [InsightSectionInfo]) {
         self.insightInfo = info
         super.init(nibName: nil, bundle: nil)
@@ -30,7 +29,7 @@ class WriteInsightEtc: UIViewController {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.minimumLineSpacing = 8
         flowLayout.minimumInteritemSpacing = 8
-        flowLayout.sectionInset = UIEdgeInsets(top: 8, left: 20, bottom: 40, right: 20)
+        flowLayout.sectionInset = UIEdgeInsets(top: 8, left: 20, bottom: 16, right: 20)
 
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
         collectionView.delegate = self
@@ -39,11 +38,12 @@ class WriteInsightEtc: UIViewController {
         
         collectionView.register(header: InsightEtcHeaderView.self)
         collectionView.register(cell: InsightEtcCollectionCell.self)
+        collectionView.register(footer: InsightTotalAppraisalFooterView.self)
 
         view.addSubview(collectionView)
         
         collectionView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(24)
+            $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
@@ -75,14 +75,24 @@ extension WriteInsightEtc: UICollectionViewDelegate, UICollectionViewDataSource,
             let sectionInfo = insightInfo[indexPath.section]
             header.config(title: sectionInfo.title, description: sectionInfo.description, subtitle: sectionInfo.subTitle)
             return header
+        } else if kind == UICollectionView.elementKindSectionFooter {
+            let footer = collectionView.dequeueReusableFooter(forIndexPath: indexPath, footerType: InsightTotalAppraisalFooterView.self)
+            footer.config(title: "호재 총평")
+            return footer
         }
         return UICollectionReusableView()
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.bounds.width, height: insightInfo[section].subTitle == nil ? 20 : 60)
+        return CGSize(width: collectionView.bounds.width, height: insightInfo[section].subTitle == nil ? 44 : 84)
     }
     
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+        if section == insightInfo.count - 1 {
+            return CGSize(width: collectionView.bounds.width, height: 300)
+        }
+        return .zero
+    }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let horizontalPadding: CGFloat = 20 * 2

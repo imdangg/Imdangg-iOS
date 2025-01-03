@@ -34,6 +34,8 @@ class InsightEtcHeaderView: UICollectionReusableView {
         $0.textColor = .grayScale500
     }
     
+    private let backView = UIView()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -54,26 +56,28 @@ class InsightEtcHeaderView: UICollectionReusableView {
     }
     
     private func addSubViews() {
-        [titleLabel, subTitleLabel, descriptionLabel].forEach {
-            addSubview($0)
+        [titleLabel, descriptionLabel].forEach {
+            backView.addSubview($0)
         }
+        
+        addSubview(backView)
     }
     
     private func makeConstraints() {
-        titleLabel.snp.makeConstraints {
+        backView.snp.makeConstraints {
             $0.top.equalToSuperview()
+            $0.leading.trailing.bottom.equalToSuperview()
+            $0.height.equalTo(44)
+        }
+        
+        titleLabel.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(24)
             $0.leading.equalToSuperview().offset(20)
             $0.height.equalTo(20)
         }
         
-        subTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(8)
-            $0.leading.equalToSuperview().offset(20)
-            $0.height.equalTo(32)
-        }
-        
         descriptionLabel.snp.makeConstraints {
-            $0.top.equalToSuperview()
+            $0.top.equalToSuperview().offset(24)
             $0.trailing.equalToSuperview().offset(-20)
             $0.height.equalTo(20)
         }
@@ -84,6 +88,17 @@ class InsightEtcHeaderView: UICollectionReusableView {
         descriptionLabel.text = description
         if let subtitle {
             subTitleLabel.text = subtitle
+            backView.addSubview(subTitleLabel)
+            
+            backView.snp.updateConstraints {
+                $0.height.equalTo(84)
+            }
+            
+            subTitleLabel.snp.makeConstraints {
+                $0.top.equalTo(titleLabel.snp.bottom).offset(8)
+                $0.leading.equalToSuperview().offset(20)
+                $0.height.equalTo(32)
+            }
         } else {
             subTitleLabel.removeFromSuperview()
         }
