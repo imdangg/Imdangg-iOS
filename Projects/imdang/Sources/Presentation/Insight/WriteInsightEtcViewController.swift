@@ -1,5 +1,5 @@
 //
-//  WriteInsightEtc.swift
+//  WriteInsightEtcViewController.swift
 //  imdang
 //
 //  Created by 임대진 on 12/30/24.
@@ -7,12 +7,16 @@
 
 import UIKit
 
-class WriteInsightEtc: UIViewController {
+class WriteInsightEtcViewController: UIViewController {
     let insightInfo: [InsightSectionInfo]
+    let tabTitle: String!
+    var totalAppraisalText: String = ""
+    
     private var collectionView: UICollectionView!
     
-    init(info: [InsightSectionInfo]) {
+    init(info: [InsightSectionInfo], title: String) {
         self.insightInfo = info
+        self.tabTitle = title
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -50,7 +54,7 @@ class WriteInsightEtc: UIViewController {
     }
 }
 
-extension WriteInsightEtc: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return insightInfo.count
     }
@@ -77,7 +81,10 @@ extension WriteInsightEtc: UICollectionViewDelegate, UICollectionViewDataSource,
             return header
         } else if kind == UICollectionView.elementKindSectionFooter {
             let footer = collectionView.dequeueReusableFooter(forIndexPath: indexPath, footerType: InsightTotalAppraisalFooterView.self)
-            footer.config(title: "호재 총평")
+            footer.config(title: tabTitle + " 총평")
+            footer.customTextView.text = totalAppraisalText
+            footer.delegate = self
+            
             return footer
         }
         return UICollectionReusableView()
@@ -102,5 +109,22 @@ extension WriteInsightEtc: UICollectionViewDelegate, UICollectionViewDataSource,
         let itemWidth = (collectionView.bounds.width - totalSpacing) / 2
         
         return CGSize(width: itemWidth, height: 52)
+    }
+}
+
+extension WriteInsightEtcViewController: TotalAppraisalFootereViewDelegate {
+    
+    func didTapButton(title: String, text: String) {
+        let childVC = CommonTextViewViewComtroller(title: title, text: text)
+        
+        childVC.onDataSend = { [weak self] data in
+            guard let self = self else { return }
+            
+            self.totalAppraisalText = data
+            let lastSection = self.insightInfo.count - 1
+            let footerIndexPath = IndexPath(item: 0, section: lastSection)
+            self.collectionView.reloadSections(IndexSet(integer: footerIndexPath.section))
+        }
+        navigationController?.pushViewController(childVC, animated: true)
     }
 }

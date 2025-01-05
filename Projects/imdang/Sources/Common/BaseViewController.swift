@@ -24,7 +24,7 @@ import RxCocoa
          
          // 왼쪽 네비게이션 아이템 추가
          leftNaviItemView.addSubview(item)
-         leftNaviItemView.snp.makeConstraints {
+         item.snp.makeConstraints {
              $0.width.height.equalTo(20)
              $0.centerY.equalToSuperview()
              $0.leading.equalToSuperview().offset(10) // 백버튼 숨김과 관련없이 equalToSuperview로 하시면됩니다
