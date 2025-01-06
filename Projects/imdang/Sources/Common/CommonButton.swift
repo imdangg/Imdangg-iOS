@@ -19,6 +19,7 @@ enum CommonButtonType {
     case disabled
     case selectedBorderStyle
     case unselectedBorderStyle
+    case enabledGrayStyle
 }
 
 class CommonButton: UIButton {
@@ -34,6 +35,13 @@ class CommonButton: UIButton {
         self.radius = radius
         super.init(frame: frame)
         setupButton()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     required init?(coder: NSCoder) {
@@ -74,12 +82,48 @@ class CommonButton: UIButton {
                 self.setTitleColor(.grayScale200, for: .normal)
                 self.layer.borderWidth = 1
                 self.layer.borderColor = UIColor.grayScale200.cgColor
+            case .enabledGrayStyle:
+                self.isEnabled = true
+                self.backgroundColor = .grayScale100
+                self.layer.borderWidth = 0
+                self.setTitleColor(.grayScale500, for: .normal)
             }
         }
     }
     
     func setButtonTitle(title: String) {
         setTitle(title, for: .normal)
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+           let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval {
+            
+            UIView.animate(withDuration: duration) {
+                self.layer.cornerRadius = 0
+                
+                self.snp.remakeConstraints {
+                    $0.horizontalEdges.equalToSuperview()
+                    $0.bottom.equalToSuperview().inset(keyboardFrame.height)
+                    $0.height.equalTo(56)
+                }
+            }
+        }
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        if let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval {
+            
+            UIView.animate(withDuration: duration) {
+                self.layer.cornerRadius = self.radius ?? 8
+                
+                self.snp.remakeConstraints {
+                    $0.horizontalEdges.equalToSuperview().inset(20)
+                    $0.bottom.equalToSuperview().inset(40)
+                    $0.height.equalTo(56)
+                }
+            }
+        }
     }
 }
 

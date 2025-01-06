@@ -37,10 +37,10 @@ class SearchingViewController: UIViewController {
         collectionView.delegate = self
         collectionView.showsVerticalScrollIndicator = false
         
-        collectionView.register(SearchingSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SearchingSectionHeaderView.reuseIdentifier)
+        collectionView.register(header: SearchingSectionHeaderView.self)
         
-        collectionView.register(PagingFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: PagingFooterView.reuseIdentifier)
-        collectionView.register(SectionSeparatorView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: SectionSeparatorView.reuseIdentifier)
+        collectionView.register(footer: PagingFooterView.self)
+        collectionView.register(footer: SectionSeparatorView.self)
         
         view.addSubview(collectionView)
         view.addSubview(searchBoxView)

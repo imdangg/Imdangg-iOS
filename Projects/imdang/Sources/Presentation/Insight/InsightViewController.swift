@@ -52,10 +52,10 @@ class InsightViewController: UIViewController {
 
     lazy var insightSubView: [UIViewController] = [
         EmptyViewController(labelText: "기본 정보"),
-        EmptyViewController(labelText: "인프라"),
-        EmptyViewController(labelText: "단지 환경"),
-        EmptyViewController(labelText: "단지 시설"),
-        EmptyViewController(labelText: "호재")
+        WriteInsightEtcViewController(info: InsightEtcInfo.infrastructure, title: "인프라", selectType: .several),
+        WriteInsightEtcViewController(info: InsightEtcInfo.environment, title: "단지 환경", selectType: .one),
+        WriteInsightEtcViewController(info: InsightEtcInfo.facility, title: "단지 시설", selectType: .several),
+        WriteInsightEtcViewController(info: InsightEtcInfo.goodNews, title: "호재", selectType: .several)
     ]
 
     override func viewDidLoad() {
