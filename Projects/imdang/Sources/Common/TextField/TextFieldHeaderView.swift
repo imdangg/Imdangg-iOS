@@ -52,7 +52,7 @@ class TextFieldHeaderView: UIView {
         addSubViews()
         makeUI()
     }
-    /Users/dayexx/Documents/imdang1217/imdang-iOS/Projects/imdang/Sources/Common/TextField/TextFieldHeaderView.swift
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

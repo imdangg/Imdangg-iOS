@@ -75,17 +75,15 @@ final class StorageBoxViewController: BaseViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.showsVerticalScrollIndicator = false
+        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
         
         collectionView.register(cell: LocationBoxCollectionCell.self)
         collectionView.register(cell: InsightCollectionCell.self)
         
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
-        collectionView.register(SectionSeparatorView.self,
-                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
-                                withReuseIdentifier: SectionSeparatorView.reuseIdentifier)
+        collectionView.register(header: InsightHeaderView.self)
+        collectionView.register(header: LocationBoxHeaderView.self)
         
-        collectionView.register(InsightHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: InsightHeaderView.reuseIdentifier)
-        collectionView.register(LocationBoxHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: LocationBoxHeaderView.reuseIdentifier)
+        collectionView.register(footer: SectionSeparatorView.self)
         
         view.addSubview(collectionView)
         collectionView.snp.makeConstraints {

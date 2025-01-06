@@ -29,7 +29,7 @@ class BaseInfoHeaderCell: UICollectionReusableView {
     }
     
     func configure(title: String, script: String) {
-        headerView.setConfigure(title: title, script: script)
+        headerView.setConfigure(title: title, script: script, limitNumber: 0)
     }
     
     func adjustTopPadding(_ padding: CGFloat) {

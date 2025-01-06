@@ -45,4 +45,13 @@ extension UIViewController {
     func hideNavigationBackButton() {
         self.navigationItem.hidesBackButton = true
     }
+    
+    func showInsightAlert(comfrimAction: (() -> Void)? = nil, cancelAction: (() -> Void)? = nil) {
+        let customAlertViewController = InsightAlertViewController()
+        customAlertViewController.confirmAction = comfrimAction
+        customAlertViewController.cancelAction = cancelAction
+        customAlertViewController.modalPresentationStyle = .overFullScreen
+        customAlertViewController.modalTransitionStyle = .crossDissolve
+        self.present(customAlertViewController, animated: true, completion: nil)
+    }
 }
