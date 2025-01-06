@@ -125,8 +125,8 @@ class CommonTextViewViewComtroller: BaseViewController {
         makeConstraints()
         bindActions()
         
-        if description != "" {
-            descriptionLabel.text = description
+        if descriptionText != "" {
+            descriptionLabel.text = descriptionText
             updateConstraints()
         }
         
