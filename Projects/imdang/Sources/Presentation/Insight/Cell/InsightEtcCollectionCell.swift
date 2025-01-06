@@ -25,6 +25,16 @@ class InsightEtcCollectionCell: UICollectionViewCell {
         $0.layer.borderColor = UIColor.grayScale100.cgColor
     }
     
+    var isClicked = false {
+        didSet {
+            if isClicked {
+                isSeleted()
+            } else {
+                unSeleted()
+            }
+        }
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -52,19 +62,19 @@ class InsightEtcCollectionCell: UICollectionViewCell {
         }
     }
     
-    func config(buttonTitle: String) {
-        label.text = buttonTitle
-    }
-    
-    func isSeleted() {
+    private func isSeleted() {
         label.backgroundColor = .mainOrange50
         label.textColor = .mainOrange500
         label.layer.borderColor = UIColor.mainOrange500.cgColor
     }
     
-    func unSeleted() {
+    private func unSeleted() {
         label.backgroundColor = .white
         label.textColor = .grayScale400
         label.layer.borderColor = UIColor.grayScale100.cgColor
+    }
+    
+    func config(buttonTitle: String) {
+        label.text = buttonTitle
     }
 }

@@ -41,7 +41,7 @@ class CommonTextViewViewComtroller: BaseViewController {
         $0.textColor = .grayScale700
     }
     
-    private let discriptionLabel = PaddingLabel().then {
+    private let descriptionLabel = PaddingLabel().then {
         $0.font = .pretenMedium(14)
         $0.textColor = .grayScale600
         $0.backgroundColor = .grayScale50
@@ -53,7 +53,7 @@ class CommonTextViewViewComtroller: BaseViewController {
         $0.clipsToBounds = true
     }
     
-    private var discription = ""
+    private var descriptionText = ""
     
     private var icon = UIImageView().then {
         $0.image = ImdangImages.Image(resource: .warning)
@@ -96,13 +96,13 @@ class CommonTextViewViewComtroller: BaseViewController {
     
     private let configButton = CommonButton(title: "확인", initialButtonType: .enabledGrayStyle)
 
-    init(title: String, text: String, placeHolder: String? = "", discription: String? = "") {
+    init(title: String, text: String, placeHolder: String? = "", description: String? = "") {
         super.init(nibName: nil, bundle: nil)
         
         titleLabel.text = title
         textView.text = text
         NavigationTitleLabel.text = title
-        self.discription = discription ?? ""
+        self.descriptionText = description ?? ""
         
         if text.isEmpty {
             placeholderLabel.text = placeHolder
@@ -125,8 +125,8 @@ class CommonTextViewViewComtroller: BaseViewController {
         makeConstraints()
         bindActions()
         
-        if discription != "" {
-            discriptionLabel.text = discription
+        if description != "" {
+            descriptionLabel.text = description
             updateConstraints()
         }
         
@@ -138,30 +138,30 @@ class CommonTextViewViewComtroller: BaseViewController {
         leftNaviItemView.addSubview(NavigationTitleLabel)
         textFieldBackground.addSubview(textView)
         textCountstackView.addArrangedSubview(textCountLabel)
-        [titleLabel, discriptionLabel, icon, textFieldBackground, configButton, placeholderLabel, textCountstackView].forEach { view.addSubview($0) }
+        [titleLabel, descriptionLabel, icon, textFieldBackground, configButton, placeholderLabel, textCountstackView].forEach { view.addSubview($0) }
     }
     
     private func updateConstraints() {
-        discriptionLabel.snp.makeConstraints {
+        descriptionLabel.snp.makeConstraints {
             $0.topEqualToNavigationBottom(vc: self).offset(20)
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.height.equalTo(92)
         }
         
         icon.snp.makeConstraints {
-            $0.top.equalTo(discriptionLabel.snp.top).offset(18)
-            $0.leading.equalTo(discriptionLabel.snp.leading).offset(20)
+            $0.top.equalTo(descriptionLabel.snp.top).offset(18)
+            $0.leading.equalTo(descriptionLabel.snp.leading).offset(20)
             $0.width.equalTo(16)
             $0.height.equalTo(18)
         }
         
         titleLabel.snp.remakeConstraints {
-            $0.top.equalTo(discriptionLabel.snp.bottom).offset(24)
+            $0.top.equalTo(descriptionLabel.snp.bottom).offset(24)
             $0.leading.equalToSuperview().offset(20)
         }
         
         textCountstackView.snp.remakeConstraints {
-            $0.top.equalTo(discriptionLabel.snp.bottom).offset(24)
+            $0.top.equalTo(descriptionLabel.snp.bottom).offset(24)
             $0.trailing.equalToSuperview().offset(-20)
         }
     }
