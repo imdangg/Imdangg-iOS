@@ -103,6 +103,8 @@ class InsightEtcHeaderView: UICollectionReusableView {
             backView.addSubview(subTitleLabel)
             
             backView.snp.remakeConstraints {
+                $0.top.equalToSuperview()
+                $0.leading.trailing.equalToSuperview()
                 $0.height.equalTo(84)
             }
             

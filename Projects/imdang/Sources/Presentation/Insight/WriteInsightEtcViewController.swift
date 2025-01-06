@@ -139,7 +139,7 @@ class WriteInsightEtcViewController: UIViewController {
         for row in 0..<collectionView.numberOfItems(inSection: indexPath.section) {
             let cellIndexPath = IndexPath(row: row, section: indexPath.section)
             if let cell = collectionView.cellForItem(at: cellIndexPath) as? InsightEtcCollectionCell {
-                if cell.isClicked { // isClicked 값 확인
+                if cell.isClicked {
                     allCellsUnselected = false
                     break
                 }
