@@ -14,16 +14,17 @@ import RxCocoa
 class InsightEtcCollectionCell: UICollectionViewCell {
     static let identifier = "InsightEtcCollectionCell"
     
-    private let button = UIButton().then {
+    private let label = UILabel().then {
         $0.backgroundColor = .white
-        $0.titleLabel?.font = .pretenMedium(16)
-        $0.setTitleColor(.grayScale400, for: .normal)
+        $0.font = .pretenMedium(16)
+        $0.textColor = .grayScale400
+        $0.textAlignment = .center
         
         $0.layer.cornerRadius = 8
         $0.layer.borderWidth = 1
         $0.layer.borderColor = UIColor.grayScale100.cgColor
     }
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -32,7 +33,9 @@ class InsightEtcCollectionCell: UICollectionViewCell {
     }
     
     override func prepareForReuse() {
-        button.setTitle("", for: .normal)
+        super.prepareForReuse()
+        
+        unSeleted()
     }
     
     required init?(coder: NSCoder) {
@@ -40,16 +43,28 @@ class InsightEtcCollectionCell: UICollectionViewCell {
     }
     
     private func addSubview() {
-        contentView.addSubview(button)
+        contentView.addSubview(label)
     }
     
     private func makeConstraints() {
-        button.snp.makeConstraints {
+        label.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
-
+    
     func config(buttonTitle: String) {
-        button.setTitle(buttonTitle, for: .normal)
+        label.text = buttonTitle
+    }
+    
+    func isSeleted() {
+        label.backgroundColor = .mainOrange50
+        label.textColor = .mainOrange500
+        label.layer.borderColor = UIColor.mainOrange500.cgColor
+    }
+    
+    func unSeleted() {
+        label.backgroundColor = .white
+        label.textColor = .grayScale400
+        label.layer.borderColor = UIColor.grayScale100.cgColor
     }
 }

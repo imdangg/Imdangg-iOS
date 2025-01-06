@@ -11,6 +11,11 @@ import Then
 class InsightEtcHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "InsightEtcHeaderView"
     
+    private let checkIcon = UIImageView().then {
+        $0.image = ImdangImages.Image(resource: .circleCheck)
+        $0.isHidden = true
+    }
+    
     private let titleLabel = UILabel().then {
         $0.font = .pretenSemiBold(14)
         $0.textAlignment = .center
@@ -53,10 +58,11 @@ class InsightEtcHeaderView: UICollectionReusableView {
         titleLabel.text = ""
         subTitleLabel.text = ""
         descriptionLabel.text = ""
+        checkIcon.isHidden = true
     }
     
     private func addSubViews() {
-        [titleLabel, descriptionLabel].forEach {
+        [titleLabel, descriptionLabel, checkIcon].forEach {
             backView.addSubview($0)
         }
         
@@ -80,6 +86,12 @@ class InsightEtcHeaderView: UICollectionReusableView {
             $0.top.equalToSuperview().offset(24)
             $0.trailing.equalToSuperview().offset(-20)
             $0.height.equalTo(20)
+        }
+        
+        checkIcon.snp.makeConstraints {
+            $0.centerY.equalTo(titleLabel.snp.centerY)
+            $0.leading.equalTo(titleLabel.snp.trailing).offset(4)
+            $0.height.width.equalTo(20)
         }
     }
     
@@ -108,5 +120,13 @@ class InsightEtcHeaderView: UICollectionReusableView {
         attributedString.addAttribute(.foregroundColor, value: UIColor.red, range: range)
         
         titleLabel.attributedText = attributedString
+    }
+    
+    func addCheckIcon() {
+        checkIcon.isHidden = false
+    }
+    
+    func removeCheckIcon() {
+        checkIcon.isHidden = true
     }
 }

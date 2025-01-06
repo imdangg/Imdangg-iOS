@@ -8,10 +8,11 @@
 import UIKit
 
 class WriteInsightEtcViewController: UIViewController {
-    let insightInfo: [InsightSectionInfo]
-    let tabTitle: String!
-    var totalAppraisalText: String = ""
-    
+    private let insightInfo: [InsightSectionInfo]
+    private let tabTitle: String!
+    private var totalAppraisalText: String = ""
+    private var sectionItemClicked: [Bool] = []
+    private var selectedButtonIndexInSection: [Int: Int] = [:]
     private var collectionView: UICollectionView!
     
     init(info: [InsightSectionInfo], title: String) {
@@ -27,6 +28,7 @@ class WriteInsightEtcViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionView()
+        sectionItemClicked = Array(repeating: false, count: collectionView.numberOfSections)
     }
 
     private func setupCollectionView() {
@@ -52,6 +54,14 @@ class WriteInsightEtcViewController: UIViewController {
             $0.bottom.equalToSuperview()
         }
     }
+    
+    private func reloadSectionItems(section: Int) {
+        let indexPaths = (0..<collectionView.numberOfItems(inSection: section)).map {
+            IndexPath(item: $0, section: section)
+        }
+
+        collectionView.reloadItems(at: indexPaths)
+    }
 }
 
 extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -62,13 +72,43 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return insightInfo[section].buttonTitles.count
     }
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        selectedButtonIndexInSection[indexPath.section] = indexPath.row
+        sectionItemClicked[indexPath.section] = true
+        
+//        collectionView.reloadSections(IndexSet(integer: indexPath.section))
+//        reloadSectionItems(section: indexPath.section)
+        
+        for visibleIndexPath in collectionView.indexPathsForVisibleItems {
+            guard let cell = collectionView.cellForItem(at: visibleIndexPath) as? InsightEtcCollectionCell else { continue }
+            
+            if visibleIndexPath.section == indexPath.section {
+                if (visibleIndexPath.row == indexPath.row) {
+                    cell.isSeleted()
+                } else {
+                    cell.unSeleted()
+                }
+            }
+        }
+        
+        if let header = collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: indexPath.section)) as? InsightEtcHeaderView {
+            header.addCheckIcon()
+        }
+    }
+
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let sectionInfo = insightInfo[indexPath.section]
         let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightEtcCollectionCell.self)
         
         let buttonTitle = sectionInfo.buttonTitles[indexPath.row]
         cell.config(buttonTitle: buttonTitle)
+        
+        if selectedButtonIndexInSection[indexPath.section] == indexPath.row {
+            cell.isSeleted()
+        } else {
+            cell.unSeleted()
+        }
         
         return cell
     }
@@ -78,6 +118,13 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
             let header = collectionView.dequeueReusableHeader(forIndexPath: indexPath, headerType: InsightEtcHeaderView.self)
             let sectionInfo = insightInfo[indexPath.section]
             header.config(title: sectionInfo.title, description: sectionInfo.description, subtitle: sectionInfo.subTitle)
+
+            if sectionItemClicked[indexPath.section] {
+                header.addCheckIcon()
+            } else {
+                header.removeCheckIcon()
+            }
+            
             return header
         } else if kind == UICollectionView.elementKindSectionFooter {
             let footer = collectionView.dequeueReusableFooter(forIndexPath: indexPath, footerType: InsightTotalAppraisalFooterView.self)
