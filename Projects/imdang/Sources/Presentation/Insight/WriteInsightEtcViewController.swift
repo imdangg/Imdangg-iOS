@@ -6,7 +6,9 @@
 //
 
 import UIKit
-
+enum ItemSelectType {
+    case one, several
+}
 class WriteInsightEtcViewController: UIViewController {
     private let insightInfo: [InsightSectionInfo]
     private let tabTitle: String!
@@ -14,10 +16,12 @@ class WriteInsightEtcViewController: UIViewController {
     private var sectionItemClicked: [Bool] = []
     private var selectedButtonIndexInSection: [Int: Int] = [:]
     private var collectionView: UICollectionView!
+    private var selectType: ItemSelectType
     
-    init(info: [InsightSectionInfo], title: String) {
+    init(info: [InsightSectionInfo], title: String, selectType: ItemSelectType) {
         self.insightInfo = info
         self.tabTitle = title
+        self.selectType = selectType
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -72,6 +76,7 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return insightInfo[section].buttonTitles.count
     }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         selectedButtonIndexInSection[indexPath.section] = indexPath.row
         sectionItemClicked[indexPath.section] = true
@@ -80,16 +85,48 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
 //        reloadSectionItems(section: indexPath.section)
         
         for visibleIndexPath in collectionView.indexPathsForVisibleItems {
-            guard let cell = collectionView.cellForItem(at: visibleIndexPath) as? InsightEtcCollectionCell else { continue }
-            
-            if visibleIndexPath.section == indexPath.section {
-                if (visibleIndexPath.row == indexPath.row) {
-                    cell.isSeleted()
+                guard let cell = collectionView.cellForItem(at: visibleIndexPath) as? InsightEtcCollectionCell else { continue }
+
+                if selectType == .one {
+                    if visibleIndexPath.section == indexPath.section {
+                        if visibleIndexPath.row == indexPath.row {
+                            cell.isSeleted()
+                        } else {
+                            cell.unSeleted()
+                        }
+                    }
                 } else {
-                    cell.unSeleted()
+                    if visibleIndexPath.section == indexPath.section {
+                        if visibleIndexPath.row == indexPath.row {
+                            cell.isSeleted()
+                            
+                            let selectedText = cell.label.text ?? ""
+                            if selectedText == "해당 없음" || selectedText ==  "잘 모르겠어요" {
+                                // X 인 경우 다른 셀의 상태 해제
+                                for otherVisibleIndexPath in collectionView.indexPathsForVisibleItems {
+                                    if otherVisibleIndexPath.section == indexPath.section,
+                                       otherVisibleIndexPath != visibleIndexPath {
+                                        if let otherCell = collectionView.cellForItem(at: otherVisibleIndexPath) as? InsightEtcCollectionCell {
+                                            otherCell.unSeleted()
+                                        }
+                                    }
+                                }
+                            } else {
+                                // X 가 아닌 경우 X인 셀의 상태 해제
+                                for otherVisibleIndexPath in collectionView.indexPathsForVisibleItems {
+                                    if otherVisibleIndexPath.section == indexPath.section,
+                                       otherVisibleIndexPath != visibleIndexPath {
+                                        if let otherCell = collectionView.cellForItem(at: otherVisibleIndexPath) as? InsightEtcCollectionCell,
+                                           otherCell.label.text == "해당 없음" || otherCell.label.text == "잘 모르겠어요" {
+                                            otherCell.unSeleted()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }
         
         if let header = collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: indexPath.section)) as? InsightEtcHeaderView {
             header.addCheckIcon()

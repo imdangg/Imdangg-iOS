@@ -14,7 +14,7 @@ import RxCocoa
 class InsightEtcCollectionCell: UICollectionViewCell {
     static let identifier = "InsightEtcCollectionCell"
     
-    private let label = UILabel().then {
+    let label = UILabel().then {
         $0.backgroundColor = .white
         $0.font = .pretenMedium(16)
         $0.textColor = .grayScale400
