@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 import Then
 
-class InsightViewController: UIViewController {
+class InsightViewController: BaseViewController {
 
     private let buttonTitles = ["기본 정보", "인프라", "단지 환경", "단지 시설", "호재"]
     private var selectedIndex = 0
@@ -22,15 +22,7 @@ class InsightViewController: UIViewController {
         $0.font = .pretenBold(20)
         $0.textColor = .grayScale900
     }
-
-    private let backButton = UIButton().then {
-        $0.setImage(ImdangImages.Image(resource: .backButton), for: .normal)
-    }
-
-    private let navigationLineView = UIView().then {
-        $0.backgroundColor = .grayScale100
-    }
-
+    
     private let buttonStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 16
@@ -51,12 +43,20 @@ class InsightViewController: UIViewController {
     }
 
     lazy var insightSubView: [UIViewController] = [
-        EmptyViewController(labelText: "기본 정보"),
+        InsightBaseInfoViewController(),
         EmptyViewController(labelText: "인프라"),
         EmptyViewController(labelText: "단지 환경"),
         EmptyViewController(labelText: "단지 시설"),
         EmptyViewController(labelText: "호재")
     ]
+    
+    private var nextButton = CommonButton(title: "작성 완료", initialButtonType: .disabled).then {
+        $0.layer.shadowColor = UIColor.white.cgColor
+        $0.layer.shadowOffset = CGSize(width: 0, height: -20)
+        $0.layer.shadowOpacity = 0.8
+        $0.layer.shadowRadius = 20
+        $0.layer.masksToBounds = false
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,7 +65,7 @@ class InsightViewController: UIViewController {
         configNavigationBarItem()
         layout()
         setupButtons()
-        bind()
+        bind(reactor: InsightReactor())
     }
 
     override func viewDidLayoutSubviews() {
@@ -77,36 +77,21 @@ class InsightViewController: UIViewController {
     }
 
     private func configNavigationBarItem() {
-        let backgroundView = UIView()
-
-        [backButton, titleLabel].forEach {
-            backgroundView.addSubview($0)
-        }
-
-        backButton.snp.makeConstraints {
-            $0.width.height.equalTo(20)
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 6, bottom: 0, right: 0))
-        }
-
+        customBackButton.isHidden = false
+        
+        leftNaviItemView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
-            $0.leading.equalTo(backButton.snp.trailing).offset(8)
-            $0.centerY.equalTo(backButton.snp.centerY)
+            $0.height.equalTo(20)
+            $0.centerY.equalToSuperview()
+            $0.leading.equalToSuperview().offset(10)
         }
-
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backgroundView)
     }
 
     private func layout() {
-        [buttonStackView, navigationLineView, selectTabUnderLineView, underLineView, containerView].forEach { view.addSubview($0) }
-
-        navigationLineView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            $0.height.equalTo(1)
-            $0.horizontalEdges.equalToSuperview()
-        }
+        [buttonStackView, selectTabUnderLineView, underLineView, containerView, nextButton].forEach { view.addSubview($0) }
 
         buttonStackView.snp.makeConstraints {
-            $0.top.equalTo(navigationLineView.snp.bottom).offset(4)
+            $0.topEqualToNavigationBottom(vc: self).offset(4)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.height.equalTo(40)
         }
@@ -126,12 +111,26 @@ class InsightViewController: UIViewController {
 
         containerView.snp.makeConstraints {
             $0.top.equalTo(underLineView.snp.bottom)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(nextButton.snp.top)
+        }
+        
+        nextButton.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(15)
+            $0.height.equalTo(56)
         }
 
         DispatchQueue.main.async {
             self.showInsightSubViewController(at: 0)
         }
+    }
+    
+    private func presentModal() {
+        let modalVC = BaseInfoViewBottomSheet()
+        modalVC.modalPresentationStyle = .fullScreen
+        modalVC.modalTransitionStyle = .crossDissolve
+        self.present(modalVC, animated: true, completion: nil)
     }
 
     private func setupButtons() {
@@ -150,10 +149,15 @@ class InsightViewController: UIViewController {
         }
     }
 
-    private func bind() {
-        backButton.rx.tap
-            .subscribe(onNext: { [weak self] _ in
-                self?.navigationController?.popViewController(animated: true)
+    func bind(reactor: InsightReactor) {
+        reactor.state
+            .map { $0.isShowingCameraSheet }
+            .distinctUntilChanged()
+            .subscribe(onNext: { isShowingCamera in
+                if isShowingCamera {
+                    print("Open camera sheet!")
+                    self.presentModal()
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -202,4 +206,6 @@ class InsightViewController: UIViewController {
         childVC.view.snp.makeConstraints { $0.edges.equalToSuperview() }
         childVC.didMove(toParent: self)
     }
+    
+    
 }

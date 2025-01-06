@@ -17,7 +17,7 @@ class TextFieldHeaderView: UIView {
     let title: String
     let isEssential: Bool
     let descriptionText: String?
-    let limitNumber: Int?
+    var limitNumber: Int?
     
     private var titleLabel = UILabel().then {
         $0.font = .pretenMedium(14)
@@ -52,7 +52,7 @@ class TextFieldHeaderView: UIView {
         addSubViews()
         makeUI()
     }
-    
+    /Users/dayexx/Documents/imdang1217/imdang-iOS/Projects/imdang/Sources/Common/TextField/TextFieldHeaderView.swift
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -125,6 +125,12 @@ class TextFieldHeaderView: UIView {
     func setTextNumber(_ num: Int) {
         guard let limitNumber else { return }
         textNumLabel.text = "(\(num)/\(limitNumber))"
+    }
+    
+    func setConfigure(title: String, script: String, limitNumber: Int?) {
+        titleLabel.text = title
+        descriptionLabel.text = script
+        self.limitNumber = limitNumber
     }
 }
 

@@ -17,14 +17,14 @@ enum ExchangeRequestState {
     case receive
 }
 
-final class ExchangeViewController: UIViewController, View {
+final class ExchangeViewController: BaseViewController, View {
    
     private let insights = BehaviorSubject<[Insight]>(value: [])
     var disposeBag = DisposeBag()
-    
-    private let navigationLineView = UIView().then {
-        $0.backgroundColor = .grayScale100
-    }
+//    
+//    private let navigationLineView = UIView().then {
+//        $0.backgroundColor = .grayScale100
+//    }
     private let ticketView = TicketView()
     private let segmentControl = UISegmentedControl().then {
         $0.insertSegment(withTitle: "내가 요청한 내역", at: 0, animated: true)
@@ -74,6 +74,7 @@ final class ExchangeViewController: UIViewController, View {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        navigationViewBottomShadow.isHidden = false
         
         setupHeaderView()
         setupView()
@@ -138,17 +139,19 @@ final class ExchangeViewController: UIViewController, View {
     
     // MARK: - Setup View
     private func setupView() {
-        view.addSubview(navigationLineView)
+//        view.addSubview(navigationLineView)
         view.addSubview(tableView)
         tableView.register(InsightTableCell.self, forCellReuseIdentifier: "InsightTableCell")
         
-        navigationLineView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(16)
-            $0.height.equalTo(1)
-            $0.horizontalEdges.equalToSuperview()
-        }
+        //        navigationLineView.snp.makeConstraints {
+        //            $0.top.equalToSuperview().inset(16)
+        //            $0.height.equalTo(1)
+        //            $0.horizontalEdges.equalToSuperview()
+        //        }
+
         tableView.snp.makeConstraints {
-            $0.top.equalTo(navigationLineView.snp.bottom)
+            //            $0.top.equalTo(navigationLineView.snp.bottom)
+            $0.topEqualToNavigationBottom(vc: self)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
     }

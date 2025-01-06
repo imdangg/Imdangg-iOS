@@ -12,8 +12,6 @@ import RxSwift
 import RxCocoa
 import Then
 
-// TODO: clear button, dateFormatter
-
 enum TextFieldState {
     case normal
     case editing
@@ -25,12 +23,16 @@ class CommomTextField: UITextField {
     var isClearButtonTapped = BehaviorSubject<Bool>(value: false)
     let placeholderText: String
     let textfieldType: UIKeyboardType
+    let disposeBag = DisposeBag()
     
     init(frame: CGRect = .zero, placeholderText: String, textfieldType: UIKeyboardType) {
         self.placeholderText = placeholderText
         self.textfieldType = textfieldType
         super.init(frame: frame)
         setAttribute()
+        if textfieldType == .numberPad || textfieldType == .decimalPad {
+            numberPadTypeBind()
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -93,6 +95,15 @@ class CommomTextField: UITextField {
         self.text = ""
         isClearButtonTapped.onNext(true)
     }
+    
+    func setConfigure(placeholderText: String, textfieldType: UIKeyboardType) {
+        self.placeholder = placeholderText
+        self.keyboardType = textfieldType
+        
+        if textfieldType == .numberPad || textfieldType == .decimalPad {
+            numberPadTypeBind()
+        }
+    }
 }
 
 extension Reactive where Base: CommomTextField {
@@ -100,6 +111,37 @@ extension Reactive where Base: CommomTextField {
         return Binder(self.base) { view, state in
             view.setState(state)
         }
+    }
+}
+
+// NumberPad Type
+extension CommomTextField {
+    func numberPadTypeBind() {
+        self.rx.text
+            .orEmpty
+            .map { text in
+                let limitedText = String(text.prefix(10))
+                let formattedText = self.formatText(limitedText)
+                return formattedText
+            }
+            .bind(to: self.rx.text)
+            .disposed(by: disposeBag)
+    }
+    
+    private func formatText(_ text: String) -> String {
+        var result = text.replacingOccurrences(of: ".", with: "")
+        
+        if result.count > 4 {
+            let index = result.index(result.startIndex, offsetBy: 4)
+            result.insert(".", at: index)
+        }
+        
+        if result.count > 7 {
+            let index = result.index(result.startIndex, offsetBy: 7)
+            result.insert(".", at: index)
+        }
+        
+        return result
     }
 }
 

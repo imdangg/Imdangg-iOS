@@ -45,6 +45,7 @@ class CommonButton: UIButton {
         titleLabel?.font = .pretenSemiBold(16)
         layer.cornerRadius = radius ?? 8
         clipsToBounds = true
+
         contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         setState(initialButtonType)
     }
@@ -73,13 +74,17 @@ class CommonButton: UIButton {
                 self.backgroundColor = .white
                 self.setTitleColor(.grayScale200, for: .normal)
                 self.layer.borderWidth = 1
-                self.layer.borderColor = UIColor.grayScale200.cgColor
+                self.layer.borderColor = UIColor.grayScale100.cgColor
             }
         }
     }
     
     func setButtonTitle(title: String) {
         setTitle(title, for: .normal)
+    }
+    
+    func setTitleColor(color: UIColor) {
+        self.setTitleColor(color, for: .normal)
     }
 }
 
