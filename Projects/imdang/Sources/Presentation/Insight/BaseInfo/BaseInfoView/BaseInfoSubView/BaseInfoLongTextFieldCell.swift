@@ -35,6 +35,7 @@ class BaseInfoLongTextFieldCell: UICollectionViewCell {
     
     func bind() {
         buttonView.rx.tap
+            .throttle(.milliseconds(300), latest: false, scheduler: MainScheduler.instance)
             .bind(to: buttonTapState)
             .disposed(by: disposeBag)
     }

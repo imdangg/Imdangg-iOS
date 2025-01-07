@@ -97,7 +97,7 @@ class CommonTextViewButton: UIView {
         }
     }
     
-    private let placeholderLabel = UILabel().then {
+    var placeholderLabel = UILabel().then {
         $0.textColor = .grayScale400
         $0.font = .pretenMedium(16)
         $0.numberOfLines = 0

@@ -10,7 +10,7 @@ import UIKit
 class BaseInfoHeaderCell: UICollectionReusableView {
     static let identifier = "BaseInfoHeaderCell"
     
-    private let headerView = TextFieldHeaderView(title: "", isEssential: true, descriptionText: "", limitNumber: 10)
+    let headerView = TextFieldHeaderView(title: "", isEssential: true, descriptionText: "", limitNumber: 10)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
