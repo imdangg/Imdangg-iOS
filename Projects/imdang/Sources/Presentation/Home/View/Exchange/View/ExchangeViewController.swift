@@ -19,7 +19,7 @@ enum ExchangeRequestState {
 
 final class ExchangeViewController: UIViewController, View {
    
-    private let insights = BehaviorSubject<[Insight]>(value: [])
+    private let insights = BehaviorSubject<[InsightCell]>(value: [])
     var disposeBag = DisposeBag()
     
     private let navigationLineView = UIView().then {
@@ -278,7 +278,7 @@ final class ExchangeViewController: UIViewController, View {
 extension ExchangeViewController {
     func setupItems(){
         let insights = (1...20).map { index in
-            Insight(
+            InsightCell(
                 id: index,
                 titleName: "Insight \(index)",
                 titleImageUrl: "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg",

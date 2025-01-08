@@ -19,9 +19,7 @@ class SearchingViewController: UIViewController {
         $0.register(cell: InsightCollectionCell.self)
         $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "BannerCell")
     }
-    private let navigationLineView = UIView().then {
-        $0.backgroundColor = .grayScale100
-    }
+    
     private let bannerImageView = BannerView()
     private let searchBoxView = SearchBoxView()
     
@@ -44,7 +42,6 @@ class SearchingViewController: UIViewController {
         
         view.addSubview(collectionView)
         view.addSubview(searchBoxView)
-        view.addSubview(navigationLineView)
         
         searchBoxView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(24)
@@ -52,14 +49,8 @@ class SearchingViewController: UIViewController {
             $0.height.equalTo(50)
         }
         
-        navigationLineView.snp.makeConstraints {
-            $0.top.equalTo(searchBoxView.snp.bottom).offset(16)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(1)
-        }
-        
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(navigationLineView.snp.bottom)
+            $0.top.equalTo(searchBoxView.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
@@ -190,6 +181,17 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
         }
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let textImage = UIImageView().then {
+            guard let url = URL(string: "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg") else { return }
+            $0.kf.setImage(with: url)
+            $0.contentMode = .scaleAspectFill
+        }
+        let vc = InsightDetailViewController(image: textImage.image ?? UIImage())
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: SearchingSectionHeaderView.reuseIdentifier, for: indexPath) as! SearchingSectionHeaderView
@@ -242,19 +244,19 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
         case 1:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
             
-            let insight = Insight(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
+            let insight = InsightCell(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
             cell.configure(insight: insight, layoutType: .horizontal)
             return cell
         case 2:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
             
-            let insight = Insight(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
+            let insight = InsightCell(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
             cell.configure(insight: insight, layoutType: .vertical)
             return cell
         case 3:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
             
-            let insight = Insight(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
+            let insight = InsightCell(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
             cell.configure(insight: insight, layoutType: .horizontal)
             return cell
         default:

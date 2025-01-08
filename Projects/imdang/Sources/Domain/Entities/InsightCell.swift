@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct Insight {
+struct InsightCell {
     let id: Int
     let titleName: String
     let titleImageUrl: String
