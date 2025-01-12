@@ -1,18 +1,19 @@
 //
-//  InsightDetailBasicView.swift
-//  SharedLibraries
+//  testCEll.swift
+//  imdang
 //
-//  Created by 임대진 on 1/8/25.
+//  Created by 임대진 on 1/13/25.
 //
-
 import UIKit
-import Then
 import SnapKit
+import Then
+import RxSwift
+import RxCocoa
 
-class InsightDetailBasicView: UIView {
+class InsightDetailDefaultInfoCollectionCell: UICollectionViewCell {
+    static let identifier = "InsightDetailDefaultInfoCollectionCell"
     private let mapButton = UIButton().then {
         $0.backgroundColor = .grayScale50
-        
         $0.layer.cornerRadius = 16
     }
     
@@ -88,12 +89,24 @@ class InsightDetailBasicView: UIView {
         $0.numberOfLines = 0
     }
     
+    private let descriptionImageView = UIImageView().then {
+        $0.image = ImdangImages.Image(resource: .detailExchangeRequest)
+        $0.contentMode = .scaleAspectFit
+    }
     
-    override init(frame: CGRect = .zero) {
+    private let separatorView = UIView().then {
+        $0.backgroundColor = .grayScale50
+    }
+    
+
+    override init(frame: CGRect) {
         super.init(frame: frame)
         
         addSubviews()
         makeConstraints()
+    }
+    
+    override func prepareForReuse() {
     }
     
     required init?(coder: NSCoder) {
@@ -101,7 +114,7 @@ class InsightDetailBasicView: UIView {
     }
     
     private func addSubviews() {
-        [adressTitleLabel, adressLabel, mapButton, dateTitleLabel, dateLabel, transTitleLabel, transLabel, accessTitleLabel, accessLabel, summaryTitleLabel, summaryLabel].forEach { addSubview($0) }
+        [adressTitleLabel, adressLabel, mapButton, dateTitleLabel, dateLabel, transTitleLabel, transLabel, accessTitleLabel, accessLabel, summaryTitleLabel, summaryLabel, descriptionImageView, separatorView].forEach { contentView.addSubview($0) }
     }
     
     private func makeConstraints() {
@@ -160,13 +173,79 @@ class InsightDetailBasicView: UIView {
             $0.top.equalTo(summaryTitleLabel.snp.bottom).offset(4)
             $0.horizontalEdges.equalToSuperview().inset(20)
         }
+        
+        separatorView.snp.makeConstraints {
+            $0.top.equalTo(summaryLabel.snp.bottom).offset(32)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(8)
+        }
     }
     
-    func config(info: InsightDetail) {
+    private func calculateLabelHeight(text: String) -> CGFloat {
+        let width = UIScreen.main.bounds.width - 40
+        let lineHeight = 22.4
+        let font = UIFont.pretenMedium(16)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = lineHeight
+        paragraphStyle.maximumLineHeight = lineHeight
+        paragraphStyle.lineBreakMode = .byWordWrapping
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .paragraphStyle: paragraphStyle
+        ]
+
+        let boundingSize = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let boundingBox = text.boundingRect(with: boundingSize,
+                                            options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                            attributes: attributes,
+                                            context: nil)
+
+        return ceil(boundingBox.height)
+    }
+    
+    func config(info: InsightDetail, state: DetailExchangeState) {
         adressLabel.text = info.basicInfo.adress
         dateLabel.text = info.basicInfo.writeDate
         transLabel.text = info.basicInfo.transportation
         accessLabel.text = info.basicInfo.restrictionsOnAccess
         summaryLabel.setTextWithLineHeight(text: info.basicInfo.summary, lineHeight: 22.4)
+        
+        switch state {
+        case .beforeRequest:
+            descriptionImageView.image = ImdangImages.Image(resource: .detailExchangeRequest)
+        case .afterRequest:
+            descriptionImageView.image = ImdangImages.Image(resource: .detailRequestReply)
+        case .waiting:
+            descriptionImageView.image = ImdangImages.Image(resource: .detailWaiting)
+        default:
+            break
+        }
+        
+        let width = UIScreen.main.bounds.width
+        if state == .done {
+            contentView.snp.makeConstraints {
+                $0.edges.equalToSuperview()
+                $0.width.equalTo(width)
+                $0.height.equalTo(608 + calculateLabelHeight(text: info.basicInfo.summary))
+            }
+        } else {
+            contentView.snp.remakeConstraints {
+                $0.edges.equalToSuperview()
+                $0.width.equalTo(width)
+                $0.height.equalTo(608 + calculateLabelHeight(text: info.basicInfo.summary) + 312)
+            }
+            
+            descriptionImageView.snp.makeConstraints {
+                $0.top.equalTo(summaryLabel.snp.bottom).offset(32)
+                $0.horizontalEdges.equalToSuperview()
+            }
+            
+            separatorView.snp.remakeConstraints {
+                $0.top.equalTo(descriptionImageView.snp.bottom).offset(32)
+                $0.horizontalEdges.equalToSuperview()
+                $0.height.equalTo(8)
+            }
+        }
     }
 }

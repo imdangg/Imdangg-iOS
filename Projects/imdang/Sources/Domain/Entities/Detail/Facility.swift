@@ -13,4 +13,15 @@ struct Facility {
     let leisure: [String]
     let environment: [String]
     let text: String
+    
+    func conversionArray() -> [(String, [String])] {
+        let allArrays: [(name: String, items: [String])] = [
+            ("가족", family),
+            ("다목적", multipurpose),
+            ("여가 (단지내부)", leisure),
+            ("환경", environment)
+        ]
+        
+        return allArrays
+    }
 }

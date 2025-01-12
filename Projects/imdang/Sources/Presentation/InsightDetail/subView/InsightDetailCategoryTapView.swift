@@ -8,7 +8,7 @@ import UIKit
 import Then
 import SnapKit
 
-class InsightCategoryTapView: UIView {
+class InsightDetailCategoryTapView: UIView {
     private let buttonTitles = ["기본 정보", "인프라", "단지 환경", "단지 시설", "호재"]
     private var selectedIndex = 0
 
@@ -92,9 +92,7 @@ class InsightCategoryTapView: UIView {
         }
 
         if let button = getButton(at: selectedIndex) {
-            UIView.animate(withDuration: 0.2) {
-                self.updateUnderlinePosition(for: button)
-            }
+            self.updateUnderlinePosition(for: button)
         }
 
         showInsightSubViewController(at: selectedIndex)

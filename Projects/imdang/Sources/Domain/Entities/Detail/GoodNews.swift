@@ -16,4 +16,18 @@ struct GoodNews {
     let industry: [String]
     let policy: [String]
     let text: String
+    
+    func conversionArray() -> [(String, [String])] {
+        let allArrays: [(name: String, items: [String])] = [
+            ("교통", traficNews),
+            ("개발", develop),
+            ("교육", education),
+            ("자연 환경", naturalEnvironment),
+            ("문화", culture),
+            ("산업", industry),
+            ("정책", policy)
+        ]
+        
+        return allArrays
+    }
 }
