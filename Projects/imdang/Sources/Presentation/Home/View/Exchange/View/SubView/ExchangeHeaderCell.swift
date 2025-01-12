@@ -11,7 +11,6 @@ import RxCocoa
 import Then
 import ReactorKit
 
-
 final class ExchangeHeaderCell: UITableViewCell {
     
     let disposeBag = DisposeBag()

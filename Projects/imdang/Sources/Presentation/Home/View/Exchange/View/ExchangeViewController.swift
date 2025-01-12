@@ -43,7 +43,6 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
         tableView.dataSource = self
         tableView.register(ExchangeHeaderCell.self, forCellReuseIdentifier: "ExchangeHeaderCell")
         tableView.register(InsightTableCell.self, forCellReuseIdentifier: "InsightTableCell")
-        tableView.separatorInset = .init(top: 0, left: 20, bottom: 12, right: 20)
         tableView.rowHeight = 100
         tableView.rowHeight = UITableView.automaticDimension
         tableView.separatorStyle = .none
@@ -101,7 +100,6 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "InsightTableCell", for: indexPath) as! InsightTableCell
             cell.configure(insight: insights[indexPath.row], layoutType: .horizontal)
-
             cell.selectionStyle = .none
             return cell
         }
