@@ -12,7 +12,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
-        FirebaseApp.configure()
+//        FirebaseApp.configure()
         
         if let APIKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String {
             RxKakaoSDK.initSDK(appKey: APIKey)
