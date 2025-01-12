@@ -16,13 +16,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let vc = ExchangeViewController(reactor: ExchangeReactor())
         let viewController = SigninViewController()
         let reactor = SigninReactor()
         viewController.reactor = reactor
         viewController.view.backgroundColor = .white
 
-        let navigationController = UINavigationController(rootViewController: vc)
+        let navigationController = UINavigationController(rootViewController: viewController)
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
