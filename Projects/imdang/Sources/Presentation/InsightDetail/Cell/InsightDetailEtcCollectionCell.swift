@@ -60,7 +60,7 @@ class InsightDetailEtcCollectionCell: UICollectionViewCell {
                 $0.font = .pretenMedium(14)
                 $0.textColor = .grayScale600
             }
-            let labelsView = TagView()
+            let labelsView = TagView2()
             labelsView.setup(with: items)
             stackView.addArrangedSubview(title)
             stackView.addArrangedSubview(labelsView)
@@ -70,27 +70,30 @@ class InsightDetailEtcCollectionCell: UICollectionViewCell {
             }
             labelsView.snp.makeConstraints {
 //                $0.width.equalToSuperview()
-//                $0.height.equalTo(labelsView.currentY)
+                $0.height.equalTo(labelsView.currentY)
 //                $0.width.equalTo(UIScreen.main.bounds.width - 20)
-                $0.height.equalTo(labelsView.frame.height)
+//                $0.height.equalTo(labelsView.frame.height)
             }
         }
         
-//        let titleLabel = UILabel().then {
-//            $0.text = "총평"
-//            $0.font = .pretenMedium(14)
-//            $0.textColor = .grayScale600
-//        }
-//        
-//        let descriptionLabel = UILabel().then {
-//            $0.text = text 
-//            $0.font = .pretenMedium(16)
-//            $0.textColor = .grayScale900
-//            $0.numberOfLines = 0
-//        }
-//        
-//        [titleLabel, descriptionLabel].forEach { stackView.addArrangedSubview($0) }
+        let titleLabel = UILabel().then {
+            $0.text = "총평"
+            $0.font = .pretenMedium(14)
+            $0.textColor = .grayScale600
+        }
         
+        let descriptionLabel = UILabel().then {
+            $0.text = text 
+            $0.font = .pretenMedium(16)
+            $0.textColor = .grayScale900
+            $0.numberOfLines = 0
+        }
+        
+        [titleLabel].forEach { stackView.addArrangedSubview($0) }
+        
+//        titleLabel.snp.makeConstraints {
+//            $0.height.equalTo(22)
+//        }
 //        descriptionLabel.snp.makeConstraints {
 //            $0.width.equalTo(UIScreen.main.bounds.width - 20)
 //        }
