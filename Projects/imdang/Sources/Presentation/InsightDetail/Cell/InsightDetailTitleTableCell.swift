@@ -1,5 +1,5 @@
 //
-//  InsightDetailTitleViewCell.swift
+//  InsightDetailTitleTableCell.swift
 //  imdang
 //
 //  Created by 임대진 on 1/13/25.
@@ -11,8 +11,8 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class InsightDetailTitleCollectionCell: UICollectionViewCell {
-    static let identifier = "InsightDetailTitleCollectionCell"
+final class InsightDetailTitleTableCell: UITableViewCell {
+    static let identifier = "InsightDetailTitleTableCell"
     private var disposeBag = DisposeBag()
     
     private let backView = UIView()
@@ -66,8 +66,8 @@ class InsightDetailTitleCollectionCell: UICollectionViewCell {
         $0.textColor = .grayScale900
     }
     
-    override init(frame: CGRect = .zero) {
-        super.init(frame: frame)
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         addSubviews()
         makeConstraints()

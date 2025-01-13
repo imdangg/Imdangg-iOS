@@ -1,10 +1,10 @@
+////
+////  InsightDetailViewController.swift
+////  imdang
+////
+////  Created by 임대진 on 1/8/25.
+////
 //
-//  InsightDetailViewController.swift
-//  imdang
-//
-//  Created by 임대진 on 1/8/25.
-//
-
 import UIKit
 import SnapKit
 import Then
@@ -16,12 +16,10 @@ enum DetailExchangeState {
     case done
 }
 
-
 final class InsightDetailViewController: BaseViewController {
+
     var testDate = InsightDetail.testData
-    private var collectionView: UICollectionView!
-    
-    private let insightEtcView = InsightDetailEtcCollectionCell()
+    var tableView: UITableView!
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
         $0.isHidden = true
@@ -41,7 +39,6 @@ final class InsightDetailViewController: BaseViewController {
         $0.contentMode = .scaleAspectFill
     }
     
-    
     init(image: UIImage, state: DetailExchangeState) {
         exchangeState = state
         imageView.image = image
@@ -57,11 +54,9 @@ final class InsightDetailViewController: BaseViewController {
         super.viewDidLoad()
         customBackButton.isHidden = false
         navigationViewBottomShadow.isHidden = true
-        
-        
+
         setNavigationItem()
-        configureCollectionView()
-        
+        configureTableView()
         
         view.addSubview(categoryTapView)
         categoryTapView.snp.makeConstraints {
@@ -70,7 +65,6 @@ final class InsightDetailViewController: BaseViewController {
             $0.height.equalTo(44)
         }
     }
-    
     private func setNavigationItem() {
         [reportIcon, shareIcon].forEach { rightNaviItemView.addSubview($0) }
         
@@ -86,63 +80,44 @@ final class InsightDetailViewController: BaseViewController {
             $0.trailing.equalTo(shareIcon.snp.leading).offset(-12)
         }
     }
-    
-    private func configureCollectionView() {
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-////        flowLayout.minimumLineSpacing = 8
-////        flowLayout.minimumInteritemSpacing = 8
-//
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
+    private func configureTableView() {
+        tableView = UITableView(frame: self.view.bounds, style: .grouped)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.estimatedRowHeight = 1
+        tableView.rowHeight = UITableView.automaticDimension
         
-        collectionView.backgroundColor = .white
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.showsVerticalScrollIndicator = false
-        collectionView.isPrefetchingEnabled = false // 셀 미리 로딩 비활성화
+        tableView.register(cell: UITableViewCell.self)
+        tableView.register(cell: InsightDetailTitleTableCell.self)
+        tableView.register(cell: InsightDetailDefaultInfoTableCell.self)
+        tableView.register(cell: InsightDetailEtcTableCell.self)
         
-        collectionView.register(cell: UICollectionViewCell.self)
-        collectionView.register(header: UICollectionReusableView.self)
-        
-        collectionView.register(cell: InsightDetailEtcCollectionCell.self)
-        collectionView.register(cell: InsightDetailTitleCollectionCell.self)
-        collectionView.register(cell: InsightDetailDefaultInfoCollectionCell.self)
-        collectionView.register(header: InsightDetailCategoryTapViewCell.self)
-        
-        view.addSubview(collectionView)
-        collectionView.snp.makeConstraints {
+        self.view.addSubview(tableView)
+        tableView.snp.makeConstraints {
             $0.topEqualToNavigationBottom(vc: self)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
 }
 
-extension InsightDetailViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
+extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegate {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 7
     }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
-    
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-                if kind == UICollectionView.elementKindSectionHeader {
-                    if indexPath.section == 2 {
-                        let headerView = collectionView.dequeueReusableHeader(forIndexPath: indexPath, headerType: InsightDetailCategoryTapViewCell.self)
-                        return headerView
-                    } else {
-                        return UICollectionReusableView()
-                    }
-                } else {
-                    return UICollectionReusableView()
-                }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let etcCell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailEtcTableCell.self)
+        etcCell.selectionStyle = .none
+        
+        etcCell.layer.borderColor = UIColor.white.cgColor
+        etcCell.layer.borderWidth = 1
         switch indexPath.section {
         case 0:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: UICollectionViewCell.self)
+            let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: UITableViewCell.self)
             cell.contentView.addSubview(imageView)
             imageView.snp.makeConstraints {
                 $0.edges.equalToSuperview()
@@ -151,52 +126,80 @@ extension InsightDetailViewController: UICollectionViewDelegate, UICollectionVie
             }
             return cell
         case 1:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleCollectionCell.self)
+            let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
             cell.config(info: testDate)
+            cell.selectionStyle = .none
             return cell
         case 2:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailDefaultInfoCollectionCell.self)
+            let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailDefaultInfoTableCell.self)
             cell.config(info: testDate, state: .beforeRequest)
+            cell.selectionStyle = .none
             return cell
         case 3:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailEtcCollectionCell.self)
-            cell.config(info: testDate.infra.conversionArray(), text: testDate.infra.text)
-            cell.backgroundColor = .red
-            return cell
+            etcCell.config(info: testDate.infra.conversionArray(), text: testDate.infra.text)
+            return etcCell
         case 4:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailEtcCollectionCell.self)
-            cell.config(info: testDate.environment.conversionArray(), text: testDate.environment.text)
-            cell.backgroundColor = .orange
-            return cell
+            etcCell.config(info: testDate.environment.conversionArray(), text: testDate.environment.text)
+            return etcCell
         case 5:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailEtcCollectionCell.self)
-            cell.config(info: testDate.facility.conversionArray(), text: testDate.facility.text)
-            cell.backgroundColor = .yellow
-            return cell
+            etcCell.config(info: testDate.facility.conversionArray(), text: testDate.facility.text)
+            return etcCell
         case 6:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailEtcCollectionCell.self)
-            cell.config(info: testDate.goodNews.conversionArray(), text: testDate.goodNews.text)
-            cell.backgroundColor = .green
-            return cell
+            etcCell.config(info: testDate.goodNews.conversionArray(), text: testDate.goodNews.text)
+            return etcCell
         default:
-            return UICollectionViewCell()
+            return UITableViewCell()
         }
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         switch section {
-        case 2, 3, 4, 5, 6:
-            return UIEdgeInsets(top: 0, left: 0, bottom: 32, right: 0)
+        case 2:
+            return 44
+        case 3,4,5,6:
+            return 32
         default:
-            return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+            return 0
         }
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        if section == 2 {
-            return CGSize(width: UIScreen.main.bounds.width, height: 44)
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let headerView = InsightDetailCategoryTapView()
+        switch section {
+        case 2:
+            return headerView
+        default:
+            return UIView().then { $0.backgroundColor = .white }
         }
-        return .zero
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        switch section {
+        case 0,1,2:
+            return 0
+        default:
+            return UITableView.automaticDimension
+        }
+    }
+
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let footerView = InsightDetailEtcFooterView()
+        switch section {
+        case 3:
+            footerView.config(text: testDate.infra.text)
+            return footerView
+        case 4:
+            footerView.config(text: testDate.infra.text)
+            return footerView
+        case 5:
+            footerView.config(text: testDate.infra.text)
+            return footerView
+        case 6:
+            footerView.config(text: testDate.infra.text)
+            return footerView
+        default:
+            return nil
+        }
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

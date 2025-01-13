@@ -1,5 +1,5 @@
 //
-//  InsightDetailEtcViewCell.swift
+//  InsightDetailEtcTableCell.swift
 //  imdang
 //
 //  Created by 임대진 on 1/13/25.
@@ -8,19 +8,19 @@ import UIKit
 import Then
 import SnapKit
 
-class InsightDetailEtcCollectionCell: UICollectionViewCell {
+final class InsightDetailEtcTableCell: UITableViewCell {
     
     private var stackView = UIStackView().then {
         $0.axis = .vertical
-        $0.spacing = 4
+        $0.spacing = 24
     }
     
     private let separatorView = UIView().then {
         $0.backgroundColor = .grayScale50
     }
     
-    override init(frame: CGRect = .zero) {
-        super.init(frame: frame)
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         addSubviews()
         makeConstraints()
@@ -35,11 +35,6 @@ class InsightDetailEtcCollectionCell: UICollectionViewCell {
             $0.axis = .vertical
             $0.spacing = 4
         }
-        [stackView].forEach { contentView.addSubview($0) }
-        stackView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-            $0.width.equalTo(UIScreen.main.bounds.width)
-        }
     }
     
     private func addSubviews() {
@@ -48,8 +43,8 @@ class InsightDetailEtcCollectionCell: UICollectionViewCell {
     
     private func makeConstraints() {
         stackView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-            $0.width.equalTo(UIScreen.main.bounds.width)
+            $0.verticalEdges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(20)
         }
     }
     func config(info: [(String, [String])], text: String) {
@@ -60,102 +55,34 @@ class InsightDetailEtcCollectionCell: UICollectionViewCell {
                 $0.font = .pretenMedium(14)
                 $0.textColor = .grayScale600
             }
-            let labelsView = TagView2()
+            let labelsView = makeLabelsView()
             labelsView.setup(with: items)
-            stackView.addArrangedSubview(title)
-            stackView.addArrangedSubview(labelsView)
+            
+            let infoView = UIView()
+            
+            infoView.addSubview(title)
+            infoView.addSubview(labelsView)
+            stackView.addArrangedSubview(infoView)
             
             title.snp.makeConstraints {
+                $0.top.leading.equalToSuperview()
                 $0.height.equalTo(22)
             }
-            labelsView.snp.makeConstraints {
-//                $0.width.equalToSuperview()
-                $0.height.equalTo(labelsView.currentY)
-//                $0.width.equalTo(UIScreen.main.bounds.width - 20)
-//                $0.height.equalTo(labelsView.frame.height)
-            }
-        }
-        
-        let titleLabel = UILabel().then {
-            $0.text = "총평"
-            $0.font = .pretenMedium(14)
-            $0.textColor = .grayScale600
-        }
-        
-        let descriptionLabel = UILabel().then {
-            $0.text = text 
-            $0.font = .pretenMedium(16)
-            $0.textColor = .grayScale900
-            $0.numberOfLines = 0
-        }
-        
-        [titleLabel].forEach { stackView.addArrangedSubview($0) }
-        
-//        titleLabel.snp.makeConstraints {
-//            $0.height.equalTo(22)
-//        }
-//        descriptionLabel.snp.makeConstraints {
-//            $0.width.equalTo(UIScreen.main.bounds.width - 20)
-//        }
-        
-//        separatorView.snp.makeConstraints {
-//            $0.top.equalTo(descriptionLabel.snp.bottom).offset(32)
-//            $0.leading.equalToSuperview().offset(-20)
-//            $0.trailing.equalToSuperview()
-//            $0.height.equalTo(8)
-//        }
-    }
-}
-
-class TagView: UIView {
-    func setup(with tags: [String]) {
-        self.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 0)
-
-        var currentX: CGFloat = 0
-        var currentY: CGFloat = 0
-        let padding: CGFloat = 8    // 라벨 사이 간격
-        let lineSpacing: CGFloat = 8 // 줄 간격
-        let maxWidth = self.bounds.width
-
-        for tag in tags {
-            let noneLabel = tag == "해당 없음" || tag == "잘 모르겠어요"
             
-            let label = UILabel().then {
-                $0.text = tag
-                $0.font = .pretenSemiBold(14)
-                $0.textColor = noneLabel ? .grayScale500 : .mainOrange500
-                $0.backgroundColor = noneLabel ? .grayScale50 : .mainOrange50
-                $0.textAlignment = .center
-                $0.layer.cornerRadius = 8
-                $0.layer.masksToBounds = true
-                $0.layer.borderColor = noneLabel ? UIColor.grayScale100.cgColor : UIColor.mainOrange500.cgColor
-                $0.layer.borderWidth = 1
-                
-                $0.sizeToFit()
-                $0.frame.size.width += 32
-                $0.frame.size.height = 36
+            labelsView.snp.makeConstraints {
+                $0.top.equalTo(title.snp.bottom).offset(4)
+                $0.leading.equalToSuperview()
+                $0.height.equalTo(labelsView.currentY)
             }
-
-            // 가로 방향으로 공간 초과 시 새 줄로 이동
-            if currentX + label.frame.width > maxWidth {
-                currentX = 0
-                currentY += label.frame.height + lineSpacing // 줄바꿈
+            
+            infoView.snp.makeConstraints {
+                $0.height.equalTo(26 + labelsView.currentY)
             }
-
-            // 라벨 위치 설정
-            label.frame.origin = CGPoint(x: currentX, y: currentY)
-            self.addSubview(label)
-
-            // 다음 라벨의 x 좌표 업데이트
-            currentX += label.frame.width + padding
         }
-
-        // 전체 뷰의 높이 업데이트
-        self.frame.size.height = 36 + currentY + 20 // 여유 공간 추가
     }
 }
 
-class TagView2: UIView {
+final class makeLabelsView: UIView {
     var currentY: CGFloat = 36
     func setup(with tags: [String]) {
         self.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 0)
@@ -206,15 +133,9 @@ class TagView2: UIView {
             }
 
             // 다음 라벨의 x 좌표 업데이트
-            previousLabel = label // 현재 라벨을 이전 라벨로 설정
+            previousLabel = label
             currentX += label.frame.width + padding
         }
         self.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: currentY)
-
-        // 전체 뷰의 높이 업데이트
-//        self.snp.makeConstraints { make in
-//            make.horizontalEdges.equalToSuperview()
-//
-//        }
     }
 }

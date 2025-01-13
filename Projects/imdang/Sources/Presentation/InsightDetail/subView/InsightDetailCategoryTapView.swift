@@ -8,7 +8,7 @@ import UIKit
 import Then
 import SnapKit
 
-class InsightDetailCategoryTapView: UIView {
+final class InsightDetailCategoryTapView: UIView {
     private let buttonTitles = ["기본 정보", "인프라", "단지 환경", "단지 시설", "호재"]
     private var selectedIndex = 0
 

@@ -1,5 +1,5 @@
 //
-//  testCEll.swift
+//  InsightDetailDefaultInfoTableCell.swift
 //  imdang
 //
 //  Created by 임대진 on 1/13/25.
@@ -10,8 +10,8 @@ import Then
 import RxSwift
 import RxCocoa
 
-class InsightDetailDefaultInfoCollectionCell: UICollectionViewCell {
-    static let identifier = "InsightDetailDefaultInfoCollectionCell"
+final class InsightDetailDefaultInfoTableCell: UITableViewCell {
+    static let identifier = "InsightDetailDefaultInfoTableCell"
     private let mapButton = UIButton().then {
         $0.backgroundColor = .grayScale50
         $0.layer.cornerRadius = 16
@@ -98,9 +98,9 @@ class InsightDetailDefaultInfoCollectionCell: UICollectionViewCell {
         $0.backgroundColor = .grayScale50
     }
     
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         addSubviews()
         makeConstraints()
