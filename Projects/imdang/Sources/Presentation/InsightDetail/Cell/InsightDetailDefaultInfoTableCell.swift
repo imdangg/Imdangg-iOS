@@ -233,7 +233,7 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
             contentView.snp.remakeConstraints {
                 $0.edges.equalToSuperview()
                 $0.width.equalTo(width)
-                $0.height.equalTo(608 + calculateLabelHeight(text: info.basicInfo.summary) + 312)
+                $0.height.equalTo(608 + calculateLabelHeight(text: info.basicInfo.summary) + 312).priority(999)
             }
             
             descriptionImageView.snp.makeConstraints {

@@ -9,6 +9,7 @@ import Then
 import SnapKit
 
 final class InsightDetailEtcTableCell: UITableViewCell {
+    static let identifier = "InsightDetailEtcTableCell"
     
     private var stackView = UIStackView().then {
         $0.axis = .vertical
@@ -76,7 +77,7 @@ final class InsightDetailEtcTableCell: UITableViewCell {
             }
             
             infoView.snp.makeConstraints {
-                $0.height.equalTo(26 + labelsView.currentY)
+                $0.height.equalTo(26 + labelsView.currentY).priority(999)
             }
         }
     }

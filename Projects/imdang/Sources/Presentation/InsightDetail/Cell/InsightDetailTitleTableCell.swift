@@ -87,7 +87,7 @@ final class InsightDetailTitleTableCell: UITableViewCell {
         backView.snp.makeConstraints {
             $0.edges.equalToSuperview()
             $0.width.equalTo(UIScreen.main.bounds.width)
-            $0.height.equalTo(123)
+            $0.height.equalTo(123).priority(999)
         }
         
         profileImageView.snp.makeConstraints {

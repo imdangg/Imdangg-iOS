@@ -51,7 +51,7 @@ final class InsightDetailCategoryTapView: UIView {
         
         buttonStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(4)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.horizontalEdges.equalToSuperview().inset(20).priority(999)
             $0.height.equalTo(40)
         }
 

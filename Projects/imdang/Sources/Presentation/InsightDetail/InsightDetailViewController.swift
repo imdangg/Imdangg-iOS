@@ -35,13 +35,11 @@ final class InsightDetailViewController: BaseViewController {
         $0.image = ImdangImages.Image(resource: .share)
     }
     
-    private let imageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
-    }
+    private var insightImage = UIImage()
     
     init(image: UIImage, state: DetailExchangeState) {
         exchangeState = state
-        imageView.image = image
+        insightImage = image
         testDate.profileImage = image
         super.init(nibName: nil, bundle: nil)
     }
@@ -86,11 +84,13 @@ final class InsightDetailViewController: BaseViewController {
         tableView.delegate = self
         tableView.estimatedRowHeight = 1
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = UITableView.automaticDimension
         
         tableView.register(cell: UITableViewCell.self)
+        tableView.register(cell: InsightDetailImageCell.self)
+        tableView.register(cell: InsightDetailEtcTableCell.self)
         tableView.register(cell: InsightDetailTitleTableCell.self)
         tableView.register(cell: InsightDetailDefaultInfoTableCell.self)
-        tableView.register(cell: InsightDetailEtcTableCell.self)
         
         self.view.addSubview(tableView)
         tableView.snp.makeConstraints {
@@ -117,23 +117,22 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
         etcCell.layer.borderWidth = 1
         switch indexPath.section {
         case 0:
-            let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: UITableViewCell.self)
-            cell.contentView.addSubview(imageView)
-            imageView.snp.makeConstraints {
-                $0.edges.equalToSuperview()
-                $0.width.equalTo(UIScreen.main.bounds.width)
-                $0.height.equalTo(300)
-            }
+            let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailImageCell.self)
+            cell.config(image: insightImage)
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
             cell.config(info: testDate)
             cell.selectionStyle = .none
+            cell.layer.borderColor = UIColor.white.cgColor
+            cell.layer.borderWidth = 1
             return cell
         case 2:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailDefaultInfoTableCell.self)
             cell.config(info: testDate, state: .beforeRequest)
             cell.selectionStyle = .none
+            cell.layer.borderColor = UIColor.white.cgColor
+            cell.layer.borderWidth = 1
             return cell
         case 3:
             etcCell.config(info: testDate.infra.conversionArray(), text: testDate.infra.text)
@@ -151,7 +150,7 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             return UITableViewCell()
         }
     }
-    
+
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         switch section {
         case 2:
