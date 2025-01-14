@@ -135,7 +135,7 @@ final class InsightDetailViewController: BaseViewController {
         switch exchangeState {
         case .beforeRequest:
             requestButton.snp.makeConstraints {
-                $0.horizontalEdges.equalToSuperview().offset(-20)
+                $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.height.equalTo(56)
                 $0.bottom.equalToSuperview().offset(-40)
             }
@@ -162,7 +162,7 @@ final class InsightDetailViewController: BaseViewController {
             doneButton.snp.makeConstraints {
                 $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.height.equalTo(56)
-                $0.bottom.equalToSuperview().inset(40)
+                $0.bottom.equalToSuperview().offset(-40)
             }
         }
     }
