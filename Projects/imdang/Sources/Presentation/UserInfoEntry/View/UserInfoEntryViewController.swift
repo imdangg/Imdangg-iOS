@@ -46,7 +46,7 @@ final class UserInfoEntryViewController: BaseViewController, View {
     private var selectFemaleButton = CommonButton(title: "여자", initialButtonType: .unselectedBorderStyle)
     
     //button
-    private var submitButton = CommonButton(title: "다음", initialButtonType: .disabled)
+    private var submitButton = CommonButton(title: "다음", initialButtonType: .disabled, keyboardEvent: true)
     
     private lazy var stackView = UIStackView().then {
         $0.isUserInteractionEnabled = false
@@ -293,8 +293,6 @@ final class UserInfoEntryViewController: BaseViewController, View {
             (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
         }).disposed(by: disposeBag)
         
-        bindingKeyboard()
-        
         reactor.state
             .map { $0.nicknameTextFieldState }
             .distinctUntilChanged()
@@ -364,50 +362,4 @@ final class UserInfoEntryViewController: BaseViewController, View {
         return result
     }
     
-}
-
-// Keyboard event
-extension UserInfoEntryViewController {
-    
-    func keyboardHeight() -> Observable<CGFloat> {
-        return Observable
-            .from([
-                NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
-                    .map { notification -> CGFloat in
-                        (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height ?? 0
-                    },
-                NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
-                    .map { _ -> CGFloat in
-                        0
-                    }
-            ])
-            .merge()
-    }
-    
-    func bindingKeyboard() {
-        keyboardHeight()
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { keyboardHeight in
-                UIView.animate(withDuration: 0.1) {
-                    let safeAreaBottom = self.view.safeAreaInsets.bottom
-                    let height = keyboardHeight > 0.0 ? (keyboardHeight - safeAreaBottom) : safeAreaBottom
-                    self.updateNextBtnBottom(-height, keyboardHeight)
-                    self.view.layoutIfNeeded()
-                }
-            })
-            .disposed(by: disposeBag)
-        
-    }
-    
-    func updateNextBtnBottom(_ offset: CGFloat, _ keyboardHeight: CGFloat){
-        self.submitButton.snp.remakeConstraints {
-            if keyboardHeight > 0.0 {
-                $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(offset)
-            } else {
-                $0.bottom.equalTo(stackView.snp.bottom)
-            }
-            $0.horizontalEdges.equalTo(keyboardHeight > 0.0 ? 0 : stackView.snp.horizontalEdges)
-            $0.height.equalTo(56)
-        }
-    }
 }

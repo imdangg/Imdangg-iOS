@@ -94,7 +94,7 @@ class CommonTextViewViewComtroller: BaseViewController {
         $0.lineBreakMode = .byWordWrapping
     }
     
-    private let configButton = CommonButton(title: "확인", initialButtonType: .enabled)
+    private let configButton = CommonButton(title: "확인", initialButtonType: .enabled, keyboardEvent: true)
 
     init(title: String, text: String, placeHolder: String? = "", description: String? = "") {
         super.init(nibName: nil, bundle: nil)
