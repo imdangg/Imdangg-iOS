@@ -9,10 +9,10 @@
 import Foundation
 import ReactorKit
 
-enum Gender {
+enum Gender: String {
     case none
-    case male
-    case female
+    case male = "MALE"
+    case female = "FEMALE"
 }
 
 final class UserInfoEntryReactor: Reactor {

@@ -16,6 +16,7 @@ import Then
 final class UserInfoEntryViewController: UIViewController, View {
     
     var disposeBag: DisposeBag = DisposeBag()
+    private let joinService = ServerJoinService()
     
     private var mainTitle = UILabel().then {
         $0.text = "기본정보입력"
@@ -286,8 +287,27 @@ final class UserInfoEntryViewController: UIViewController, View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        submitButton.rx.tap.subscribe(onNext: {
-            (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+        submitButton.rx.tap.subscribe(onNext: { [self] in
+//            guard let nickname = nicknameTextField.text, !nickname.isEmpty else {
+//                print("nickname empty")
+//                return
+//            }
+//            guard let birthDate = birthTextField.text, !birthDate.isEmpty else {
+//                print("birthDate empty")
+//                return
+//            }
+//                
+//            joinService.joinImdang(nickname: nickname, birthDate: birthDate, gender: reactor.currentState.selectedGender)
+//                    .subscribe { success in
+//                        if success {
+//                            (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+//                        } else {
+//                            print("join failed")
+//                        }
+//                    }
+//                    .disposed(by: disposeBag)
+            
+                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
         }).disposed(by: disposeBag)
         
         bindingKeyboard()

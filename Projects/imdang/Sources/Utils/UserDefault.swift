@@ -11,11 +11,11 @@ import Foundation
 enum UserdefaultKey {
     // 저장: UserdefaultKey.test = "~~"
     // 읽기: let test = UserdefaultKey.test
-    @UserDefault(key: "test", defaultValue: "")
-    static var test: String
+    @UserDefault(key: "memberId", defaultValue: "")
+    static var memberId: String
     
-    @UserDefault(key: "test1", defaultValue: "")
-    static var test1: String
+    @UserDefault(key: "deviceToken", defaultValue: "")
+    static var deviceToken: String
 }
 
 

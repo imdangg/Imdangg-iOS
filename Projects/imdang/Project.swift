@@ -41,7 +41,17 @@ let project = Project(
                         ],
                     ],
                     "KAKAO_URL_KEY": "$(KAKAO_URL_KEY)",
-                    "KAKAO_APP_KEY": "$(KAKAO_APP_KEY)"
+                    "KAKAO_APP_KEY": "$(KAKAO_APP_KEY)",
+                    "NSAppTransportSecurity": [
+                        "NSExceptionDomains": [
+                            "imdang.info": [
+                                "NSIncludesSubdomains": true,
+                                "NSExceptionAllowsInsecureHTTPLoads": true
+                            ]
+                        ]
+                    ],
+                    "UIBackgroundModes": ["remote-notification"]
+
                 ]
             ),
             sources: ["Sources/**"],
@@ -49,6 +59,7 @@ let project = Project(
                 "Resources/**",
                 "Sources/App/LaunchScreen.storyboard",
             ],
+            entitlements: "imdang.entitlements",
             dependencies: [
                 .external(name: "Kingfisher"),
                 .external(name: "Alamofire"),
@@ -59,6 +70,12 @@ let project = Project(
                 .external(name: "RxCocoa"),
                 .external(name: "RxKakaoSDK"),
 //                .external(name: "KakaoSDK"),
+                .external(name: "FirebaseCrashlytics"),
+                .external(name: "FirebaseDynamicLinks"),
+                .external(name: "FirebaseMessaging"),
+                .external(name: "FirebasePerformance"),
+                .external(name: "FirebaseRemoteConfig"),
+                .external(name: "FirebaseAnalytics"),
                 .project(target: "NetworkKit", path: "../NetworkKit"),
                 .target(name: "SharedLibraries")
             ],
