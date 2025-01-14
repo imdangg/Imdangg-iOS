@@ -94,7 +94,7 @@ class CommonTextViewViewComtroller: BaseViewController {
         $0.lineBreakMode = .byWordWrapping
     }
     
-    private let configButton = CommonButton(title: "확인", initialButtonType: .enabledGrayStyle)
+    private let configButton = CommonButton(title: "확인", initialButtonType: .enabled)
 
     init(title: String, text: String, placeHolder: String? = "", description: String? = "") {
         super.init(nibName: nil, bundle: nil)
@@ -106,9 +106,6 @@ class CommonTextViewViewComtroller: BaseViewController {
         
         if text.isEmpty {
             placeholderLabel.text = placeHolder
-            configButton.setState(.enabledGrayStyle)
-        } else {
-            configButton.setState(.enabled)
         }
     }
     
@@ -250,7 +247,7 @@ extension CommonTextViewViewComtroller: UITextViewDelegate {
             
             updateCurrentTextCount()
         } else {
-            configButton.setState(.enabledGrayStyle)
+            configButton.setState(.enabled)
             currentTextCountLabel.removeFromSuperview()
         }
     }

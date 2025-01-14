@@ -19,7 +19,7 @@ enum CommonButtonType {
     case disabled
     case selectedBorderStyle
     case unselectedBorderStyle
-    case enabledGrayStyle
+    case whiteBackBorderStyle
 }
 
 class CommonButton: UIButton {
@@ -82,11 +82,12 @@ class CommonButton: UIButton {
                 self.setTitleColor(.grayScale200, for: .normal)
                 self.layer.borderWidth = 1
                 self.layer.borderColor = UIColor.grayScale200.cgColor
-            case .enabledGrayStyle:
+            case .whiteBackBorderStyle:
                 self.isEnabled = true
-                self.backgroundColor = .grayScale100
-                self.layer.borderWidth = 0
-                self.setTitleColor(.grayScale500, for: .normal)
+                self.backgroundColor = .white
+                self.setTitleColor(.mainOrange500, for: .normal)
+                self.layer.borderWidth = 1
+                self.layer.borderColor = UIColor.mainOrange500.cgColor
             }
         }
     }

@@ -1,34 +1,15 @@
 //
-//  ImageTextButton.swift
+//  ImageTextLabel.swift
 //  imdang
 //
-//  Created by 임대진 on 12/16/24.
+//  Created by 임대진 on 1/8/25.
 //
 
 import UIKit
 import Then
 import SnapKit
 
-enum PriorityType {
-    case imageFirst
-    case textFirst
-}
-
-/*
- 사용방법
- let button = ImageTextButton(type: .imageFirst, horizonPadding: 4, spacing: 8).then {
-     $0.customText.text = ""
-     $0.customText.textColor = .white
-     $0.customText.font = .pretenBold(1)
-     
-     $0.customImage.image = ImdangImages.Image(resource: .alarm)
-     $0.customImage.tintColor = .white
-     $0.imageSize = 20
- }
-}
- */
-
-class ImageTextButton: UIButton {
+class ImageTextLabel: UILabel {
     let customImage = UIImageView()
     let customText = UILabel()
     /// 왼쪽에 먼저오는 아이템
