@@ -19,13 +19,12 @@ enum DetailExchangeState {
 final class InsightDetailViewController: BaseViewController {
 
     var testDate = InsightDetail.testData
-    var tableView: UITableView!
+    private var tableView: UITableView!
+    private var exchangeState: DetailExchangeState
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
         $0.isHidden = true
     }
-    
-    private var exchangeState: DetailExchangeState
     
     private let reportIcon = UIImageView().then {
         $0.image = ImdangImages.Image(resource: .report)
@@ -85,6 +84,8 @@ final class InsightDetailViewController: BaseViewController {
         tableView.estimatedRowHeight = 1
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = UITableView.automaticDimension
+        tableView.backgroundColor = .white
+        tableView.separatorStyle = .none
         
         tableView.register(cell: UITableViewCell.self)
         tableView.register(cell: InsightDetailImageCell.self)
@@ -102,7 +103,7 @@ final class InsightDetailViewController: BaseViewController {
 
 extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 7
+        return exchangeState == .done ? 7 : 3
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -113,8 +114,6 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
         let etcCell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailEtcTableCell.self)
         etcCell.selectionStyle = .none
         
-        etcCell.layer.borderColor = UIColor.white.cgColor
-        etcCell.layer.borderWidth = 1
         switch indexPath.section {
         case 0:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailImageCell.self)
@@ -124,15 +123,11 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
             cell.config(info: testDate)
             cell.selectionStyle = .none
-            cell.layer.borderColor = UIColor.white.cgColor
-            cell.layer.borderWidth = 1
             return cell
         case 2:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailDefaultInfoTableCell.self)
-            cell.config(info: testDate, state: .beforeRequest)
+            cell.config(info: testDate, state: exchangeState)
             cell.selectionStyle = .none
-            cell.layer.borderColor = UIColor.white.cgColor
-            cell.layer.borderWidth = 1
             return cell
         case 3:
             etcCell.config(info: testDate.infra.conversionArray(), text: testDate.infra.text)
