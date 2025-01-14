@@ -13,7 +13,7 @@ import SnapKit
 import ReactorKit
 import Then
 
-final class UserInfoEntryViewController: UIViewController, View {
+final class UserInfoEntryViewController: BaseViewController, View {
     
     var disposeBag: DisposeBag = DisposeBag()
     
@@ -62,12 +62,15 @@ final class UserInfoEntryViewController: UIViewController, View {
         fatalError("init(coder:) has not been implemented")
     }
     
-   override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
+        customBackButton.isHidden = false
+        navigationViewBottomShadow.isHidden = true
+        
         view.backgroundColor = UIColor.grayScale25
         view.addSubview(stackView)
-       setup()
-   }
+        setup()
+    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
@@ -79,8 +82,8 @@ final class UserInfoEntryViewController: UIViewController, View {
     }
     
     func attriubute(){
-   
-       
+        
+        
     }
     
     func layout(){
@@ -160,13 +163,13 @@ final class UserInfoEntryViewController: UIViewController, View {
         stackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.top.equalToSuperview().inset(110)
+            $0.topEqualToNavigationBottom(vc: self)
             $0.bottom.equalToSuperview().inset(40)
         }
     }
     
     func bind(reactor: UserInfoEntryReactor) {
-  
+        
         //nickname
         nicknameTextField.rx.controlEvent(.primaryActionTriggered)
             .subscribe(onNext: {[weak self] in self?.birthTextField.becomeFirstResponder()})
@@ -182,7 +185,7 @@ final class UserInfoEntryViewController: UIViewController, View {
         nicknameTextField.rx.controlEvent([.editingDidEnd])
             .asDriver()
             .map { [weak self] in
-
+                
                 // 닉네임 미입력 오류 처리
                 guard let text = self?.nicknameTextField.text, !text.isEmpty else {
                     self?.niknameFooterView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
@@ -200,8 +203,8 @@ final class UserInfoEntryViewController: UIViewController, View {
             }
             .drive(reactor.action) // Reactor로 Action 전달
             .disposed(by: disposeBag)
-
-
+        
+        
         nicknameTextField.rx.text
             .orEmpty
             .bind { [weak self] text in
