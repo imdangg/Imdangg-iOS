@@ -22,7 +22,7 @@ final class InsightDetailEtcFooterView: UICollectionReusableView {
         $0.numberOfLines = 0
     }
     
-    private let separatorView = UIView().then {
+    let separatorView = UIView().then {
         $0.backgroundColor = .grayScale50
     }
     
@@ -40,6 +40,7 @@ final class InsightDetailEtcFooterView: UICollectionReusableView {
             $0.height.equalTo(22)
         }
     }
+    
     override func prepareForReuse() {
         descriptionLabel.text = ""
     }

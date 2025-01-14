@@ -19,7 +19,9 @@ enum DetailExchangeState {
 final class InsightDetailViewController: BaseViewController {
 
     var testDate = InsightDetail.testData
+    
     private var tableView: UITableView!
+    private var insightImage = UIImage()
     private var exchangeState: DetailExchangeState
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
@@ -34,7 +36,12 @@ final class InsightDetailViewController: BaseViewController {
         $0.image = ImdangImages.Image(resource: .share)
     }
     
-    private var insightImage = UIImage()
+    private let requestButton = CommonButton(title: "교환 요청", initialButtonType: .enabled)
+    private let degreeButton = CommonButton(title: "거절", initialButtonType: .whiteBackBorderStyle)
+    private let agreeButton = CommonButton(title: "수락", initialButtonType: .enabled)
+    private let waitButton = CommonButton(title: "대기중", initialButtonType: .disabled)
+    private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
+    private let buttonBackView = UIView().then { $0.backgroundColor = .white }
     
     init(image: UIImage, state: DetailExchangeState) {
         exchangeState = state
@@ -51,9 +58,11 @@ final class InsightDetailViewController: BaseViewController {
         super.viewDidLoad()
         customBackButton.isHidden = false
         navigationViewBottomShadow.isHidden = true
-
+        
         setNavigationItem()
         configureTableView()
+        addSubviews()
+        makeConstraints()
         
         view.addSubview(categoryTapView)
         categoryTapView.snp.makeConstraints {
@@ -62,6 +71,7 @@ final class InsightDetailViewController: BaseViewController {
             $0.height.equalTo(44)
         }
     }
+    
     private func setNavigationItem() {
         [reportIcon, shareIcon].forEach { rightNaviItemView.addSubview($0) }
         
@@ -77,6 +87,7 @@ final class InsightDetailViewController: BaseViewController {
             $0.trailing.equalTo(shareIcon.snp.leading).offset(-12)
         }
     }
+    
     private func configureTableView() {
         tableView = UITableView(frame: self.view.bounds, style: .grouped)
         tableView.dataSource = self
@@ -97,6 +108,62 @@ final class InsightDetailViewController: BaseViewController {
         tableView.snp.makeConstraints {
             $0.topEqualToNavigationBottom(vc: self)
             $0.horizontalEdges.bottom.equalToSuperview()
+        }
+    }
+    
+    private func addSubviews() {
+        view.addSubview(buttonBackView)
+        switch exchangeState {
+        case .beforeRequest:
+            view.addSubview(requestButton)
+        case .afterRequest:
+            view.addSubview(degreeButton)
+            view.addSubview(agreeButton)
+        case .waiting:
+            view.addSubview(waitButton)
+        case .done:
+            view.addSubview(doneButton)
+        }
+    }
+    
+    private func makeConstraints() {
+        buttonBackView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(96)
+            $0.bottom.equalToSuperview()
+        }
+        switch exchangeState {
+        case .beforeRequest:
+            requestButton.snp.makeConstraints {
+                $0.horizontalEdges.equalToSuperview().offset(-20)
+                $0.height.equalTo(56)
+                $0.bottom.equalToSuperview().offset(-40)
+            }
+        case .afterRequest:
+            degreeButton.snp.makeConstraints {
+                $0.leading.equalToSuperview().offset(20)
+                $0.trailing.equalTo(buttonBackView.snp.centerX).offset(-5)
+                $0.height.equalTo(56)
+                $0.bottom.equalToSuperview().offset(-40)
+            }
+            agreeButton.snp.makeConstraints {
+                $0.leading.equalTo(buttonBackView.snp.centerX).offset(5)
+                $0.trailing.equalToSuperview().offset(-20)
+                $0.height.equalTo(56)
+                $0.bottom.equalToSuperview().offset(-40)
+            }
+        case .waiting:
+            waitButton.snp.makeConstraints {
+                $0.horizontalEdges.equalToSuperview().inset(20)
+                $0.height.equalTo(56)
+                $0.bottom.equalToSuperview().offset(-40)
+            }
+        case .done:
+            doneButton.snp.makeConstraints {
+                $0.horizontalEdges.equalToSuperview().inset(20)
+                $0.height.equalTo(56)
+                $0.bottom.equalToSuperview().inset(40)
+            }
         }
     }
 }
@@ -183,13 +250,14 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             footerView.config(text: testDate.infra.text)
             return footerView
         case 4:
-            footerView.config(text: testDate.infra.text)
+            footerView.config(text: testDate.environment.text)
             return footerView
         case 5:
-            footerView.config(text: testDate.infra.text)
+            footerView.config(text: testDate.facility.text)
             return footerView
         case 6:
-            footerView.config(text: testDate.infra.text)
+            footerView.config(text: testDate.goodNews.text)
+            footerView.separatorView.isHidden = true
             return footerView
         default:
             return nil
