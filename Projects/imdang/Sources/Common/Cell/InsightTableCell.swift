@@ -20,7 +20,7 @@ class InsightTableCell: UITableViewCell {
         contentView.addSubview(insightCellView)
         
         insightCellView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20))
         }
     }
     

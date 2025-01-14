@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct InsightCell {
+struct Insight: Equatable{
     let id: Int
     let titleName: String
     let titleImageUrl: String
