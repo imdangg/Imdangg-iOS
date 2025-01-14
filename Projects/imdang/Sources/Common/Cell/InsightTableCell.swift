@@ -40,7 +40,7 @@ class InsightTableCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(insight: InsightCell, layoutType: DirectionType) {
+    func configure(insight: Insight, layoutType: DirectionType) {
         insightCellView.configure(insight: insight, layoutType: layoutType)
     }
 }
