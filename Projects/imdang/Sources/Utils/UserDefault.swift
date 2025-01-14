@@ -16,6 +16,10 @@ enum UserdefaultKey {
     
     @UserDefault(key: "test1", defaultValue: "")
     static var test1: String
+    
+    @UserDefault(key: "dontSeeToday", defaultValue: false)
+    static var dontSeeToday: Bool
+    
 }
 
 
