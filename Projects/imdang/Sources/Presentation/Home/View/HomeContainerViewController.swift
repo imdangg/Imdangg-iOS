@@ -60,7 +60,10 @@ class HomeContainerViewController: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        presentModal()
+        
+        if !UserdefaultKey.dontSeeToday {
+            presentModal()
+        }
     }
     
     private func presentModal() {

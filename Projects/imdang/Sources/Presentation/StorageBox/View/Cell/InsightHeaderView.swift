@@ -57,6 +57,8 @@ class InsightHeaderView: UICollectionReusableView {
         $0.font = .pretenSemiBold(16)
     }
     
+    private let toggleSwitch = CustomSwitch()
+    
     private let secondLineView = UIView().then {
         $0.backgroundColor = .white
         
@@ -84,7 +86,7 @@ class InsightHeaderView: UICollectionReusableView {
         [viewAllButton, areaSeletButton].forEach {
             firstLineView.addSubview($0)
         }
-        [myInsightLabel, insightCount].forEach {
+        [myInsightLabel, toggleSwitch, insightCount].forEach {
             secondLineView.addSubview($0)
         }
         [firstLineView, secondLineView].forEach {
@@ -122,6 +124,13 @@ class InsightHeaderView: UICollectionReusableView {
         myInsightLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().offset(20)
+        }
+        
+        toggleSwitch.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.leading.equalTo(myInsightLabel.snp.trailing).offset(8)
+            $0.width.equalTo(32)
+            $0.height.equalTo(18)
         }
         
         insightCount.snp.makeConstraints {

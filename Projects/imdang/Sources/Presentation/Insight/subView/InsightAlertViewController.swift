@@ -29,8 +29,7 @@ class InsightAlertViewController: UIViewController {
     }
     
     private let descriptionLabel = UILabel().then {
-        $0.text = "해당 없음, 잘 모르겠어요\n선택시 다른 항목들은\n선택이 해제돼요. 괜찮으신가요?"
-        $0.setLineSpacing(lineHeightMultiple: 1.2)
+        $0.setTextWithLineHeight(text: "해당 없음, 잘 모르겠어요\n선택시 다른 항목들은\n선택이 해제돼요. 괜찮으신가요?", lineHeight: 25.2)
         $0.font = .pretenSemiBold(18)
         $0.textColor = .grayScale900
         $0.numberOfLines = 3

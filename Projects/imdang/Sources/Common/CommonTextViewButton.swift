@@ -87,12 +87,10 @@ class CommonTextViewButton: UIView {
             if !self.text.isEmpty {
                 currentTextCountLabel.text = "(\(self.text.count)/200)"
                 textCountstackView.addArrangedSubview(currentTextCountLabel)
-                
-                checkIcon.snp.makeConstraints {
-                    $0.centerY.equalTo(titleLabel.snp.centerY)
-                    $0.leading.equalTo(titleLabel.snp.trailing).offset(4)
-                    $0.height.width.equalTo(20)
-                }
+                checkIcon.isHidden = false
+            } else {
+                currentTextCountLabel.removeFromSuperview()
+                checkIcon.isHidden = true
             }
         }
     }
@@ -155,6 +153,12 @@ class CommonTextViewButton: UIView {
         placeholderLabel.snp.makeConstraints {
             $0.top.equalTo(textFieldBackground).offset(16)
             $0.horizontalEdges.equalTo(textFieldBackground).inset(16)
+        }
+        
+        checkIcon.snp.makeConstraints {
+            $0.centerY.equalTo(titleLabel.snp.centerY)
+            $0.leading.equalTo(titleLabel.snp.trailing).offset(4)
+            $0.height.width.equalTo(20)
         }
     }
     

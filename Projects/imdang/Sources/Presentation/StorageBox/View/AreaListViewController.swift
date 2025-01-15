@@ -16,7 +16,7 @@ class AreaListViewController: BaseViewController {
     
     private let confirmButton = UIButton().then {
         $0.setTitle("선택 완료", for: .normal)
-        $0.backgroundColor = .orange
+        $0.backgroundColor = .mainOrange500
         $0.layer.cornerRadius = 8
     }
     
