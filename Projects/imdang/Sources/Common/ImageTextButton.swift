@@ -45,7 +45,7 @@ class ImageTextButton: UIButton {
         }
     }
 
-    init(frame: CGRect = .zero, type: PriorityType, horizonPadding: Int, spacing: Int) {
+    init(frame: CGRect = .zero, type: PriorityType = .imageFirst, horizonPadding: Int, spacing: Int) {
         self.type = type
         self.horizonPadding = horizonPadding
         self.spacing = spacing

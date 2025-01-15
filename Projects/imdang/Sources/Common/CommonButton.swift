@@ -19,7 +19,7 @@ enum CommonButtonType {
     case disabled
     case selectedBorderStyle
     case unselectedBorderStyle
-    case enabledGrayStyle
+    case whiteBackBorderStyle
 }
 
 class CommonButton: UIButton {
@@ -29,15 +29,17 @@ class CommonButton: UIButton {
     var initialButtonType: CommonButtonType
     var radius: CGFloat?
 
-    init(frame: CGRect = .zero, title: String, initialButtonType: CommonButtonType, radius: CGFloat? = 8) {
+    init(frame: CGRect = .zero, title: String, initialButtonType: CommonButtonType, radius: CGFloat? = 8, keyboardEvent: Bool = false) {
         self.title = title
         self.initialButtonType = initialButtonType
         self.radius = radius
         super.init(frame: frame)
         setupButton()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        if keyboardEvent {
+            NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        }
     }
     
     deinit {
@@ -82,12 +84,13 @@ class CommonButton: UIButton {
                 self.backgroundColor = .white
                 self.setTitleColor(.grayScale200, for: .normal)
                 self.layer.borderWidth = 1
-                self.layer.borderColor = UIColor.grayScale100.cgColor
-            case .enabledGrayStyle:
+                self.layer.borderColor = UIColor.grayScale200.cgColor
+            case .whiteBackBorderStyle:
                 self.isEnabled = true
-                self.backgroundColor = .grayScale100
-                self.layer.borderWidth = 0
-                self.setTitleColor(.grayScale500, for: .normal)
+                self.backgroundColor = .white
+                self.setTitleColor(.mainOrange500, for: .normal)
+                self.layer.borderWidth = 1
+                self.layer.borderColor = UIColor.mainOrange500.cgColor
             }
         }
     }
