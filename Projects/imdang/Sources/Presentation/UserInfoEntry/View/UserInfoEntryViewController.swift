@@ -266,18 +266,7 @@ final class UserInfoEntryViewController: BaseViewController, View {
             }
             .drive(reactor.action)
             .disposed(by: disposeBag)
-        
-        birthTextField.rx.text
-            .orEmpty
-            .map { text in
-                let limitedText = String(text.prefix(10))
-                let formattedText = self.formatText(limitedText)
-                return formattedText
-            }
-            .bind(to: birthTextField.rx.text)
-            .disposed(by: disposeBag)
-        
-        
+
         // gender
         selectMaleButton.rx.tap
             .map{ Reactor.Action.tapGenderButton(.male)}
@@ -345,21 +334,4 @@ final class UserInfoEntryViewController: BaseViewController, View {
             })
             .disposed(by: disposeBag)
     }
-    
-    private func formatText(_ text: String) -> String {
-        var result = text.replacingOccurrences(of: ".", with: "")
-        
-        if result.count > 4 {
-            let index = result.index(result.startIndex, offsetBy: 4)
-            result.insert(".", at: index)
-        }
-        
-        if result.count > 7 {
-            let index = result.index(result.startIndex, offsetBy: 7)
-            result.insert(".", at: index)
-        }
-        
-        return result
-    }
-    
 }

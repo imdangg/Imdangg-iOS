@@ -55,6 +55,7 @@ class CommonButton: UIButton {
         titleLabel?.font = .pretenSemiBold(16)
         layer.cornerRadius = radius ?? 8
         clipsToBounds = true
+
         contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         setState(initialButtonType)
     }
@@ -98,34 +99,38 @@ class CommonButton: UIButton {
         setTitle(title, for: .normal)
     }
     
+    func setTitleColor(color: UIColor) {
+        self.setTitleColor(color, for: .normal)
+    }
+    
     @objc private func keyboardWillShow(_ notification: Notification) {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
            let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval {
             
-            UIView.animate(withDuration: duration) {
-                self.layer.cornerRadius = 0
-                
-                self.snp.remakeConstraints {
-                    $0.horizontalEdges.equalToSuperview()
-                    $0.bottom.equalToSuperview().inset(keyboardFrame.height)
-                    $0.height.equalTo(56)
-                }
-            }
+//            UIView.animate(withDuration: duration) {
+//                self.layer.cornerRadius = 0
+//                
+//                self.snp.remakeConstraints {
+//                    $0.horizontalEdges.equalToSuperview()
+//                    $0.bottom.equalToSuperview().inset(keyboardFrame.height)
+//                    $0.height.equalTo(56)
+//                }
+//            }
         }
     }
 
     @objc private func keyboardWillHide(_ notification: Notification) {
         if let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval {
             
-            UIView.animate(withDuration: duration) {
-                self.layer.cornerRadius = self.radius ?? 8
-                
-                self.snp.remakeConstraints {
-                    $0.horizontalEdges.equalToSuperview().inset(20)
-                    $0.bottom.equalToSuperview().inset(40)
-                    $0.height.equalTo(56)
-                }
-            }
+//            UIView.animate(withDuration: duration) {
+//                self.layer.cornerRadius = self.radius ?? 8
+//                
+//                self.snp.remakeConstraints {
+//                    $0.horizontalEdges.equalToSuperview().inset(20)
+//                    $0.bottom.equalToSuperview().inset(40)
+//                    $0.height.equalTo(56)
+//                }
+//            }
         }
     }
 }

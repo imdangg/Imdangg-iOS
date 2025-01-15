@@ -32,9 +32,11 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+
         reactor?.action.onNext(.loadInsights)
         setupTableView()
     }
+
 
     private func setupTableView() {
         view.addSubview(tableView)
