@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let vc = TabBarController()
+
         let viewController = SigninViewController()
         let reactor = SigninReactor()
         viewController.reactor = reactor
@@ -24,7 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let navigationController = UINavigationController(rootViewController: viewController)
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = vc
+        window?.rootViewController = viewController
         window?.makeKeyAndVisible()
         
     }
