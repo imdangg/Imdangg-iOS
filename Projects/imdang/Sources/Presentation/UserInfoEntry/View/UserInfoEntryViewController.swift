@@ -288,26 +288,26 @@ final class UserInfoEntryViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         submitButton.rx.tap.subscribe(onNext: { [self] in
-//            guard let nickname = nicknameTextField.text, !nickname.isEmpty else {
-//                print("nickname empty")
-//                return
-//            }
-//            guard let birthDate = birthTextField.text, !birthDate.isEmpty else {
-//                print("birthDate empty")
-//                return
-//            }
-//                
-//            joinService.joinImdang(nickname: nickname, birthDate: birthDate, gender: reactor.currentState.selectedGender)
-//                    .subscribe { success in
-//                        if success {
-//                            (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
-//                        } else {
-//                            print("join failed")
-//                        }
-//                    }
-//                    .disposed(by: disposeBag)
+            guard let nickname = nicknameTextField.text, !nickname.isEmpty else {
+                print("nickname empty")
+                return
+            }
+            guard let birthDate = birthTextField.text, !birthDate.isEmpty else {
+                print("birthDate empty")
+                return
+            }
+                
+            joinService.joinImdang(nickname: nickname, birthDate: birthDate, gender: reactor.currentState.selectedGender)
+                    .subscribe { success in
+                        if success {
+                            (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+                        } else {
+                            print("join failed")
+                        }
+                    }
+                    .disposed(by: disposeBag)
             
-                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+//                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
         }).disposed(by: disposeBag)
         
         bindingKeyboard()

@@ -139,7 +139,8 @@ final class SigninViewController: UIViewController, View {
             .distinctUntilChanged()
             .filter { $0 }
             .subscribe(onNext: { [weak self] _ in
-                self?.navigationController?.pushViewController(vc, animated: true)
+//                self?.navigationController?.pushViewController(vc, animated: true)
+                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
             })
             .disposed(by: disposeBag)
         
@@ -154,7 +155,8 @@ final class SigninViewController: UIViewController, View {
             .distinctUntilChanged()
             .filter { $0 }
             .subscribe(onNext: { [weak self] _ in
-                self?.navigationController?.pushViewController(vc, animated: true)
+//                self?.navigationController?.pushViewController(vc, animated: true)
+                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
             })
             .disposed(by: disposeBag)
     }

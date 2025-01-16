@@ -62,7 +62,7 @@ class KakaoLoginService {
             networkManager.request(with: endpoint)
                 .subscribe(
                     onNext: { entity in
-                        print("Request succeeded with entity: \(entity)")
+                        UserdefaultKey.accessToken = entity.accessToken
                         UserdefaultKey.memberId = entity.memberId
                         observer.onNext(true)
                         observer.onCompleted()

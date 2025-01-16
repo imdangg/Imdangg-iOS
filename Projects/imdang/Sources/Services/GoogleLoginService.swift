@@ -47,13 +47,12 @@ class GoogleLoginService {
                         networkManager.request(with: endpoint)
                             .subscribe(
                                 onNext: { entity in
-                                    print("Request succeeded with entity: \(entity)")
+                                    UserdefaultKey.accessToken = entity.accessToken
                                     UserdefaultKey.memberId = entity.memberId
                                     observer.onNext(true)
                                     observer.onCompleted()
                                 },
                                 onError: { error in
-                                    print("Request failed with error: \(error)")
                                     observer.onNext(false)
                                     observer.onCompleted()
                                 }

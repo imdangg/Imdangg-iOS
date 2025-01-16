@@ -58,7 +58,7 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] insights in
                 self?.insights = insights
-                print("loadData - \(insights)")
+//                print("loadData - \(insights)")
                 self?.tableView.reloadData()
             })
             .disposed(by: disposeBag)

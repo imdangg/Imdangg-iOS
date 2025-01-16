@@ -8,6 +8,7 @@
 import Foundation
 import NetworkKit
 import RxSwift
+import Alamofire
 
 enum companyType {
     case google, kakao
@@ -25,30 +26,32 @@ class ServerJoinService {
     private let networkManager = NetworkManager()
     
     func joinImdang(nickname: String, birthDate: String, gender: Gender) -> Observable<Bool> {
-        let parameters: [String: Any] = [
+        let parameters: [String: String] = [
             "nickname": nickname,
             "birthDate": birthDate,
             "gender": gender.rawValue,
             "deviceToken": UserdefaultKey.deviceToken
         ]
         
+        print("parameters \(parameters)")
+        print(UserdefaultKey.accessToken)
+        
         let endpoint = Endpoint<JoinResponse>(
             baseURL: .imdangAPI,
             path: "/auth/join",
             method: .put,
+            headers: [HTTPHeader(name: "Content-Type", value: "application/json"),
+                      HTTPHeader(name: "Authorization", value: "Bearer \(UserdefaultKey.accessToken)")],
             parameters: parameters
         )
         
         return networkManager.request(with: endpoint)
             .map { entity in
-                print("Request succeeded with entity: \(entity)")
                 return true
             }
             .catch { error in
-                print("Request failed with error: \(error)")
                 return Observable.just(false)
             }
     }
-    
 }
 

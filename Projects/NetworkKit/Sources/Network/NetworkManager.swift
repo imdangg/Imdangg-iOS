@@ -12,7 +12,7 @@ public import Alamofire
 public final class NetworkManager: Network {
     var session: Session
     
-    public init(session: Session = .default) {
+    public init(session: Session = Session(eventMonitors: [APIEventMonitor()])) {
         self.session = session
     }
     

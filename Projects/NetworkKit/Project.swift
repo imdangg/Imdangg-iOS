@@ -11,7 +11,7 @@ let NetworkKit = Project(
             deploymentTargets: .iOS("15.0"),
             infoPlist: .extendingDefault(
                 with: [
-                    "adviceslipAPI": "$(_ADVICE_SLIP_API_)"
+                    "imdangAPI": "$(_IMDANG_API_)"
                 ]
             ),
             sources: ["Sources/**"],
