@@ -13,7 +13,7 @@ import SnapKit
 import ReactorKit
 import Then
 
-final class UserInfoEntryViewController: UIViewController, View {
+final class UserInfoEntryViewController: BaseViewController, View {
     
     var disposeBag: DisposeBag = DisposeBag()
     private let joinService = ServerJoinService()
@@ -47,7 +47,7 @@ final class UserInfoEntryViewController: UIViewController, View {
     private var selectFemaleButton = CommonButton(title: "여자", initialButtonType: .unselectedBorderStyle)
     
     //button
-    private var submitButton = CommonButton(title: "다음", initialButtonType: .disabled)
+    private var submitButton = CommonButton(title: "다음", initialButtonType: .disabled, keyboardEvent: true)
     
     private lazy var stackView = UIStackView().then {
         $0.isUserInteractionEnabled = false
@@ -63,12 +63,15 @@ final class UserInfoEntryViewController: UIViewController, View {
         fatalError("init(coder:) has not been implemented")
     }
     
-   override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
+        customBackButton.isHidden = false
+        navigationViewBottomShadow.isHidden = true
+        
         view.backgroundColor = UIColor.grayScale25
         view.addSubview(stackView)
-       setup()
-   }
+        setup()
+    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
@@ -80,8 +83,8 @@ final class UserInfoEntryViewController: UIViewController, View {
     }
     
     func attriubute(){
-   
-       
+        
+        
     }
     
     func layout(){
@@ -161,13 +164,13 @@ final class UserInfoEntryViewController: UIViewController, View {
         stackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.top.equalToSuperview().inset(110)
+            $0.topEqualToNavigationBottom(vc: self)
             $0.bottom.equalToSuperview().inset(40)
         }
     }
     
     func bind(reactor: UserInfoEntryReactor) {
-  
+        
         //nickname
         nicknameTextField.rx.controlEvent(.primaryActionTriggered)
             .subscribe(onNext: {[weak self] in self?.birthTextField.becomeFirstResponder()})
@@ -183,7 +186,7 @@ final class UserInfoEntryViewController: UIViewController, View {
         nicknameTextField.rx.controlEvent([.editingDidEnd])
             .asDriver()
             .map { [weak self] in
-
+                
                 // 닉네임 미입력 오류 처리
                 guard let text = self?.nicknameTextField.text, !text.isEmpty else {
                     self?.niknameFooterView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
@@ -201,8 +204,8 @@ final class UserInfoEntryViewController: UIViewController, View {
             }
             .drive(reactor.action) // Reactor로 Action 전달
             .disposed(by: disposeBag)
-
-
+        
+        
         nicknameTextField.rx.text
             .orEmpty
             .bind { [weak self] text in
@@ -264,18 +267,7 @@ final class UserInfoEntryViewController: UIViewController, View {
             }
             .drive(reactor.action)
             .disposed(by: disposeBag)
-        
-        birthTextField.rx.text
-            .orEmpty
-            .map { text in
-                let limitedText = String(text.prefix(10))
-                let formattedText = self.formatText(limitedText)
-                return formattedText
-            }
-            .bind(to: birthTextField.rx.text)
-            .disposed(by: disposeBag)
-        
-        
+
         // gender
         selectMaleButton.rx.tap
             .map{ Reactor.Action.tapGenderButton(.male)}
@@ -309,8 +301,6 @@ final class UserInfoEntryViewController: UIViewController, View {
             
 //                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
         }).disposed(by: disposeBag)
-        
-        bindingKeyboard()
         
         reactor.state
             .map { $0.nicknameTextFieldState }
@@ -363,68 +353,5 @@ final class UserInfoEntryViewController: UIViewController, View {
                 self?.submitButton.rx.commonButtonState.onNext(isEnabled ? .enabled : .disabled)
             })
             .disposed(by: disposeBag)
-    }
-    
-    private func formatText(_ text: String) -> String {
-        var result = text.replacingOccurrences(of: ".", with: "")
-        
-        if result.count > 4 {
-            let index = result.index(result.startIndex, offsetBy: 4)
-            result.insert(".", at: index)
-        }
-        
-        if result.count > 7 {
-            let index = result.index(result.startIndex, offsetBy: 7)
-            result.insert(".", at: index)
-        }
-        
-        return result
-    }
-    
-}
-
-// Keyboard event
-extension UserInfoEntryViewController {
-    
-    func keyboardHeight() -> Observable<CGFloat> {
-        return Observable
-            .from([
-                NotificationCenter.default.rx.notification(UIResponder.keyboardWillShowNotification)
-                    .map { notification -> CGFloat in
-                        (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height ?? 0
-                    },
-                NotificationCenter.default.rx.notification(UIResponder.keyboardWillHideNotification)
-                    .map { _ -> CGFloat in
-                        0
-                    }
-            ])
-            .merge()
-    }
-    
-    func bindingKeyboard() {
-        keyboardHeight()
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { keyboardHeight in
-                UIView.animate(withDuration: 0.1) {
-                    let safeAreaBottom = self.view.safeAreaInsets.bottom
-                    let height = keyboardHeight > 0.0 ? (keyboardHeight - safeAreaBottom) : safeAreaBottom
-                    self.updateNextBtnBottom(-height, keyboardHeight)
-                    self.view.layoutIfNeeded()
-                }
-            })
-            .disposed(by: disposeBag)
-        
-    }
-    
-    func updateNextBtnBottom(_ offset: CGFloat, _ keyboardHeight: CGFloat){
-        self.submitButton.snp.remakeConstraints {
-            if keyboardHeight > 0.0 {
-                $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(offset)
-            } else {
-                $0.bottom.equalTo(stackView.snp.bottom)
-            }
-            $0.horizontalEdges.equalTo(keyboardHeight > 0.0 ? 0 : stackView.snp.horizontalEdges)
-            $0.height.equalTo(56)
-        }
     }
 }

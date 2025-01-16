@@ -16,13 +16,12 @@ class OnboardingContainerViewController: UIViewController {
     private let onboardingPageVC = OnboardingPageViewController()
     private let nextButton = UIButton().then {
         $0.setTitle("다음", for: .normal)
-        $0.backgroundColor = .orange
+        $0.backgroundColor = .mainOrange500
         $0.layer.cornerRadius = 8
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .lightGray
         self.navigationItem.hidesBackButton = true
         
         addSubView()
@@ -38,10 +37,7 @@ class OnboardingContainerViewController: UIViewController {
     
     private func makeConstraints() {
         onboardingPageVC.view.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.bottom.equalToSuperview()
-            $0.height.equalTo(289)
-            $0.width.equalTo(view.snp.width)
+            $0.edges.equalToSuperview()
         }
         
         nextButton.snp.makeConstraints {

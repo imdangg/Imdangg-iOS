@@ -154,18 +154,21 @@ class TicketModalViewController: UIViewController {
     private func bindActions() {
         xButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
+                UserdefaultKey.dontSeeToday = true
                 self?.dismiss(animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
         
         closeButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
+                UserdefaultKey.dontSeeToday = true
                 self?.dismiss(animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
         
         acceptButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
+                UserdefaultKey.dontSeeToday = true
                 self?.dismiss(animated: true, completion: nil)
             })
             .disposed(by: disposeBag)

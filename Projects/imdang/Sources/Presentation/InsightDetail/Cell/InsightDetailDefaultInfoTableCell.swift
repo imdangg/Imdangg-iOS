@@ -241,11 +241,7 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
                 $0.horizontalEdges.equalToSuperview()
             }
             
-            separatorView.snp.remakeConstraints {
-                $0.top.equalTo(descriptionImageView.snp.bottom).offset(32)
-                $0.horizontalEdges.equalToSuperview()
-                $0.height.equalTo(8)
-            }
+            separatorView.removeFromSuperview()
         }
     }
 }
