@@ -205,11 +205,11 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
     }
     
     func config(info: InsightDetail, state: DetailExchangeState) {
-        adressLabel.text = info.basicInfo.adress
-        dateLabel.text = info.basicInfo.writeDate
-        transLabel.text = info.basicInfo.transportation
-        accessLabel.text = info.basicInfo.restrictionsOnAccess
-        summaryLabel.setTextWithLineHeight(text: info.basicInfo.summary, lineHeight: 22.4)
+        adressLabel.text = "\(info.adress.toString())\n(\(info.apartmentComplex))"
+        dateLabel.text = info.visitAt
+        transLabel.text = info.visitMethods.joined(separator: " ")
+        accessLabel.text = info.access
+        summaryLabel.setTextWithLineHeight(text: info.summary, lineHeight: 22.4)
         
         switch state {
         case .beforeRequest:
@@ -227,13 +227,13 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
             contentView.snp.makeConstraints {
                 $0.edges.equalToSuperview()
                 $0.width.equalTo(width)
-                $0.height.equalTo(608 + calculateLabelHeight(text: info.basicInfo.summary))
+                $0.height.equalTo(608 + calculateLabelHeight(text: info.summary))
             }
         } else {
             contentView.snp.remakeConstraints {
                 $0.edges.equalToSuperview()
                 $0.width.equalTo(width)
-                $0.height.equalTo(608 + calculateLabelHeight(text: info.basicInfo.summary) + 312).priority(999)
+                $0.height.equalTo(608 + calculateLabelHeight(text: info.summary) + 312).priority(999)
             }
             
             descriptionImageView.snp.makeConstraints {

@@ -46,7 +46,6 @@ final class InsightDetailViewController: BaseViewController {
     init(image: UIImage, state: DetailExchangeState) {
         exchangeState = state
         insightImage = image
-        testDate.profileImage = image
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -201,13 +200,13 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             etcCell.config(info: testDate.infra.conversionArray(), text: testDate.infra.text)
             return etcCell
         case 4:
-            etcCell.config(info: testDate.environment.conversionArray(), text: testDate.environment.text)
+            etcCell.config(info: testDate.complexEnvironment.conversionArray(), text: testDate.complexEnvironment.text)
             return etcCell
         case 5:
-            etcCell.config(info: testDate.facility.conversionArray(), text: testDate.facility.text)
+            etcCell.config(info: testDate.complexFacility.conversionArray(), text: testDate.complexFacility.text)
             return etcCell
         case 6:
-            etcCell.config(info: testDate.goodNews.conversionArray(), text: testDate.goodNews.text)
+            etcCell.config(info: testDate.favorableNews.conversionArray(), text: testDate.favorableNews.text)
             return etcCell
         default:
             return UITableViewCell()
@@ -251,13 +250,13 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             footerView.config(text: testDate.infra.text)
             return footerView
         case 4:
-            footerView.config(text: testDate.environment.text)
+            footerView.config(text: testDate.complexEnvironment.text)
             return footerView
         case 5:
-            footerView.config(text: testDate.facility.text)
+            footerView.config(text: testDate.complexFacility.text)
             return footerView
         case 6:
-            footerView.config(text: testDate.goodNews.text)
+            footerView.config(text: testDate.favorableNews.text)
             footerView.separatorView.isHidden = true
             return footerView
         default:

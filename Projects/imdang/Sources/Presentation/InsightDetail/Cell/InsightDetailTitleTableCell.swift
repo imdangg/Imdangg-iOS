@@ -121,10 +121,10 @@ final class InsightDetailTitleTableCell: UITableViewCell {
     }
     
     func config(info: InsightDetail) {
-        profileImageView.image = info.profileImage
-        userNameLabel.text = info.userName
-        likeCount = info.likeCount
-        likeButton.customText.text = "추천 \(info.likeCount)"
-        titleLabel.text = info.titleName
+        profileImageView.image = ImdangImages.Image(resource: .person)
+        userNameLabel.text = "홍길동"
+        likeCount = 21
+        likeButton.customText.text = "추천 \(21)"
+        titleLabel.text = info.title
     }
 }
