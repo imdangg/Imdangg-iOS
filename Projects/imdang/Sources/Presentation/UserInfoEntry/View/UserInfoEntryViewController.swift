@@ -294,12 +294,10 @@ final class UserInfoEntryViewController: BaseViewController, View {
                         if success {
                             (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
                         } else {
-                            print("join failed")
+                            print("사용자 정보 등록 실패")
                         }
                     }
                     .disposed(by: disposeBag)
-            
-//                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
         }).disposed(by: disposeBag)
         
         reactor.state

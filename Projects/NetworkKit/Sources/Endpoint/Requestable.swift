@@ -29,7 +29,7 @@ public extension Requestable {
     
     var encoding: ParameterEncoding {
         switch method {
-            case .post:
+            case .post, .put:
                 return JSONEncoding.default
             default:
                 return URLEncoding.default

@@ -33,23 +33,20 @@ class ServerJoinService {
             "deviceToken": UserdefaultKey.deviceToken
         ]
         
-        print("parameters \(parameters)")
-        print(UserdefaultKey.accessToken)
-        
         let endpoint = Endpoint<JoinResponse>(
             baseURL: .imdangAPI,
             path: "/auth/join",
             method: .put,
-            headers: [HTTPHeader(name: "Content-Type", value: "application/json"),
-                      HTTPHeader(name: "Authorization", value: "Bearer \(UserdefaultKey.accessToken)")],
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
             parameters: parameters
         )
         
-        return networkManager.request(with: endpoint)
-            .map { entity in
+        return networkManager.requestOptional(with: endpoint)
+            .map { _ in
                 return true
             }
             .catch { error in
+                print("Error: \(error.localizedDescription)")
                 return Observable.just(false)
             }
     }
