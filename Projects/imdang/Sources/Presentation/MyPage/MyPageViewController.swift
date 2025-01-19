@@ -16,7 +16,7 @@ final class MyPageViewController: BaseViewController {
     
     private let tableView = UITableView(frame: .zero, style: .grouped)
     private let deleteAccountButton = CommonButton(title: "계정 탈퇴", initialButtonType: .unselectedBorderStyle).then {
-        $0.setTitleGray(setGray: true)
+        $0.setButtonTitleColor(color: .grayScale700)
     }
     
     private let navigationTitleLabel = UILabel().then {

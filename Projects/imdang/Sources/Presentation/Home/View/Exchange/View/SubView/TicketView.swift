@@ -48,18 +48,18 @@ final class TicketView: UIView {
         
          iconImageView.snp.makeConstraints {
              $0.size.equalTo(CGSize(width: 20, height: 20))
+             $0.centerY.equalToSuperview()
              $0.leading.equalToSuperview().inset(20)
-             $0.top.bottom.equalToSuperview().inset(17)
          }
          
          textLabel.snp.makeConstraints {
              $0.leading.equalTo(iconImageView.snp.trailing).offset(4)
-             $0.top.bottom.equalToSuperview().inset(16)
+             $0.centerY.equalToSuperview()
          }
-        
+      
         ticketNumberLabel.snp.makeConstraints {
             $0.trailing.equalToSuperview().inset(20)
-            $0.top.bottom.equalToSuperview().inset(16)
+            $0.centerY.equalToSuperview()
         }
     }
     

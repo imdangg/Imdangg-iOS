@@ -30,7 +30,6 @@ class CommonAlertViewController: UIViewController {
     }
     
     private let descriptionLabel = UILabel().then {
-        $0.setLineSpacing(lineHeightMultiple: 1.2)
         $0.font = .pretenSemiBold(18)
         $0.textColor = .grayScale900
         $0.numberOfLines = 3

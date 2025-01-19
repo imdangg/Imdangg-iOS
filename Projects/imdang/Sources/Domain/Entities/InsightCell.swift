@@ -1,4 +1,4 @@
-//
+ //
 //  Insight.swift
 //  SharedLibraries
 //
@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct Insight {
+struct Insight: Equatable{
     let id: Int
     let titleName: String
     let titleImageUrl: String

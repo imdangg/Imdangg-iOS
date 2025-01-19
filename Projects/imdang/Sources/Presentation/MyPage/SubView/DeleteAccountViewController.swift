@@ -102,7 +102,7 @@ final class DeleteAccountViewController: BaseViewController {
                 
                 print(self.onTabCheckButton)
                 self.deleteButton.isEnabled.toggle()
-                self.deleteButton.setTitleGray(setGray: self.deleteButton.isEnabled)
+                self.deleteButton.setButtonTitleColor(color: self.deleteButton.isEnabled ? .grayScale700 : .grayScale400 )
             })
             .disposed(by: disposeBag)
  

@@ -12,7 +12,7 @@ public import Alamofire
 public final class NetworkManager: Network {
     var session: Session
     
-    public init(session: Session = .default) {
+    public init(session: Session = Session(eventMonitors: [APIEventMonitor()])) {
         self.session = session
     }
     
@@ -39,6 +39,54 @@ public final class NetworkManager: Network {
                     }
                 }
             
+            return Disposables.create {
+                request.cancel()
+            }
+        }
+    }
+    
+    public func requestOptional<E: Requestable>(with endpoint: E) -> Observable<E.Response?> {
+        return Observable.create { [weak self] observer in
+            guard let self = self else {
+                observer.onError(NSError(domain: "Network Error", code: -1, userInfo: nil))
+                return Disposables.create()
+            }
+
+            let request = self.session.request(endpoint.makeURL(),
+                                               method: endpoint.method,
+                                               parameters: endpoint.parameters,
+                                               encoding: endpoint.encoding,
+                                               headers: endpoint.headers)
+                .validate()
+                .response { response in
+                    if (200..<300).contains(response.response?.statusCode ?? 0) {
+                        
+                        if let data = response.data, !data.isEmpty {
+                            do {
+                                let decodedData = try JSONDecoder().decode(E.Response.self, from: data)
+                                observer.onNext(decodedData)
+                                observer.onCompleted()
+                            } catch {
+                                observer.onError(error)
+                            }
+                        } else {
+                            observer.onNext(nil)
+                            observer.onCompleted()
+                        }
+                    } else {
+                        if let errorData = response.data {
+                            do {
+                                let decodedError = try JSONDecoder().decode(E.Response.self, from: errorData)
+                                observer.onError(NSError(domain: "Network Error", code: response.response?.statusCode ?? -1, userInfo: ["data": decodedError]))
+                            } catch {
+                                observer.onError(error)
+                            }
+                        } else {
+                            observer.onError(NSError(domain: "Network Error", code: response.response?.statusCode ?? -1, userInfo: nil))
+                        }
+                    }
+                }
+
             return Disposables.create {
                 request.cancel()
             }
