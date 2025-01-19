@@ -95,6 +95,14 @@ class CommonButton: UIButton {
         setTitle(title, for: .normal)
     }
     
+    func setTitleGray(setGray: Bool) {
+        if setGray {
+            self.setTitleColor(.grayScale700, for: .normal)
+        } else {
+            self.setTitleColor(.grayScale200, for: .normal)
+        }
+    }
+    
     @objc private func keyboardWillShow(_ notification: Notification) {
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
            let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval {

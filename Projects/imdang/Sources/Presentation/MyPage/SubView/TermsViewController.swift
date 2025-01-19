@@ -9,9 +9,9 @@ import UIKit
 import SnapKit
 import Then
 
-class TermsViewController: BaseViewController {
+final class TermsViewController: BaseViewController {
    
-    let array: [String] = ["개인정보 수집 및 이용", "이용 약관"]
+    private let array: [String] = ["개인정보 수집 및 이용", "이용 약관"]
     
     private let tableView = UITableView(frame: .zero, style: .plain)
     
@@ -23,6 +23,7 @@ class TermsViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .grayScale25
         setUp()
         configNavigationBarItem()
     }
@@ -33,7 +34,6 @@ class TermsViewController: BaseViewController {
         tableView.delegate = self
         tableView.isScrollEnabled = false
         tableView.separatorStyle = .none
-        // Custom Cell 등록
         tableView.register(TermsCell.self, forCellReuseIdentifier: "TermsCell")
         
         view.addSubview(tableView)
@@ -45,7 +45,6 @@ class TermsViewController: BaseViewController {
     }
     
     private func configNavigationBarItem() {
-        // TODO: 색깔변경 해야됨
         customBackButton.isHidden = false
         leftNaviItemView.addSubview(navigationTitleLabel)
         navigationTitleLabel.snp.makeConstraints {
@@ -54,7 +53,6 @@ class TermsViewController: BaseViewController {
             $0.leading.equalToSuperview().offset(10)
         }
     }
-   
 }
 
 extension TermsViewController: UITableViewDataSource, UITableViewDelegate {
@@ -76,11 +74,20 @@ extension TermsViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-            64
-        }
-
+        64
+    }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
+        if indexPath.row == 0 {
+            let vc =  PersonInfoViewController()
+            vc.hidesBottomBarWhenPushed = false
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        else if indexPath.row == 1 {
+            let vc = TermsDetailViewController()
+            vc.hidesBottomBarWhenPushed = false
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
-   
 }

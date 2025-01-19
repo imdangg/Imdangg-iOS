@@ -60,6 +60,7 @@ final class SigninViewController: UIViewController, View {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
         addSubView()
         makeConstraints()
     }
