@@ -13,5 +13,6 @@ internal import Alamofire
 protocol Network {
     var session: Session { get }
     
-    func request<E: Requestable>(with endpoint: E) -> Observable<E.Response> 
+    func request<E: Requestable>(with endpoint: E) -> Observable<E.Response>
+    func requestOptional<E: Requestable>(with endpoint: E) -> Observable<E.Response?>
 }

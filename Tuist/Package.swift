@@ -15,7 +15,8 @@
             "Kingfisher": .framework,
             "RxKakaoSDK": .framework,
 //            "KakaoSDK": .framework,
-            "SharedLibraries": .framework
+            "SharedLibraries": .framework,
+            "firebase-ios-sdk": .framework
         ]
     )
 #endif
@@ -31,8 +32,8 @@ let package = Package(
         .package(url: "https://github.com/onevcat/Kingfisher.git", .upToNextMinor(from: "8.1.0")),
         .package(url: "https://github.com/kakao/kakao-ios-sdk-rx", .upToNextMinor(from: "2.23.0")),
         .package(url: "https://github.com/kakao/kakao-ios-sdk", .upToNextMinor(from: "2.23.0")),
-        .package(url: "https://github.com/firebase/firebase-ios-sdk", .upToNextMinor(from: "11.5.0")),
-        .package(url: "https://github.com/google/GoogleSignIn-iOS", .upToNextMinor(from: "8.0.0"))
+        .package(url: "https://github.com/firebase/firebase-ios-sdk", .upToNextMinor(from: "11.7.0")),
+        .package(url: "https://github.com/google/GoogleSignIn-iOS", .upToNextMinor(from: "8.0.0")),
     ]
 )
 

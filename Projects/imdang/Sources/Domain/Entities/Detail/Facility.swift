@@ -8,18 +8,18 @@
 import Foundation
 
 struct Facility {
-    let family: [String]
-    let multipurpose: [String]
-    let leisure: [String]
-    let environment: [String]
+    let familyFacilities: [String]
+    let multipurposeFacilities: [String]
+    let leisureFacilities: [String]
+    let surroundings: [String]
     let text: String
     
     func conversionArray() -> [(String, [String])] {
         let allArrays: [(name: String, items: [String])] = [
-            ("가족", family),
-            ("다목적", multipurpose),
-            ("여가 (단지내부)", leisure),
-            ("환경", environment)
+            ("가족", familyFacilities),
+            ("다목적", multipurposeFacilities),
+            ("여가 (단지내부)", leisureFacilities),
+            ("환경", surroundings)
         ]
         
         return allArrays

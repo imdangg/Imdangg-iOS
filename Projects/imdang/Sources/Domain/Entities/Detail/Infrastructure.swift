@@ -8,24 +8,24 @@
 import Foundation
 
 struct Infrastructure {
-    let traffic: [String]
-    let educationInfo: [String]
-    let livingFacility: [String]
-    let culturalAndLeisure: [String]
-    let surroundEnvironment: [String]
-    let landMark: [String]
-    let repellentFacility: [String]
+    let transportations: [String]
+    let schoolDistricts: [String]
+    let amenities: [String]
+    let facilities: [String]
+    let surroundings: [String]
+    let landmarks: [String]
+    let unpleasantFacilities: [String]
     let text: String
     
     func conversionArray() -> [(String, [String])] {
         let allArrays: [(name: String, items: [String])] = [
-            ("교통", traffic),
-            ("학군", educationInfo),
-            ("생활 편의 시설", livingFacility),
-            ("문화 및 여가시설 (단지외부)", culturalAndLeisure),
-            ("주변환경", surroundEnvironment),
-            ("랜드마크", landMark),
-            ("기피 시설", repellentFacility)
+            ("교통", transportations),
+            ("학군", schoolDistricts),
+            ("생활 편의 시설", amenities),
+            ("문화 및 여가시설 (단지외부)", facilities),
+            ("주변환경", surroundings),
+            ("랜드마크", landmarks),
+            ("기피 시설", unpleasantFacilities)
         ]
         
         return allArrays

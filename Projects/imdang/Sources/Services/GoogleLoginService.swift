@@ -8,9 +8,13 @@
 // GoogleLoginService.swift
 import RxSwift
 import GoogleSignIn
+import NetworkKit
 
 class GoogleLoginService {
     static let shared = GoogleLoginService()
+    
+    private var disposeBag = DisposeBag()
+    private let networkManager = NetworkManager()
     
     func signIn() -> Observable<Bool> {
         return Observable.create { observer in
@@ -20,15 +24,46 @@ class GoogleLoginService {
                 return Disposables.create()
             }
             
-            GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { signInResult, error in
+            GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { [self] signInResult, error in
                 if let error = error {
                     print("Google sign-in error: \(error)")
                     observer.onNext(false)
+                    observer.onCompleted()
                 } else {
                     print("Google sign-in success: \(signInResult?.user.profile?.name ?? "")")
-                    observer.onNext(true)
+                    
+                    if let accessToken = signInResult?.user.accessToken {
+                        let parameters: [String: Any] = [
+                            "accessToken": accessToken.tokenString
+                        ]
+                        
+                        let endpoint = Endpoint<User>(
+                            baseURL: .imdangAPI,
+                            path: "/auth/google",
+                            method: .post,
+                            parameters: parameters
+                        )
+                        
+                        networkManager.request(with: endpoint)
+                            .subscribe(
+                                onNext: { entity in
+                                    UserdefaultKey.accessToken = entity.accessToken
+                                    UserdefaultKey.memberId = entity.memberId
+                                    observer.onNext(true)
+                                    observer.onCompleted()
+                                },
+                                onError: { error in
+                                    observer.onNext(false)
+                                    observer.onCompleted()
+                                }
+                            )
+                            .disposed(by: disposeBag)
+                    } else {
+                        print("token not found")
+                        observer.onNext(false)
+                        observer.onCompleted()
+                    }
                 }
-                observer.onCompleted()
             }
             
             return Disposables.create()

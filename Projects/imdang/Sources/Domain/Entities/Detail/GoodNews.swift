@@ -8,24 +8,24 @@
 import Foundation
 
 struct GoodNews {
-    let traficNews: [String]
-    let develop: [String]
-    let education: [String]
-    let naturalEnvironment: [String]
-    let culture: [String]
-    let industry: [String]
-    let policy: [String]
+    let transportations: [String]
+    let developments: [String]
+    let educations: [String]
+    let environments: [String]
+    let cultures: [String]
+    let industries: [String]
+    let policies: [String]
     let text: String
     
     func conversionArray() -> [(String, [String])] {
         let allArrays: [(name: String, items: [String])] = [
-            ("교통", traficNews),
-            ("개발", develop),
-            ("교육", education),
-            ("자연 환경", naturalEnvironment),
-            ("문화", culture),
-            ("산업", industry),
-            ("정책", policy)
+            ("교통", transportations),
+            ("개발", developments),
+            ("교육", educations),
+            ("자연 환경", environments),
+            ("문화", cultures),
+            ("산업", industries),
+            ("정책", policies)
         ]
         
         return allArrays

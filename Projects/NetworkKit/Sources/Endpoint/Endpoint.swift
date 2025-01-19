@@ -23,9 +23,10 @@ public struct Endpoint<R>: Requestable where R: Decodable {
         baseURL: BaseURL,
         path: String,
         method: HTTPMethod,
+        headers: HTTPHeaders = [HTTPHeader(name: "Content-Type", value: "application/json")],
         parameters: HTTPRequestParameter? = nil
     ) {
-        self.headers = ["Content-Type": "application/json"]
+        self.headers = headers
         self.baseURL = baseURL.configValue
         self.path = path
         self.method = method
