@@ -160,5 +160,13 @@ class HomeContainerViewController: BaseViewController {
                 self?.exchangeButton.setTitleColor(.grayScale900, for: .normal)
             })
             .disposed(by: disposeBag)
+        
+        myPageButton.rx.tap
+            .subscribe(onNext: { [weak self] state in
+                let vc = MyPageViewController()
+                vc.hidesBottomBarWhenPushed = true
+                self?.navigationController?.pushViewController(vc, animated: true)
+        })
+        .disposed(by: disposeBag)
     }
 }

@@ -54,4 +54,13 @@ extension UIViewController {
         customAlertViewController.modalTransitionStyle = .crossDissolve
         self.present(customAlertViewController, animated: true, completion: nil)
     }
+    
+    func showLogoutAlert(comfrimAction: (() -> Void)? = nil, cancelAction: (() -> Void)? = nil) {
+        let customAlertViewController = CommonAlertViewController()
+        customAlertViewController.confirmAction = comfrimAction
+        customAlertViewController.cancelAction = cancelAction
+        customAlertViewController.modalPresentationStyle = .overFullScreen
+        customAlertViewController.modalTransitionStyle = .crossDissolve
+        self.present(customAlertViewController, animated: true, completion: nil)
+    }
 }
