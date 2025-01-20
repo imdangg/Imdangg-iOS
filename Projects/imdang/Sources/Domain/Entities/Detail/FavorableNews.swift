@@ -1,5 +1,5 @@
 //
-//  GoodNews.swift
+//  FavorableNews.swift
 //  imdang
 //
 //  Created by 임대진 on 1/8/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct GoodNews {
+struct FavorableNews {
     let transportations: [String]
     let developments: [String]
     let educations: [String]

@@ -10,12 +10,13 @@ import SnapKit
 import RxSwift
 import RxCocoa
 import Then
+import ReactorKit
 
-class InsightViewController: BaseViewController {
+class InsightViewController: BaseViewController, View {
 
     private let buttonTitles = ["기본 정보", "인프라", "단지 환경", "단지 시설", "호재"]
     private var selectedIndex = 0
-    let disposeBag = DisposeBag()
+    var disposeBag = DisposeBag()
 
     private let titleLabel = UILabel().then {
         $0.text = "인사이트 작성"
@@ -37,60 +38,81 @@ class InsightViewController: BaseViewController {
     private let underLineView = UIView().then {
         $0.backgroundColor = .grayScale100
     }
-
+    
     private let containerView = UIView().then {
         $0.backgroundColor = .clear
     }
-
-    lazy var insightSubView: [UIViewController] = [
-
-       InsightBaseInfoViewController(),
-        WriteInsightEtcViewController(info: InsightEtcInfo.infrastructure, title: "인프라", selectType: .several),
-        WriteInsightEtcViewController(info: InsightEtcInfo.environment, title: "단지 환경", selectType: .one),
-        WriteInsightEtcViewController(info: InsightEtcInfo.facility, title: "단지 시설", selectType: .several),
-        WriteInsightEtcViewController(info: InsightEtcInfo.goodNews, title: "호재", selectType: .several)
-
-    ]
     
-    private var nextButton = CommonButton(title: "작성 완료", initialButtonType: .disabled).then {
-        $0.layer.shadowColor = UIColor.white.cgColor
-        $0.layer.shadowOffset = CGSize(width: 0, height: -20)
-        $0.layer.shadowOpacity = 0.8
-        $0.layer.shadowRadius = 20
-        $0.layer.masksToBounds = false
+    private let scoreLabel = PaddingLabel().then {
+        $0.text = "00%"
+        $0.textColor = .mainOrange500
+        $0.font = .pretenSemiBold(14)
+        $0.backgroundColor = .mainOrange50
+        $0.padding = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
+        
+        $0.layer.cornerRadius = 14
+        $0.clipsToBounds = true
     }
+
+    private var insightSubView: [UIViewController] = []
+    private let baseVC = InsightBaseInfoViewController()
+    private let infraVC = WriteInsightEtcViewController(info: InsightEtcInfo.infrastructure, title: "인프라", selectType: .several)
+    private let environVC = WriteInsightEtcViewController(info: InsightEtcInfo.environment, title: "단지 환경", selectType: .one)
+    private let facilVC = WriteInsightEtcViewController(info: InsightEtcInfo.facility, title: "단지 시설", selectType: .several)
+    private let newsVC = WriteInsightEtcViewController(info: InsightEtcInfo.goodNews, title: "호재", selectType: .several)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .grayScale25
-
+        
+        
+        reactor = InsightReactor()
+        setupSubviews()
+        
         configNavigationBarItem()
         layout()
         setupButtons()
-        bind(reactor: InsightReactor())
     }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-
-        if selectedIndex == 0, let firstButton = getButton(at: 0) {
-            updateUnderlinePosition(for: firstButton)
-        }
+//    override func viewDidLayoutSubviews() {
+//        super.viewDidLayoutSubviews()
+//
+//        if selectedIndex == 0, let firstButton = getButton(at: 0) {
+//            updateUnderlinePosition(for: firstButton)
+//        }
+//    }
+    
+    private func setupSubviews() {
+        baseVC.reactor = self.reactor
+        infraVC.reactor = self.reactor
+        environVC.reactor = self.reactor
+        facilVC.reactor = self.reactor
+        newsVC.reactor = self.reactor
+        [baseVC, infraVC, environVC, facilVC, newsVC].forEach { insightSubView.append($0) }
     }
 
     private func configNavigationBarItem() {
         customBackButton.isHidden = false
         
         leftNaviItemView.addSubview(titleLabel)
+        rightNaviItemView.addSubview(scoreLabel)
+        
         titleLabel.snp.makeConstraints {
             $0.height.equalTo(20)
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().offset(10)
         }
+        
+        scoreLabel.snp.makeConstraints {
+            $0.height.equalTo(28)
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalToSuperview()
+        }
+        
     }
 
     private func layout() {
-        [buttonStackView, selectTabUnderLineView, underLineView, containerView, nextButton].forEach { view.addSubview($0) }
+        [buttonStackView, selectTabUnderLineView, underLineView, containerView].forEach { view.addSubview($0) }
 
         buttonStackView.snp.makeConstraints {
             $0.topEqualToNavigationBottom(vc: self).offset(4)
@@ -114,18 +136,10 @@ class InsightViewController: BaseViewController {
         containerView.snp.makeConstraints {
             $0.top.equalTo(underLineView.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(nextButton.snp.top)
+            $0.bottom.equalToSuperview()
         }
         
-        nextButton.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(15)
-            $0.height.equalTo(56)
-        }
-
-        DispatchQueue.main.async {
-            self.showInsightSubViewController(at: 0)
-        }
+        self.showInsightSubViewController(at: 0)
     }
     
     private func presentModal() {
@@ -160,6 +174,15 @@ class InsightViewController: BaseViewController {
                     print("Open camera sheet!")
                     self.presentModal()
                 }
+            })
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .map { $0.setCurrentCategory }
+            .distinctUntilChanged()
+            .subscribe(onNext: { index in
+                self.showInsightSubViewController(at: index)
             })
             .disposed(by: disposeBag)
     }
@@ -199,15 +222,16 @@ class InsightViewController: BaseViewController {
     }
 
     private func showInsightSubViewController(at index: Int) {
-        children.forEach { $0.removeFromParent() }
-        containerView.subviews.forEach { $0.removeFromSuperview() }
 
-        let childVC = insightSubView[index]
-        addChild(childVC)
-        containerView.addSubview(childVC.view)
-        childVC.view.snp.makeConstraints { $0.edges.equalToSuperview() }
-        childVC.didMove(toParent: self)
+        if let childVC = insightSubView[safe: index] {
+            children.forEach { $0.removeFromParent() }
+            containerView.subviews.forEach { $0.removeFromSuperview() }
+            
+            addChild(childVC)
+            containerView.addSubview(childVC.view)
+            childVC.view.snp.makeConstraints { $0.edges.equalToSuperview() }
+            childVC.didMove(toParent: self)
+        }
     }
-    
-    
+
 }

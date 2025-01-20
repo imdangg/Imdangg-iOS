@@ -40,7 +40,7 @@ final class InsightDetailViewController: BaseViewController {
     private let degreeButton = CommonButton(title: "거절", initialButtonType: .whiteBackBorderStyle)
     private let agreeButton = CommonButton(title: "수락", initialButtonType: .enabled)
     private let waitButton = CommonButton(title: "대기중", initialButtonType: .disabled)
-    private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
+    private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled).then { $0.applyTopBlur() }
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }
     
     init(image: UIImage, state: DetailExchangeState) {

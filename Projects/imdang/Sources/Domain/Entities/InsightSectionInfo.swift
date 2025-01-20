@@ -34,7 +34,7 @@ struct InsightSectionInfo {
     static let leisure: InsightSectionInfo = InsightSectionInfo(title: "여가 (단지내부)*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "피트니스 센터", "독서실", "사우나", "목욕탕", "스크린 골프장", "영화관", "도서관", "수영장", "공부방", "어린이집", "게스트하우스", "워터파크", "조식"])
     static let environment: InsightSectionInfo = InsightSectionInfo(title: "환경*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "잔디밭", "조형물", "벤치", "테이블 및 의자", "분수"])
     
-    // goodNews
+    // favorableNews
     static let traficNews: InsightSectionInfo = InsightSectionInfo(title: "교통*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["잘 모르겠어요", "지하철 개통", "고속철도역 신설", "교통 허브 지정"])
     static let develop: InsightSectionInfo = InsightSectionInfo(title: "개발*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["잘 모르겠어요", "재개발", "재건축", "리모델링", "인근 신도시 개발", "복합 단지 개발", "대형 쇼핑몰", "백화점", "대형 오피스 단지"])
     static let education: InsightSectionInfo = InsightSectionInfo(title: "교육*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["잘 모르겠어요", "초등학교 신설 예정", "고등학교 신설 예정", "특목고", "자사고", "국제학교", "대학 캠퍼스"])

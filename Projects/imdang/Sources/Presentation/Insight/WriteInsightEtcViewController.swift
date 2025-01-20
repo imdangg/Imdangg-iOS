@@ -6,10 +6,17 @@
 //
 
 import UIKit
+import ReactorKit
+
 enum ItemSelectType {
     case one, several
 }
-class WriteInsightEtcViewController: UIViewController {
+
+class WriteInsightEtcViewController: UIViewController, View {
+    
+    var disposeBag = DisposeBag()
+    var reactor: InsightReactor?
+    
     private let insightInfo: [InsightSectionInfo]
     private let tabTitle: String!
     private var totalAppraisalText: String = ""
@@ -153,6 +160,10 @@ class WriteInsightEtcViewController: UIViewController {
                 header.addCheckIcon()
             }
         }
+    }
+    
+    func bind(reactor: InsightReactor) {
+        
     }
 }
 

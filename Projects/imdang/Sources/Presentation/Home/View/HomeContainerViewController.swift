@@ -58,7 +58,7 @@ class HomeContainerViewController: BaseViewController {
         navigationViewBottomShadow.isHidden = true
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         if !UserdefaultKey.dontSeeToday {

@@ -6,15 +6,22 @@
 //
 
 import RxSwift
+import RxRelay
 import ReactorKit
 import Foundation
 
 class InsightReactor: Reactor {
     let disposeBag = DisposeBag()
     
+    var detail = InsightDetail.emptyInsight {
+        didSet {
+            print("update detail info: \(detail)")
+        }
+    }
+    
     struct State {
         var isShowingCameraSheet: Bool = false
-        
+        var setCurrentCategory: Int = 0
         // infoBaseView
         var selectedItems: [[String]] = Array(repeating: [], count: 8)
         var checkSectionState: [TextFieldState] = Array(repeating: .normal, count: 8)
@@ -22,11 +29,21 @@ class InsightReactor: Reactor {
     
     enum Action {
         case tapCameraSheet(Bool)
+        case tapBaseInfoConfirm(InsightDetail)
+        case tapInfraInfoConfirm(Infrastructure)
+        case tapEnvironmentInfoConfirm(Environment)
+        case tapFacilityInfoConfirm(Facility)
+        case tapFavorableNewsInfoConfirm(FavorableNews)
         //        case selectItems(IndexPath, [String])
     }
     
     enum Mutation {
         case showingCameraSheet(Bool)
+        case updateBaseInfo(InsightDetail)
+        case updateInfra(Infrastructure)
+        case updateEnvironment(Environment)
+        case updateFacility(Facility)
+        case updateFavorableNews(FavorableNews)
         //        case updateSelectedItems(IndexPath, [String])
     }
     
@@ -39,22 +56,50 @@ class InsightReactor: Reactor {
             //        case .selectItems(let indexPath, let selectedArray):
             //            return Observable.just(.updateSelectedItems(indexPath, selectedArray))
             //        }
+        case .tapBaseInfoConfirm(let info):
+            return Observable.just(.updateBaseInfo(info))
+        case .tapInfraInfoConfirm(let info):
+            return Observable.just(.updateInfra(info))
+        case .tapEnvironmentInfoConfirm(let info):
+            return Observable.just(.updateEnvironment(info))
+        case .tapFacilityInfoConfirm(let info):
+            return Observable.just(.updateFacility(info))
+        case .tapFavorableNewsInfoConfirm(let info):
+            return Observable.just(.updateFavorableNews(info))
         }
+    }
+    
+    func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
         
-        func reduce(state: State, mutation: Mutation) -> State {
-            var newState = state
+        switch mutation {
             
-            switch mutation {
-                
             case .showingCameraSheet(let isShowingSheet):
                 newState.isShowingCameraSheet = isShowingSheet
                 //        case .updateSelectedItems(let indexPath, let selectedArray):
                 ////            newState.selectedItems[indexPath] = selectedArray
                 //        }
                 
-                return newState
-            }
+            case .updateBaseInfo(let info):
+                detail = info
+                newState.setCurrentCategory = 1
             
+            case .updateInfra(let info):
+                detail.infra = info
+                newState.setCurrentCategory = 2
+            
+            case .updateEnvironment(let info):
+                detail.complexEnvironment = info
+                newState.setCurrentCategory = 3
+            
+            case .updateFacility(let info):
+                detail.complexFacility = info
+                newState.setCurrentCategory = 4
+            
+            case .updateFavorableNews(let info):
+                detail.favorableNews = info
         }
         
-    }}
+        return newState
+    }
+}
