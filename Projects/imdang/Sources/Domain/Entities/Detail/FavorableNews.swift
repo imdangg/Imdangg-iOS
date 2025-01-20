@@ -8,14 +8,14 @@
 import Foundation
 
 struct FavorableNews {
-    let transportations: [String]
-    let developments: [String]
-    let educations: [String]
-    let environments: [String]
-    let cultures: [String]
-    let industries: [String]
-    let policies: [String]
-    let text: String
+    var transportations: [String]
+    var developments: [String]
+    var educations: [String]
+    var environments: [String]
+    var cultures: [String]
+    var industries: [String]
+    var policies: [String]
+    var text: String
     
     func conversionArray() -> [(String, [String])] {
         let allArrays: [(name: String, items: [String])] = [

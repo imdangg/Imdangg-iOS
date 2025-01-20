@@ -56,10 +56,10 @@ class InsightViewController: BaseViewController, View {
 
     private var insightSubView: [UIViewController] = []
     private let baseVC = InsightBaseInfoViewController()
-    private let infraVC = WriteInsightEtcViewController(info: InsightEtcInfo.infrastructure, title: "인프라", selectType: .several)
-    private let environVC = WriteInsightEtcViewController(info: InsightEtcInfo.environment, title: "단지 환경", selectType: .one)
-    private let facilVC = WriteInsightEtcViewController(info: InsightEtcInfo.facility, title: "단지 시설", selectType: .several)
-    private let newsVC = WriteInsightEtcViewController(info: InsightEtcInfo.goodNews, title: "호재", selectType: .several)
+    private let infraVC = WriteInsightEtcViewController(info: InsightEtcInfo.infrastructure, title: "인프라")
+    private let environVC = WriteInsightEtcViewController(info: InsightEtcInfo.environment, title: "단지 환경")
+    private let facilVC = WriteInsightEtcViewController(info: InsightEtcInfo.facility, title: "단지 시설")
+    private let newsVC = WriteInsightEtcViewController(info: InsightEtcInfo.goodNews, title: "호재")
 
     override func viewDidLoad() {
         super.viewDidLoad()

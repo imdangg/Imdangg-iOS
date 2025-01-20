@@ -15,7 +15,7 @@ class InsightReactor: Reactor {
     
     var detail = InsightDetail.emptyInsight {
         didSet {
-            print("update detail info: \(detail)")
+            print(detail.printDetails())
         }
     }
     
@@ -102,6 +102,7 @@ class InsightReactor: Reactor {
             
             case .updateFavorableNews(let info):
                 detail.favorableNews = info
+                print(detail.printDetails())
             case .backSubview:
                 newState.setCurrentCategory -= 1
         }
