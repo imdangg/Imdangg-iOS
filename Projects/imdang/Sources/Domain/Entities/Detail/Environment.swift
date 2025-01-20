@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Environment {
+struct Environment: Codable {
     var buildingCondition: [String]
     var security: [String]
     var childrenFacility: [String]

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FavorableNews {
+struct FavorableNews: Codable {
     var transportations: [String]
     var developments: [String]
     var educations: [String]

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Facility {
+struct Facility: Codable {
     var familyFacilities: [String]
     var multipurposeFacilities: [String]
     var leisureFacilities: [String]

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Infrastructure {
+struct Infrastructure: Codable {
     var transportations: [String]
     var schoolDistricts: [String]
     var amenities: [String]

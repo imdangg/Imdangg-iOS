@@ -8,7 +8,7 @@
 import UIKit
 
 
-struct Adress {
+struct Adress: Codable {
     var siDo: String
     var siGungu: String
     var eupMyeonDong: String
@@ -21,8 +21,8 @@ struct Adress {
     }
 }
 
-struct InsightDetail {
-    let memberId: String = UserdefaultKey.memberId
+struct InsightDetail: Codable {
+    var memberId: String = UserdefaultKey.memberId
     var score: Int
     var mainImage: String
     var title: String

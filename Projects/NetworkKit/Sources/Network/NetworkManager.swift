@@ -23,9 +23,25 @@ public final class NetworkManager: Network {
                 return Disposables.create()
             }
             
+            var parameters: HTTPRequestParameter? = endpoint.parameters
+            
+            if let bodyParameters = endpoint.parameters as? Encodable {
+                do {
+                    let encoder = JSONEncoder()
+                    let data = try encoder.encode(bodyParameters)
+                    if let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []),
+                       let dictionary = jsonObject as? [String: Any] {
+                        parameters = dictionary
+                    }
+                } catch {
+                    observer.onError(error)
+                    return Disposables.create()
+                }
+            }
+            
             let request = self.session.request(endpoint.makeURL(),
                                                method: endpoint.method,
-                                               parameters: endpoint.parameters,
+                                               parameters: parameters,
                                                encoding: endpoint.encoding,
                                                headers: endpoint.headers)
                 .validate()
@@ -51,10 +67,27 @@ public final class NetworkManager: Network {
                 observer.onError(NSError(domain: "Network Error", code: -1, userInfo: nil))
                 return Disposables.create()
             }
+            
+            var parameters: HTTPRequestParameter? = endpoint.parameters
+            
+            if let bodyParameters = endpoint.parameters as? Encodable {
+                do {
+                    // Encodable일 경우 JSON 인코딩
+                    let encoder = JSONEncoder()
+                    let data = try encoder.encode(bodyParameters)
+                    if let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []),
+                       let dictionary = jsonObject as? [String: Any] {
+                        parameters = dictionary
+                    }
+                } catch {
+                    observer.onError(error)
+                    return Disposables.create()
+                }
+            }
 
             let request = self.session.request(endpoint.makeURL(),
                                                method: endpoint.method,
-                                               parameters: endpoint.parameters,
+                                               parameters: parameters,
                                                encoding: endpoint.encoding,
                                                headers: endpoint.headers)
                 .validate()
