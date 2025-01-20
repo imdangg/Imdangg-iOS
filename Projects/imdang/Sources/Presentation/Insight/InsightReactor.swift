@@ -29,6 +29,7 @@ class InsightReactor: Reactor {
     
     enum Action {
         case tapCameraSheet(Bool)
+        case tapBackButton
         case tapBaseInfoConfirm(InsightDetail)
         case tapInfraInfoConfirm(Infrastructure)
         case tapEnvironmentInfoConfirm(Environment)
@@ -44,6 +45,7 @@ class InsightReactor: Reactor {
         case updateEnvironment(Environment)
         case updateFacility(Facility)
         case updateFavorableNews(FavorableNews)
+        case backSubview
         //        case updateSelectedItems(IndexPath, [String])
     }
     
@@ -66,6 +68,8 @@ class InsightReactor: Reactor {
             return Observable.just(.updateFacility(info))
         case .tapFavorableNewsInfoConfirm(let info):
             return Observable.just(.updateFavorableNews(info))
+        case .tapBackButton:
+            return Observable.just(.backSubview)
         }
     }
     
@@ -98,6 +102,8 @@ class InsightReactor: Reactor {
             
             case .updateFavorableNews(let info):
                 detail.favorableNews = info
+            case .backSubview:
+                newState.setCurrentCategory -= 1
         }
         
         return newState

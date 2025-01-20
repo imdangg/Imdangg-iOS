@@ -53,7 +53,6 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     override func viewDidLoad() {
         super.viewDidLoad()
         layout()
-        setupBindings()
     }
 
     private func layout() {
@@ -88,14 +87,12 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
             .map { InsightReactor.Action.tapBaseInfoConfirm(self.baseInfo) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
-    }
-    
-    private func setupBindings() {
+        
         checkSectionState
             .subscribe(onNext: { [weak self] arr in
                 guard let self = self else { return }
-                self.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 7 ? true : false)
-//                self.nextButtonView.nextButtonEnable(value: true)
+//                self.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 7 ? true : false)
+                self.nextButtonView.nextButtonEnable(value: true)
             })
             .disposed(by: disposeBag)
     }

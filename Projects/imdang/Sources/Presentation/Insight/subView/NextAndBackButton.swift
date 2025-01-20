@@ -53,7 +53,7 @@ final class NextAndBackButton: UIView {
         [backgroundView, backButton, nextButton].forEach { addSubview($0) }
     }
     
-    private func makeConstraints(needBack: Bool) {
+    func makeConstraints(needBack: Bool) {
         backgroundView.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.verticalEdges.equalToSuperview()

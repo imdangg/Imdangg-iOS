@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxRelay
 import ReactorKit
 
 enum ItemSelectType {
@@ -15,20 +17,24 @@ enum ItemSelectType {
 class WriteInsightEtcViewController: UIViewController, View {
     
     var disposeBag = DisposeBag()
-    var reactor: InsightReactor?
     
-    private let insightInfo: [InsightSectionInfo]
+    private let insightSectionInfo: [InsightSectionInfo]
     private let tabTitle: String!
+    private var baseInfo = InsightDetail.emptyInsight
     private var totalAppraisalText: String = ""
     private var sectionItemClicked: [Bool] = []
     private var selectedButtonIndexInSection: [Int: Int] = [:]
     private var collectionView: UICollectionView!
     private var selectType: ItemSelectType
+    private var nextButtonView = NextAndBackButton(needBack: true)
+    private var checkSectionState = PublishRelay<Set<Int>>()
+    private var selectedSections: Set<Int> = []
     
     init(info: [InsightSectionInfo], title: String, selectType: ItemSelectType) {
-        self.insightInfo = info
+        self.insightSectionInfo = info
         self.tabTitle = title
         self.selectType = selectType
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -58,11 +64,18 @@ class WriteInsightEtcViewController: UIViewController, View {
         collectionView.register(footer: InsightTotalAppraisalFooterView.self)
         
         view.addSubview(collectionView)
+        view.addSubview(nextButtonView)
         
         collectionView.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
+        }
+        
+        nextButtonView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+            $0.height.equalTo(96)
         }
     }
     
@@ -141,20 +154,24 @@ class WriteInsightEtcViewController: UIViewController, View {
         }
     }
     
-    private func headerCheckIconProcessing(_ collectionView: UICollectionView, indexPath: IndexPath) {
-        var allCellsUnselected = true
+    private func checkCellAllClear(_ collectionView: UICollectionView, indexPath: IndexPath) -> Bool {
+        var result = false
         for row in 0..<collectionView.numberOfItems(inSection: indexPath.section) {
             let cellIndexPath = IndexPath(row: row, section: indexPath.section)
             if let cell = collectionView.cellForItem(at: cellIndexPath) as? InsightEtcCollectionCell {
                 if cell.isClicked {
-                    allCellsUnselected = false
+                    result = true
                     break
                 }
             }
         }
         
+        return result
+    }
+    
+    private func headerCheckIconProcessing(isClear: Bool, _ collectionView: UICollectionView, indexPath: IndexPath) {
         if let header = collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: indexPath.section)) as? InsightEtcHeaderView {
-            if allCellsUnselected {
+            if isClear {
                 header.removeCheckIcon()
             } else {
                 header.addCheckIcon()
@@ -162,33 +179,83 @@ class WriteInsightEtcViewController: UIViewController, View {
         }
     }
     
+    private func setSectionState(isClear: Bool, index: Int) {
+        if isClear {
+            selectedSections.remove(index)
+        } else {
+            selectedSections.insert(index)
+        }
+        checkSectionState.accept(selectedSections)
+    }
+    
     func bind(reactor: InsightReactor) {
+        if tabTitle == "인프라" {
+            nextButtonView.nextButton.rx.tap
+                .map { InsightReactor.Action.tapInfraInfoConfirm(self.baseInfo.infra) }
+                .bind(to: reactor.action)
+                .disposed(by: disposeBag)
+            
+        } else if tabTitle == "단지 환경" {
+            nextButtonView.nextButton.rx.tap
+                .map { InsightReactor.Action.tapEnvironmentInfoConfirm(self.baseInfo.complexEnvironment) }
+                .bind(to: reactor.action)
+                .disposed(by: disposeBag)
+            
+        } else if tabTitle == "단지 시설" {
+            nextButtonView.nextButton.rx.tap
+                .map { InsightReactor.Action.tapFacilityInfoConfirm(self.baseInfo.complexFacility) }
+                .bind(to: reactor.action)
+                .disposed(by: disposeBag)
+            
+        } else if tabTitle == "호재" {
+            nextButtonView.nextButton.setTitle("작성완료 및 업로드", for: .normal)
+            nextButtonView.makeConstraints(needBack: false)
+            
+            nextButtonView.nextButton.rx.tap
+                .map { InsightReactor.Action.tapFavorableNewsInfoConfirm(self.baseInfo.favorableNews) }
+                .bind(to: reactor.action)
+                .disposed(by: disposeBag)
+        }
         
+        nextButtonView.backButton.rx.tap
+            .map { InsightReactor.Action.tapBackButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        checkSectionState
+            .subscribe(onNext: { [weak self] arr in
+                guard let self = self else { return }
+                self.nextButtonView.nextButtonEnable(value: arr.count == insightSectionInfo.count ? true : false)
+            })
+            .disposed(by: disposeBag)
     }
 }
 
 extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return insightInfo.count
+        return insightSectionInfo.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return insightInfo[section].buttonTitles.count
+        return insightSectionInfo[section].buttonTitles.count
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let isClear = checkCellAllClear(collectionView, indexPath: indexPath)
         selectedButtonIndexInSection[indexPath.section] = indexPath.row
         sectionItemClicked[indexPath.section] = true
         
         //        collectionView.reloadSections(IndexSet(integer: indexPath.section))
         //        reloadSectionItems(section: indexPath.section)
         cellRedundancyAndUnselectProcessing(collectionView, indexPath: indexPath)
-        headerCheckIconProcessing(collectionView, indexPath: indexPath)
+        
+        headerCheckIconProcessing(isClear: isClear, collectionView, indexPath: indexPath)
+        setSectionState(isClear: isClear, index: indexPath.section)
     }
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let sectionInfo = insightInfo[indexPath.section]
+        let sectionInfo = insightSectionInfo[indexPath.section]
         let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightEtcCollectionCell.self)
         
         let buttonTitle = sectionInfo.buttonTitles[indexPath.row]
@@ -206,7 +273,7 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
             let header = collectionView.dequeueReusableHeader(forIndexPath: indexPath, headerType: InsightEtcHeaderView.self)
-            let sectionInfo = insightInfo[indexPath.section]
+            let sectionInfo = insightSectionInfo[indexPath.section]
             header.config(title: sectionInfo.title, description: sectionInfo.description, subtitle: sectionInfo.subTitle)
             
             if sectionItemClicked[indexPath.section] {
@@ -228,11 +295,11 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.bounds.width, height: insightInfo[section].subTitle == nil ? 44 : 84)
+        return CGSize(width: collectionView.bounds.width, height: insightSectionInfo[section].subTitle == nil ? 44 : 84)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
-        if section == insightInfo.count - 1 {
+        if section == insightSectionInfo.count - 1 {
             return CGSize(width: collectionView.bounds.width, height: 300)
         }
         return .zero
@@ -258,7 +325,7 @@ extension WriteInsightEtcViewController: TotalAppraisalFootereViewDelegate {
             guard let self = self else { return }
             
             self.totalAppraisalText = data
-            let lastSection = self.insightInfo.count - 1
+            let lastSection = self.insightSectionInfo.count - 1
             let footerIndexPath = IndexPath(item: 0, section: lastSection)
             self.collectionView.reloadSections(IndexSet(integer: footerIndexPath.section))
         }
