@@ -71,6 +71,7 @@ final class UserInfoEntryViewController: BaseViewController, View {
         view.backgroundColor = UIColor.grayScale25
         view.addSubview(stackView)
         setup()
+        presentModal()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -351,5 +352,12 @@ final class UserInfoEntryViewController: BaseViewController, View {
                 self?.submitButton.rx.commonButtonState.onNext(isEnabled ? .enabled : .disabled)
             })
             .disposed(by: disposeBag)
+    }
+    
+    private func presentModal() {
+        let modalVC = TermsModelViewController()
+        modalVC.modalPresentationStyle = .overFullScreen
+        modalVC.modalTransitionStyle = .crossDissolve
+        self.present(modalVC, animated: true, completion: nil)
     }
 }
