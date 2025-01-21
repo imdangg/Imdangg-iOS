@@ -293,7 +293,8 @@ final class UserInfoEntryViewController: BaseViewController, View {
             joinService.joinImdang(nickname: nickname, birthDate: birthDate, gender: reactor.currentState.selectedGender)
                     .subscribe { success in
                         if success {
-                            (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+                            let vc = JoinCompletedViewController()
+                            self.navigationController?.pushViewController(vc, animated: true)
                         } else {
                             print("사용자 정보 등록 실패")
                         }
