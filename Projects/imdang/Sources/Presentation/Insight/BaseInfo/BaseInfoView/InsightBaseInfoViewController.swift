@@ -28,7 +28,7 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     private var imageData: UIImage?
     private var buildingName = ""
     private var summary: String = ""
-    private var nextButtonView = NextAndBackButton(needBack: false)
+    private var nextButtonView = NextAndBackButton()
     
     private var selectedIndexPaths: [BehaviorRelay<Set<IndexPath>>] = [
         BehaviorRelay<Set<IndexPath>>(value: []), // Section 4
@@ -36,7 +36,7 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
         BehaviorRelay<Set<IndexPath>>(value: [])  // Section 6
     ]
     
-    private var checkSectionState = BehaviorRelay<[TextFieldState]>(value: Array(repeating: .normal, count: 7))
+    private var checkSectionState = BehaviorRelay<[TextFieldState]>(value: Array(repeating: .normal, count: 8))
     
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()).then {
         $0.backgroundColor = .grayScale25
@@ -58,6 +58,7 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     private func layout() {
         view.addSubview(collectionView)
         view.addSubview(nextButtonView)
+        nextButtonView.config(needBack: false)
         
         collectionView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide)
@@ -84,15 +85,15 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     func bind(reactor: InsightReactor) {
         
         nextButtonView.nextButton.rx.tap
-            .map { InsightReactor.Action.tapBaseInfoConfirm(self.baseInfo) }
+            .map { InsightReactor.Action.tapBaseInfoConfirm(self.baseInfo, self.imageData) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         checkSectionState
             .subscribe(onNext: { [weak self] arr in
                 guard let self = self else { return }
-//                self.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 7 ? true : false)
-                self.nextButtonView.nextButtonEnable(value: true)
+                self.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 8 ? true : false)
+//                self.nextButtonView.nextButtonEnable(value: true)
             })
             .disposed(by: disposeBag)
     }
@@ -129,7 +130,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                         
                     } else if indexPath.section == 3 {
                         
-                        baseInfo.visitAt = text ?? ""
+                        baseInfo.visitAt = text.map { $0.replacingOccurrences(of: ".", with: "-") } ?? ""
                         updateSectionState(index: indexPath.section, newState: baseInfo.visitAt != "" ? TextFieldState.done : TextFieldState.normal)
                         
                     }
@@ -197,7 +198,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                             updateSectionState(index: indexPath.section, newState: baseInfo.visitMethods.isEmpty == false ? TextFieldState.done : TextFieldState.normal)
                             
                         case 6:
-                            baseInfo.access = selectedSet.map { itemArray[$0.row] }[safe: 0] ?? ""
+                            baseInfo.access = selectedSet.map { itemArray[$0.row] }[safe: 0]?.replacingOccurrences(of: " ", with: "_") ?? ""
                             updateSectionState(index: indexPath.section, newState: baseInfo.access != "" ? TextFieldState.done : TextFieldState.normal)
                             
                         default:
@@ -298,7 +299,7 @@ extension InsightBaseInfoViewController: UICollectionViewDelegateFlowLayout {
             return headerView
         } else if kind == UICollectionView.elementKindSectionFooter {
             let footer = collectionView.dequeueReusableFooter(forIndexPath: indexPath, footerType: InsightTotalAppraisalFooterView.self)
-            footer.config(title: "인사이트 요약")
+            footer.config(title: "인사이트 요약*")
             footer.setPlaceHolder(text: "예시)\n지하철역과 도보 10분 거리로 접근성이 좋지만, 근처 공사로 소음 문제가 있을 수 있을 것 같아요. 하지만 단지 내 공원이 잘 조성되어 있어 가족 단위 거주자에게 적합할 것 같아요")
             footer.customTextView.text = summary
             footer.delegate = self
@@ -361,6 +362,7 @@ extension InsightBaseInfoViewController: UICollectionViewDelegateFlowLayout {
             guard let self = self else { return }
             
             baseInfo.summary = data
+            updateSectionState(index: 7, newState: baseInfo.summary != "" ? TextFieldState.done : TextFieldState.normal)
             self.summary = data
             let lastSection = self.items.count - 1
             let footerIndexPath = IndexPath(item: 0, section: lastSection)

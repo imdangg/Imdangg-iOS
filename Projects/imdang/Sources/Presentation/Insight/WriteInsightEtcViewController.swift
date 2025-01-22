@@ -27,7 +27,7 @@ class WriteInsightEtcViewController: UIViewController, View {
     private var checkSectionState = PublishRelay<Set<Int>>()
     private var selectedButtonNames: [Int: Set<String>] = [:]
     private var selectedButtonIndexInSection: [Int: Int] = [:]
-    private var nextButtonView = NextAndBackButton(needBack: true)
+    private var nextButtonView = NextAndBackButton()
     
     init(info: [InsightSectionInfo], title: String) {
         self.insightSectionInfo = info
@@ -42,6 +42,7 @@ class WriteInsightEtcViewController: UIViewController, View {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setupCollectionView()
         setupNextButtonView()
     }
@@ -81,26 +82,29 @@ class WriteInsightEtcViewController: UIViewController, View {
     
     func bind(reactor: InsightReactor) {
         if categoryName == "인프라" {
+            nextButtonView.config(needBack: true)
             nextButtonView.nextButton.rx.tap
                 .map { InsightReactor.Action.tapInfraInfoConfirm(self.baseInfo.infra) }
                 .bind(to: reactor.action)
                 .disposed(by: disposeBag)
             
         } else if categoryName == "단지 환경" {
+            nextButtonView.config(needBack: true)
             nextButtonView.nextButton.rx.tap
                 .map { InsightReactor.Action.tapEnvironmentInfoConfirm(self.baseInfo.complexEnvironment) }
                 .bind(to: reactor.action)
                 .disposed(by: disposeBag)
             
         } else if categoryName == "단지 시설" {
+            nextButtonView.config(needBack: true)
             nextButtonView.nextButton.rx.tap
                 .map { InsightReactor.Action.tapFacilityInfoConfirm(self.baseInfo.complexFacility) }
                 .bind(to: reactor.action)
                 .disposed(by: disposeBag)
             
         } else if categoryName == "호재" {
+            nextButtonView.config(needBack: false)
             nextButtonView.nextButton.setTitle("작성완료 및 업로드", for: .normal)
-            nextButtonView.makeConstraints(needBack: false)
             
             nextButtonView.nextButton.rx.tap
                 .map { InsightReactor.Action.tapFavorableNewsInfoConfirm(self.baseInfo.favorableNews) }
@@ -116,7 +120,28 @@ class WriteInsightEtcViewController: UIViewController, View {
         checkSectionState
             .subscribe(onNext: { [weak self] arr in
                 guard let self = self else { return }
-                self.nextButtonView.nextButtonEnable(value: arr.count == insightSectionInfo.count ? true : false)
+//                self.nextButtonView.nextButtonEnable(value: arr.count == insightSectionInfo.count ? true : false)
+                self.nextButtonView.nextButtonEnable(value: true)
+            })
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.isUploadSuccess }
+            .distinctUntilChanged()
+            .subscribe(onNext: { result in
+                self.showInsightAlert(text: "인사이트 업로드가 완료되었어요.\n작성한 내 인사이트는 보관함에서\n확인할 수 있어요.", type: .write) { [self] in
+                    if let image = reactor.mainImage {
+                        let vc = InsightDetailViewController(image: image, state: .done, insight: reactor.detail)
+                        self.navigationController?.pushViewController(vc, animated: true)
+                        if let firstVC = self.navigationController?.viewControllers.first {
+                            self.navigationController?.setViewControllers([firstVC, vc], animated: true)
+                        }
+                    }
+                } cancelAction: {
+                    self.navigationController?.popToRootViewController(animated: true)
+                    guard let tabBarController = self.tabBarController else { return }
+                    tabBarController.selectedIndex = 2
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -259,7 +284,7 @@ extension WriteInsightEtcViewController {
                                 
                                 // 클릭되어있는 셀 있을시 모달
                                 if otherCells.filter({ $0.isClicked == true }).count > 0 {
-                                    showInsightAlert { [self] in
+                                    showInsightAlert(text: "해당 없음, 잘 모르겠어요\n선택시 다른 항목들은\n선택이 해제돼요. 괜찮으신가요?", type: .cancellable) { [self] in
                                         cell.isClicked = true
                                         for otherCell in otherCells {
                                             otherCell.isClicked = false
@@ -342,41 +367,42 @@ extension WriteInsightEtcViewController {
 extension WriteInsightEtcViewController {
     func setInfoData(title: String, items: [String]) {
         var baseInfo = self.baseInfo
-        
+        let convertItems = items.map { $0.replacingOccurrences(of: " ", with: "_") }
+
         let categoryMapping: [String: [String: (inout InsightDetail) -> Void]] = [
             "인프라": [
-                "교통*": { $0.infra.transportations = items },
-                "학군*": { $0.infra.schoolDistricts = items },
-                "생활 편의시설*": { $0.infra.amenities = items },
-                "문화 및 여가시설 (단지외부)*": { $0.infra.facilities = items },
-                "주변환경*": { $0.infra.surroundings = items },
-                "랜드마크*": { $0.infra.landmarks = items },
-                "기피시설*": { $0.infra.unpleasantFacilities = items },
-                "인프라 총평": { $0.infra.text = items.first ?? "" }
+                "교통*": { $0.infra.transportations = convertItems },
+                "학군*": { $0.infra.schoolDistricts = convertItems },
+                "생활 편의시설*": { $0.infra.amenities = convertItems },
+                "문화 및 여가시설 (단지외부)*": { $0.infra.facilities = convertItems },
+                "주변환경*": { $0.infra.surroundings = convertItems },
+                "랜드마크*": { $0.infra.landmarks = convertItems },
+                "기피시설*": { $0.infra.unpleasantFacilities = convertItems },
+                "인프라 총평": { $0.infra.text = convertItems.first ?? "" }
             ],
             "단지 환경": [
-                "건물*": { $0.complexEnvironment.buildingCondition = items },
-                "안전*": { $0.complexEnvironment.security = items },
-                "어린이 시설*": { $0.complexEnvironment.childrenFacility = items },
-                "경로 시설*": { $0.complexEnvironment.seniorFacility = items },
-                "단지 환경 총평": { $0.complexEnvironment.text = items.first ?? "" }
+                "건물*": { $0.complexEnvironment.buildingCondition = convertItems },
+                "안전*": { $0.complexEnvironment.security = convertItems },
+                "어린이 시설*": { $0.complexEnvironment.childrenFacility = convertItems },
+                "경로 시설*": { $0.complexEnvironment.seniorFacility = convertItems },
+                "단지 환경 총평": { $0.complexEnvironment.text = convertItems.first ?? "" }
             ],
             "단지 시설": [
-                "가족*": { $0.complexFacility.familyFacilities = items },
-                "다목적*": { $0.complexFacility.multipurposeFacilities = items },
-                "여가 (단지내부)*": { $0.complexFacility.leisureFacilities = items },
-                "환경*": { $0.complexFacility.surroundings = items },
-                "단지 시설 총평": { $0.complexFacility.text = items.first ?? "" }
+                "가족*": { $0.complexFacility.familyFacilities = convertItems },
+                "다목적*": { $0.complexFacility.multipurposeFacilities = convertItems },
+                "여가 (단지내부)*": { $0.complexFacility.leisureFacilities = convertItems },
+                "환경*": { $0.complexFacility.surroundings = convertItems },
+                "단지 시설 총평": { $0.complexFacility.text = convertItems.first ?? "" }
             ],
             "호재": [
-                "교통*": { $0.favorableNews.transportations = items },
-                "개발*": { $0.favorableNews.developments = items },
-                "교육*": { $0.favorableNews.educations = items },
-                "자연환경*": { $0.favorableNews.environments = items },
-                "문화*": { $0.favorableNews.cultures = items },
-                "산업*": { $0.favorableNews.industries = items },
-                "정책*": { $0.favorableNews.policies = items },
-                "호재 총평": { $0.favorableNews.text = items.first ?? "" }
+                "교통*": { $0.favorableNews.transportations = convertItems },
+                "개발*": { $0.favorableNews.developments = convertItems },
+                "교육*": { $0.favorableNews.educations = convertItems },
+                "자연환경*": { $0.favorableNews.environments = convertItems },
+                "문화*": { $0.favorableNews.cultures = convertItems },
+                "산업*": { $0.favorableNews.industries = convertItems },
+                "정책*": { $0.favorableNews.policies = convertItems },
+                "호재 총평": { $0.favorableNews.text = convertItems.first ?? "" }
             ]
         ]
         

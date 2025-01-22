@@ -73,14 +73,6 @@ class InsightViewController: BaseViewController, View {
         layout()
         setupButtons()
     }
-
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-//
-//        if selectedIndex == 0, let firstButton = getButton(at: 0) {
-//            updateUnderlinePosition(for: firstButton)
-//        }
-//    }
     
     private func setupSubviews() {
         baseVC.reactor = self.reactor
@@ -199,26 +191,7 @@ class InsightViewController: BaseViewController, View {
             btn.setTitleColor(index == selectedIndex ? .grayScale900 : .grayScale500, for: .normal)
         }
 
-        if let button = getButton(at: selectedIndex) {
-            UIView.animate(withDuration: 0.2) {
-                self.updateUnderlinePosition(for: button)
-            }
-        }
-
         showInsightSubViewController(at: selectedIndex)
-    }
-
-    private func updateUnderlinePosition(for button: UIButton) {
-        selectTabUnderLineView.snp.remakeConstraints {
-            $0.bottom.equalTo(buttonStackView)
-            $0.height.equalTo(3)
-            $0.width.equalTo(button.titleLabel?.intrinsicContentSize.width ?? 0)
-            $0.centerX.equalTo(button)
-        }
-
-        UIView.animate(withDuration: 0.2) {
-            self.view.layoutIfNeeded()
-        }
     }
 
     private func showInsightSubViewController(at index: Int) {

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BasicResponse: Codable {
+public struct BasicResponse: Codable {
     let code: String
     let message: String
 }

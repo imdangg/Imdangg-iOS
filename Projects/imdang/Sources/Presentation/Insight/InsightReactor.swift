@@ -8,19 +8,18 @@
 import RxSwift
 import RxRelay
 import ReactorKit
-import Foundation
+import UIKit
 
 class InsightReactor: Reactor {
     let disposeBag = DisposeBag()
+    let insightService = InsightWriteService()
     
-    var detail = InsightDetail.emptyInsight {
-        didSet {
-            print(detail.printDetails())
-        }
-    }
+    var detail = InsightDetail.emptyInsight
+    var mainImage: UIImage?
     
     struct State {
         var isShowingCameraSheet: Bool = false
+        var isUploadSuccess: Bool = false
         var setCurrentCategory: Int = 0
         // infoBaseView
         var selectedItems: [[String]] = Array(repeating: [], count: 8)
@@ -30,7 +29,7 @@ class InsightReactor: Reactor {
     enum Action {
         case tapCameraSheet(Bool)
         case tapBackButton
-        case tapBaseInfoConfirm(InsightDetail)
+        case tapBaseInfoConfirm(InsightDetail, UIImage?)
         case tapInfraInfoConfirm(Infrastructure)
         case tapEnvironmentInfoConfirm(Environment)
         case tapFacilityInfoConfirm(Facility)
@@ -40,11 +39,11 @@ class InsightReactor: Reactor {
     
     enum Mutation {
         case showingCameraSheet(Bool)
-        case updateBaseInfo(InsightDetail)
+        case updateBaseInfo(InsightDetail, UIImage?)
         case updateInfra(Infrastructure)
         case updateEnvironment(Environment)
         case updateFacility(Facility)
-        case updateFavorableNews(FavorableNews)
+        case setUploadSuccess(Bool)
         case backSubview
         //        case updateSelectedItems(IndexPath, [String])
     }
@@ -58,8 +57,8 @@ class InsightReactor: Reactor {
             //        case .selectItems(let indexPath, let selectedArray):
             //            return Observable.just(.updateSelectedItems(indexPath, selectedArray))
             //        }
-        case .tapBaseInfoConfirm(let info):
-            return Observable.just(.updateBaseInfo(info))
+        case .tapBaseInfoConfirm(let info, let image):
+            return Observable.just(.updateBaseInfo(info, image))
         case .tapInfraInfoConfirm(let info):
             return Observable.just(.updateInfra(info))
         case .tapEnvironmentInfoConfirm(let info):
@@ -67,7 +66,21 @@ class InsightReactor: Reactor {
         case .tapFacilityInfoConfirm(let info):
             return Observable.just(.updateFacility(info))
         case .tapFavorableNewsInfoConfirm(let info):
-            return Observable.just(.updateFavorableNews(info))
+            detail.favorableNews = info
+            if let image = mainImage {
+                return insightService.createInsight(dto: detail.toDTO(), image: image)
+                    .map { success in
+                        print("Upload success state updated: \(success)")
+                        return Mutation.setUploadSuccess(success)
+                    }
+                    .catch { error in
+                        print("Error: \(error)")
+                        return Observable.just(Mutation.setUploadSuccess(false))
+                    }
+            } else {
+                print("mainImage not found")
+                return Observable.just(Mutation.setUploadSuccess(false))
+            }
         case .tapBackButton:
             return Observable.just(.backSubview)
         }
@@ -84,8 +97,9 @@ class InsightReactor: Reactor {
                 ////            newState.selectedItems[indexPath] = selectedArray
                 //        }
                 
-            case .updateBaseInfo(let info):
+            case .updateBaseInfo(let info, let image):
                 detail = info
+                mainImage = image
                 newState.setCurrentCategory = 1
             
             case .updateInfra(let info):
@@ -99,12 +113,10 @@ class InsightReactor: Reactor {
             case .updateFacility(let info):
                 detail.complexFacility = info
                 newState.setCurrentCategory = 4
-            
-            case .updateFavorableNews(let info):
-                detail.favorableNews = info
-                print(detail.printDetails())
             case .backSubview:
                 newState.setCurrentCategory -= 1
+        case .setUploadSuccess(let success):
+            newState.isUploadSuccess = success
         }
         
         return newState

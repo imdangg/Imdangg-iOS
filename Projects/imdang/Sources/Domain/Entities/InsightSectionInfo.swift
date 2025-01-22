@@ -23,10 +23,10 @@ struct InsightSectionInfo {
     static let repellentFacility: InsightSectionInfo = InsightSectionInfo(title: "기피시설*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "고속도로", "철도", "유흥거리", "산업단지", "공장", "쓰레기 소각장", "고층 건물", "공사중 건물"])
     
     // environment
-    static let building: InsightSectionInfo = InsightSectionInfo(title: "건물*", subTitle: "ex. 단지 외관 상태, 엘리베이터, 계단의 청결", description: "하나만 선택", buttonTitles: ["잘 모르겠어요", "최고에요", "좋아요", "평범해요", "별로에요"])
-    static let safety: InsightSectionInfo = InsightSectionInfo(title: "안전*", subTitle: "ex. CCTV, 경비원 상주 및 태도, 가로등", description: "하나만 선택", buttonTitles: ["잘 모르겠어요", "최고에요", "좋아요", "평범해요", "별로에요"])
-    static let childrenFacility: InsightSectionInfo = InsightSectionInfo(title: "어린이 시설*", subTitle: "ex. 놀이터, 어린이 보호 구역", description: "하나만 선택", buttonTitles: ["잘 모르겠어요", "최고에요", "좋아요", "평범해요", "별로에요"])
-    static let seniorFacility: InsightSectionInfo = InsightSectionInfo(title: "경로 시설*", subTitle: nil, description: "하나만 선택", buttonTitles: ["잘 모르겠어요", "최고에요", "좋아요", "평범해요", "별로에요"])
+    static let building: InsightSectionInfo = InsightSectionInfo(title: "건물*", subTitle: "ex. 단지 외관 상태, 엘리베이터, 계단의 청결", description: "하나만 선택", buttonTitles: ["잘 모르겠어요", "최고예요", "좋아요", "평범해요", "별로에요"])
+    static let safety: InsightSectionInfo = InsightSectionInfo(title: "안전*", subTitle: "ex. CCTV, 경비원 상주 및 태도, 가로등", description: "하나만 선택", buttonTitles: ["잘 모르겠어요", "최고예요", "좋아요", "평범해요", "별로에요"])
+    static let childrenFacility: InsightSectionInfo = InsightSectionInfo(title: "어린이 시설*", subTitle: "ex. 놀이터, 어린이 보호 구역", description: "하나만 선택", buttonTitles: ["잘 모르겠어요", "최고예요", "좋아요", "평범해요", "별로에요"])
+    static let seniorFacility: InsightSectionInfo = InsightSectionInfo(title: "경로 시설*", subTitle: nil, description: "하나만 선택", buttonTitles: ["잘 모르겠어요", "최고예요", "좋아요", "평범해요", "별로에요"])
     
     // facility
     static let family: InsightSectionInfo = InsightSectionInfo(title: "가족*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "어린이집", "경로당"])

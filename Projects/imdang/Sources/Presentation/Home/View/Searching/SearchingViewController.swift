@@ -188,7 +188,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             $0.kf.setImage(with: url)
             $0.contentMode = .scaleAspectFill
         }
-        let vc = InsightDetailViewController(image: textImage.image ?? UIImage(), state: testState[indexPath.row])
+        let vc = InsightDetailViewController(image: textImage.image ?? UIImage(), state: testState[indexPath.row], insight: InsightDetail.testData)
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }

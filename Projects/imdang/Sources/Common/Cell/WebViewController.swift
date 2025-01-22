@@ -40,7 +40,7 @@ class WebViewController: UIViewController {
         webView = WKWebView(frame: .zero, configuration: configuration)
         self.webView?.navigationDelegate = self
 
-        guard let url = URL(string: "https://da-hye0.github.io/Kakao-Postcode/"),
+        guard let url = URL(string: "https://daejinlim.github.io/daumAdressSearch/"),
             let webView = webView
             else { return }
         let request = URLRequest(url: url)

@@ -37,12 +37,10 @@ final class NextAndBackButton: UIView {
         $0.layer.cornerRadius = 8
     }
     
-    init(frame: CGRect = .zero, needBack: Bool) {
+    override init(frame: CGRect = .zero) {
         super.init(frame: frame)
         
         addSubviews()
-        makeConstraints(needBack: needBack)
-        
     }
     
     required init?(coder: NSCoder) {
@@ -53,7 +51,7 @@ final class NextAndBackButton: UIView {
         [backgroundView, backButton, nextButton].forEach { addSubview($0) }
     }
     
-    func makeConstraints(needBack: Bool) {
+    func config(needBack: Bool) {
         backgroundView.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.verticalEdges.equalToSuperview()
