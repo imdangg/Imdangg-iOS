@@ -69,7 +69,7 @@ class CheckButton: UIButton {
     }
     
     func setState(isSelected: Bool) {
-        print("백?\(isBackground)")
+//        print("백?\(isBackground)")
         UIView.animate(withDuration: 0.1) {
             switch isSelected {
             case true:

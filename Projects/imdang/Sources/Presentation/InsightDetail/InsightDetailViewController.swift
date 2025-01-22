@@ -21,7 +21,7 @@ final class InsightDetailViewController: BaseViewController {
     var testDate = InsightDetail.testData
     
     private var tableView: UITableView!
-    private var insightImage = UIImage()
+    private var insightImageUrl = ""
     private var exchangeState: DetailExchangeState
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
@@ -43,9 +43,9 @@ final class InsightDetailViewController: BaseViewController {
     private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }
     
-    init(image: UIImage, state: DetailExchangeState) {
+    init(url: String, state: DetailExchangeState) {
         exchangeState = state
-        insightImage = image
+        insightImageUrl = url
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -184,7 +184,7 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
         switch indexPath.section {
         case 0:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailImageCell.self)
-            cell.config(image: insightImage)
+            cell.config(url: insightImageUrl)
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
