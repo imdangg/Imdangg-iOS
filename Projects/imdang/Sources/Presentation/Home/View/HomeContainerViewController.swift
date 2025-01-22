@@ -168,5 +168,13 @@ class HomeContainerViewController: BaseViewController {
                 self?.navigationController?.pushViewController(vc, animated: true)
         })
         .disposed(by: disposeBag)
+        
+        alramButton.rx.tap
+            .subscribe(onNext: { [weak self] state in
+                let vc = NotificationViewController(reactor: NotificationReactor())
+                vc.hidesBottomBarWhenPushed = true
+                self?.navigationController?.pushViewController(vc, animated: true)
+        })
+        .disposed(by: disposeBag)
     }
 }
