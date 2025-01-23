@@ -144,6 +144,14 @@ class InsightViewController: BaseViewController, View {
                 self.showInsightSubViewController(at: index)
             })
             .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.isChangeScore }
+            .subscribe(onNext: { score in
+                if score == 0 { self.scoreLabel.text = "00%" }
+                else { self.scoreLabel.text = "\(score)%" }
+            })
+            .disposed(by: disposeBag)
     }
 
     private func showInsightSubViewController(at index: Int) {

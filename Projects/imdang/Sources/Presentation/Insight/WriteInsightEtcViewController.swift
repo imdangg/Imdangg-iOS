@@ -120,8 +120,8 @@ class WriteInsightEtcViewController: UIViewController, View {
         checkSectionState
             .subscribe(onNext: { [weak self] arr in
                 guard let self = self else { return }
-//                self.nextButtonView.nextButtonEnable(value: arr.count == insightSectionInfo.count ? true : false)
-                self.nextButtonView.nextButtonEnable(value: true)
+                self.nextButtonView.nextButtonEnable(value: arr.count == insightSectionInfo.count ? true : false)
+//                self.nextButtonView.nextButtonEnable(value: true)
             })
             .disposed(by: disposeBag)
         

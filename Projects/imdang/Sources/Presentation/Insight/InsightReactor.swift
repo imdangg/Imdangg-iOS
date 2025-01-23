@@ -16,8 +16,10 @@ class InsightReactor: Reactor {
     
     var detail = InsightDetail.emptyInsight
     var mainImage: UIImage?
+    var scoreRecord = [Int]()
     
     struct State {
+        var isChangeScore = 0
         var isShowingCameraSheet: Bool = false
         var isUploadSuccess: Bool = false
         var setCurrentCategory: Int = 0
@@ -58,15 +60,21 @@ class InsightReactor: Reactor {
             //            return Observable.just(.updateSelectedItems(indexPath, selectedArray))
             //        }
         case .tapBaseInfoConfirm(let info, let image):
+            
             return Observable.just(.updateBaseInfo(info, image))
         case .tapInfraInfoConfirm(let info):
+            
             return Observable.just(.updateInfra(info))
         case .tapEnvironmentInfoConfirm(let info):
+            
             return Observable.just(.updateEnvironment(info))
         case .tapFacilityInfoConfirm(let info):
+            
             return Observable.just(.updateFacility(info))
         case .tapFavorableNewsInfoConfirm(let info):
             detail.favorableNews = info
+            addScore(haveText: detail.favorableNews.text != "")
+            
             if let image = mainImage {
                 return insightService.createInsight(dto: detail.toDTO(), image: image)
                     .map { success in
@@ -81,6 +89,7 @@ class InsightReactor: Reactor {
                 print("mainImage not found")
                 return Observable.just(Mutation.setUploadSuccess(false))
             }
+            
         case .tapBackButton:
             return Observable.just(.backSubview)
         }
@@ -91,34 +100,64 @@ class InsightReactor: Reactor {
         
         switch mutation {
             
-            case .showingCameraSheet(let isShowingSheet):
-                newState.isShowingCameraSheet = isShowingSheet
-                //        case .updateSelectedItems(let indexPath, let selectedArray):
-                ////            newState.selectedItems[indexPath] = selectedArray
-                //        }
-                
-            case .updateBaseInfo(let info, let image):
-                detail = info
-                mainImage = image
-                newState.setCurrentCategory = 1
+        case .showingCameraSheet(let isShowingSheet):
+            newState.isShowingCameraSheet = isShowingSheet
+            //        case .updateSelectedItems(let indexPath, let selectedArray):
+            ////            newState.selectedItems[indexPath] = selectedArray
+            //        }
             
-            case .updateInfra(let info):
-                detail.infra = info
-                newState.setCurrentCategory = 2
+        case .updateBaseInfo(let info, let image):
+            detail = info
+            mainImage = image
+            addScore(haveText: true)
             
-            case .updateEnvironment(let info):
-                detail.complexEnvironment = info
-                newState.setCurrentCategory = 3
+            newState.isChangeScore = detail.score
+            newState.setCurrentCategory = 1
             
-            case .updateFacility(let info):
-                detail.complexFacility = info
-                newState.setCurrentCategory = 4
-            case .backSubview:
-                newState.setCurrentCategory -= 1
+        case .updateInfra(let info):
+            detail.infra = info
+            addScore(haveText: detail.infra.text != "")
+            
+            newState.isChangeScore = detail.score
+            newState.setCurrentCategory = 2
+            
+        case .updateEnvironment(let info):
+            detail.complexEnvironment = info
+            addScore(haveText: detail.complexEnvironment.text != "")
+            
+            newState.isChangeScore = detail.score
+            newState.setCurrentCategory = 3
+            
+        case .updateFacility(let info):
+            detail.complexFacility = info
+            addScore(haveText: detail.complexFacility.text != "")
+            
+            newState.isChangeScore = detail.score
+            newState.setCurrentCategory = 4
+            
         case .setUploadSuccess(let success):
             newState.isUploadSuccess = success
+            
+        case .backSubview:
+            removeScore()
+            
+            newState.isChangeScore = detail.score
+            newState.setCurrentCategory -= 1
         }
         
         return newState
+    }
+    
+    private func addScore(haveText: Bool) {
+        if haveText {
+            scoreRecord.append(20)
+        } else {
+            scoreRecord.append(10)
+        }
+        detail.score += scoreRecord.last ?? 0
+    }
+    
+    private func removeScore() {
+        detail.score -= scoreRecord.popLast() ?? 0
     }
 }
