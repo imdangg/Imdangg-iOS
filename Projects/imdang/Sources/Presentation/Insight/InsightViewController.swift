@@ -24,17 +24,8 @@ class InsightViewController: BaseViewController, View {
         $0.textColor = .grayScale900
     }
     
-    private let buttonStackView = UIStackView().then {
-        $0.axis = .horizontal
-        $0.spacing = 16
-        $0.alignment = .fill
-        $0.distribution = .fillProportionally
-    }
-
-    private let selectTabUnderLineView = UIView().then {
-        $0.backgroundColor = .grayScale900
-    }
-
+    private let progressView = InsightProgressBar()
+    
     private let underLineView = UIView().then {
         $0.backgroundColor = .grayScale100
     }
@@ -64,6 +55,7 @@ class InsightViewController: BaseViewController, View {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .grayScale25
+        navigationViewBottomShadow.isHidden = true
         
         
         reactor = InsightReactor()
@@ -71,7 +63,6 @@ class InsightViewController: BaseViewController, View {
         
         configNavigationBarItem()
         layout()
-        setupButtons()
     }
     
     private func setupSubviews() {
@@ -104,23 +95,15 @@ class InsightViewController: BaseViewController, View {
     }
 
     private func layout() {
-        [buttonStackView, selectTabUnderLineView, underLineView, containerView].forEach { view.addSubview($0) }
+        [progressView, underLineView, containerView].forEach { view.addSubview($0) }
 
-        buttonStackView.snp.makeConstraints {
+        progressView.snp.makeConstraints {
             $0.topEqualToNavigationBottom(vc: self).offset(4)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(40)
-        }
-
-        selectTabUnderLineView.snp.makeConstraints {
-            $0.bottom.equalTo(buttonStackView.snp.bottom)
-            $0.height.equalTo(3)
-            $0.width.equalTo(0)
-            $0.leading.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
         }
 
         underLineView.snp.makeConstraints {
-            $0.top.equalTo(selectTabUnderLineView.snp.bottom).offset(1)
+            $0.top.equalTo(progressView.snp.bottom).offset(1)
             $0.leading.trailing.equalToSuperview()
             $0.height.equalTo(1)
         }
@@ -139,22 +122,6 @@ class InsightViewController: BaseViewController, View {
         modalVC.modalPresentationStyle = .fullScreen
         modalVC.modalTransitionStyle = .crossDissolve
         self.present(modalVC, animated: true, completion: nil)
-    }
-
-    private func setupButtons() {
-        buttonTitles.enumerated().forEach { index, title in
-            let button = UIButton()
-            button.setTitle(title, for: .normal)
-            button.setTitleColor(index == selectedIndex ? .grayScale900 : .grayScale500, for: .normal)
-            button.titleLabel?.font = .pretenSemiBold(14)
-            button.titleLabel?.adjustsFontSizeToFitWidth = true
-            button.titleLabel?.minimumScaleFactor = 0.8
-            button.titleLabel?.lineBreakMode = .byTruncatingTail
-            button.tag = index
-
-            button.addTarget(self, action: #selector(didTapTabButton(_:)), for: .touchUpInside)
-            buttonStackView.addArrangedSubview(button)
-        }
     }
 
     func bind(reactor: InsightReactor) {
@@ -179,23 +146,9 @@ class InsightViewController: BaseViewController, View {
             .disposed(by: disposeBag)
     }
 
-    private func getButton(at index: Int) -> UIButton? {
-        return buttonStackView.arrangedSubviews[index] as? UIButton
-    }
-
-    @objc private func didTapTabButton(_ sender: UIButton) {
-        selectedIndex = sender.tag
-
-        for (index, button) in buttonStackView.arrangedSubviews.enumerated() {
-            let btn = button as! UIButton
-            btn.setTitleColor(index == selectedIndex ? .grayScale900 : .grayScale500, for: .normal)
-        }
-
-        showInsightSubViewController(at: selectedIndex)
-    }
-
     private func showInsightSubViewController(at index: Int) {
-
+        progressView.setProgress(index: index)
+        
         if let childVC = insightSubView[safe: index] {
             children.forEach { $0.removeFromParent() }
             containerView.subviews.forEach { $0.removeFromSuperview() }

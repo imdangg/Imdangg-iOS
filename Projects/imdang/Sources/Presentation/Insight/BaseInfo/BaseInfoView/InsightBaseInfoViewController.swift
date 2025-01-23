@@ -92,8 +92,8 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
         checkSectionState
             .subscribe(onNext: { [weak self] arr in
                 guard let self = self else { return }
-                self.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 8 ? true : false)
-//                self.nextButtonView.nextButtonEnable(value: true)
+//                self.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 8 ? true : false)
+                self.nextButtonView.nextButtonEnable(value: true)
             })
             .disposed(by: disposeBag)
     }
