@@ -5,8 +5,9 @@ let project = Project(
     targets: [
         .target(
             name: "imdang",
-            destinations: .iOS,
+            destinations: [.iPhone],
             product: .app,
+            productName: "아파트임당",
             bundleId: "info.apt.imdang",
             deploymentTargets: .iOS("15.0"),
             infoPlist: .extendingDefault(
