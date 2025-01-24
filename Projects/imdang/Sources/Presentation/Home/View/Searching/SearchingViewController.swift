@@ -10,16 +10,27 @@ import SnapKit
 import Then
 import RxSwift
 import RxCocoa
+import RxRelay
 
 
 class SearchingViewController: UIViewController {
     let searchingViewModel = SearchingViewModel()
     private var insights: [Insight] = []
     private var disposeBag = DisposeBag()
+    private let myInsight = BehaviorRelay<[Insight]>(value: [])
+    private let todayInsight = BehaviorRelay<[Insight]>(value: Insight.todayInsight)
+    private let topInsight = BehaviorRelay<[Insight]>(value: Insight.topInsight)
     private let currentPage = PublishSubject<Int>()
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout()).then {
         $0.backgroundColor = .white
         $0.register(cell: InsightCollectionCell.self)
+        $0.register(cell: EmptyMyInsightCollectionCell.self)
+        
+        $0.register(header: SearchingSectionHeaderView.self)
+        
+        $0.register(footer: PagingFooterView.self)
+        $0.register(footer: SectionSeparatorView.self)
+        
         $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "BannerCell")
     }
     
@@ -51,11 +62,6 @@ class SearchingViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.showsVerticalScrollIndicator = false
-        
-        collectionView.register(header: SearchingSectionHeaderView.self)
-        
-        collectionView.register(footer: PagingFooterView.self)
-        collectionView.register(footer: SectionSeparatorView.self)
         
         view.addSubview(collectionView)
         view.addSubview(searchBoxView)
@@ -90,33 +96,42 @@ class SearchingViewController: UIViewController {
         let item = NSCollectionLayoutItem(layoutSize: size)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: size, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 32, trailing: 0)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: myInsight.value.isEmpty ? 0 : 32, trailing: 0)
         return section
     }
 
     private func createFirstSectionLayout() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(100))
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(myInsight.value.isEmpty ? 72 : 100))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(336))
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitem: item, count: 3)
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(myInsight.value.isEmpty ? 72 : 336))
         
-        let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = .none
         
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(77))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         
         let separatorSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(8))
         let separator = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: separatorSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
-        
-        section.contentInsets = NSDirectionalEdgeInsets(top: 24, leading: 20, bottom: 20, trailing: 0)
-        header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20)
-        separator.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -20, bottom: 0, trailing: 0)
-        
-        section.boundarySupplementaryItems = [header, separator]
-        
-        return section
+        if myInsight.value.count == 0 {
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+            
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 32, trailing: 20)
+            header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+            separator.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -20, bottom: 0, trailing: -20)
+            section.boundarySupplementaryItems = [header, separator]
+            return section
+        } else {
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitem: item, count: 3)
+            let section = NSCollectionLayoutSection(group: group)
+            
+            section.orthogonalScrollingBehavior = .none
+            section.contentInsets = NSDirectionalEdgeInsets(top: 24, leading: 20, bottom: 20, trailing: 0)
+            header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20)
+            separator.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -20, bottom: 0, trailing: 0)
+            section.boundarySupplementaryItems = [header, separator]
+            return section
+        }
     }
     
     private func createSecondSectionLayout() -> NSCollectionLayoutSection {
@@ -174,7 +189,7 @@ class SearchingViewController: UIViewController {
         
         section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0)
         header.contentInsets = NSDirectionalEdgeInsets(top: -32, leading: 0, bottom: 0, trailing: 20)
-        footer.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: -20, bottom: 0, trailing: 0)
+        footer.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: -20, bottom: 40, trailing: 0)
         
         section.boundarySupplementaryItems = [header, footer]
         
@@ -192,18 +207,23 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
         switch section {
         case 0: return 1
         case 1: return insights.count > 3 ? 3 : insights.count
-        case 2: return 20
-        case 3: return 10
+        case 2: return todayInsight.value.count
+        case 3: return topInsight.value.count
         default: return 0
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let testState: [DetailExchangeState] = [.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,]
-        let textImage = UIImageView().then {
-            guard let url = URL(string: "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg") else { return }
-            $0.kf.setImage(with: url)
-            $0.contentMode = .scaleAspectFill
+        var vc = UIViewController()
+        switch indexPath.section {
+        case 1:
+            vc = InsightDetailViewController(url: myInsight.value[indexPath.row].titleImageUrl, state: myInsight.value[indexPath.row].state)
+        case 2:
+            vc = InsightDetailViewController(url: todayInsight.value[indexPath.row].titleImageUrl, state: todayInsight.value[indexPath.row].state)
+        case 3:
+            vc = InsightDetailViewController(url: topInsight.value[indexPath.row].titleImageUrl, state: topInsight.value[indexPath.row].state)
+        default:
+            break
         }
         
         searchingViewModel.loadInsightDetail(id: insights[indexPath.row].id)
@@ -225,7 +245,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             case 0:
                 return UICollectionReusableView()
             case 1:
-                headerView.configure(with: "내가 작성한 단지 인사이트", type: .notTopten, showHorizontalCollection: true)
+                headerView.configure(with: "내가 다녀온 단지의 다른 인사이트", type: .notTopten, showHorizontalCollection: myInsight.value.isEmpty ? false : true)
             case 2:
                 headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
             case 3:
@@ -259,7 +279,6 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let testImage = "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg"
         switch indexPath.section {
         case 0:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BannerCell", for: indexPath)
@@ -267,21 +286,21 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             bannerImageView.snp.makeConstraints { $0.edges.equalToSuperview() }
             return cell
         case 1:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
-            
-            cell.configure(insight: insights[indexPath.row], layoutType: .horizontal)
-            return cell
+            if insights.count == 0 {
+                let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: EmptyMyInsightCollectionCell.self)
+                return cell
+            } else {
+                let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
+                cell.configure(insight: insights[indexPath.row], layoutType: .horizontal)
+                return cell
+            }
         case 2:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
-            
-            let insight = Insight(id: "0", titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
-            cell.configure(insight: insight, layoutType: .vertical)
+            cell.configure(insight: todayInsight.value[indexPath.row], layoutType: .vertical)
             return cell
         case 3:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
-            
-            let insight = Insight(id: "0", titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
-            cell.configure(insight: insight, layoutType: .horizontal)
+            cell.configure(insight: topInsight.value[indexPath.row], layoutType: .horizontal)
             return cell
         default:
             return UICollectionViewCell()

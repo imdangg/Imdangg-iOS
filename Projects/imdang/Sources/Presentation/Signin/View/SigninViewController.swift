@@ -60,6 +60,7 @@ final class SigninViewController: UIViewController, View {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
         addSubView()
         makeConstraints()
     }
@@ -136,7 +137,7 @@ final class SigninViewController: UIViewController, View {
         
         reactor.state
             .map { $0.isKakaoSigninSuccess }
-            .distinctUntilChanged()
+//            .distinctUntilChanged()
             .filter { $0 }
             .subscribe(onNext: { [weak self] _ in
                 self?.navigationController?.pushViewController(vc, animated: true)
@@ -151,7 +152,7 @@ final class SigninViewController: UIViewController, View {
         
         reactor.state
             .map { $0.isGoogleSigninSuccess }
-            .distinctUntilChanged()
+//            .distinctUntilChanged()
             .filter { $0 }
             .subscribe(onNext: { [weak self] _ in
                 self?.navigationController?.pushViewController(vc, animated: true)

@@ -99,7 +99,7 @@ class CommonButton: UIButton {
         setTitle(title, for: .normal)
     }
     
-    func setTitleColor(color: UIColor) {
+    func setButtonTitleColor(color: UIColor) {
         self.setTitleColor(color, for: .normal)
     }
     

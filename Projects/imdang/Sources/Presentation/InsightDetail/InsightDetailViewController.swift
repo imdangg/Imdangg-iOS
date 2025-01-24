@@ -20,7 +20,7 @@ final class InsightDetailViewController: BaseViewController {
 
     private var insight: InsightDetail!
     private var tableView: UITableView!
-    private var insightImage = UIImage()
+    private var insightImageUrl = ""
     private var exchangeState: DetailExchangeState
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
@@ -184,7 +184,7 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
         switch indexPath.section {
         case 0:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailImageCell.self)
-            cell.config(image: insightImage)
+            cell.config(url: insightImageUrl)
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
