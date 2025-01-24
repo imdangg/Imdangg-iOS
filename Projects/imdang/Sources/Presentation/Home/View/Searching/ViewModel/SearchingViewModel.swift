@@ -18,7 +18,7 @@ final class SearchingViewModel {
         let parameters: [String: Any] = [
             "pageNumber": 0,
             "pageSize": 10,
-            "direction": "DESC",
+            "direction": "ASC",
             "properties": [ "created_at" ]
         ]
         
@@ -32,7 +32,6 @@ final class SearchingViewModel {
         
         return networkManager.request(with: endpoint)
             .map { data in
-                print("data \(data)")
                 return data.toEntitiy()
             }
             .catch { error in
@@ -56,7 +55,6 @@ final class SearchingViewModel {
         
         return networkManager.request(with: endpoint)
             .map { data in
-                print("data \(data)")
                 return data
             }
             .catch { error in

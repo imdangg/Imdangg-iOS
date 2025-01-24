@@ -17,7 +17,7 @@ class SearchingViewController: UIViewController {
     let searchingViewModel = SearchingViewModel()
     private var insights: [Insight] = []
     private var disposeBag = DisposeBag()
-    private let myInsight = BehaviorRelay<[Insight]>(value: [])
+//    private let myInsight = BehaviorRelay<[Insight]>(value: [])
     private let todayInsight = BehaviorRelay<[Insight]>(value: Insight.todayInsight)
     private let topInsight = BehaviorRelay<[Insight]>(value: Insight.topInsight)
     private let currentPage = PublishSubject<Int>()
@@ -96,15 +96,15 @@ class SearchingViewController: UIViewController {
         let item = NSCollectionLayoutItem(layoutSize: size)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: size, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: myInsight.value.isEmpty ? 0 : 32, trailing: 0)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: insights.isEmpty ? 0 : 32, trailing: 0)
         return section
     }
 
     private func createFirstSectionLayout() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(myInsight.value.isEmpty ? 72 : 100))
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(insights.isEmpty ? 72 : 100))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(myInsight.value.isEmpty ? 72 : 336))
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(insights.isEmpty ? 72 : 336))
         
         
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(77))
@@ -112,7 +112,7 @@ class SearchingViewController: UIViewController {
         
         let separatorSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(8))
         let separator = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: separatorSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
-        if myInsight.value.count == 0 {
+        if insights.isEmpty {
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
             let section = NSCollectionLayoutSection(group: group)
             
@@ -214,27 +214,30 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        var vc = UIViewController()
+        let insightId = insights[indexPath.row].id
         switch indexPath.section {
         case 1:
-            vc = InsightDetailViewController(url: myInsight.value[indexPath.row].titleImageUrl, state: myInsight.value[indexPath.row].state)
+            
+            searchingViewModel.loadInsightDetail(id: insightId)
+                .subscribe { [self] data in
+                    if let data = data {
+                        let vc = InsightDetailViewController(url: "", state: .done, insight: data)
+                        vc.hidesBottomBarWhenPushed = true
+                        navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+                .disposed(by: disposeBag)
         case 2:
-            vc = InsightDetailViewController(url: todayInsight.value[indexPath.row].titleImageUrl, state: todayInsight.value[indexPath.row].state)
+            let vc = InsightDetailViewController(url: todayInsight.value[indexPath.row].titleImageUrl, state: todayInsight.value[indexPath.row].state, insight: InsightDetail.testData)
+            vc.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(vc, animated: true)
         case 3:
-            vc = InsightDetailViewController(url: topInsight.value[indexPath.row].titleImageUrl, state: topInsight.value[indexPath.row].state)
+            let vc = InsightDetailViewController(url: topInsight.value[indexPath.row].titleImageUrl, state: topInsight.value[indexPath.row].state, insight: InsightDetail.testData)
+            vc.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(vc, animated: true)
         default:
             break
         }
-        
-        searchingViewModel.loadInsightDetail(id: insights[indexPath.row].id)
-            .subscribe { [self] data in
-                if let data = data {
-                    let vc = InsightDetailViewController(image: textImage.image ?? UIImage(), state: .done, insight: data)
-                    vc.hidesBottomBarWhenPushed = true
-                    navigationController?.pushViewController(vc, animated: true)
-                }
-            }
-            .disposed(by: disposeBag)
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -245,7 +248,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             case 0:
                 return UICollectionReusableView()
             case 1:
-                headerView.configure(with: "내가 다녀온 단지의 다른 인사이트", type: .notTopten, showHorizontalCollection: myInsight.value.isEmpty ? false : true)
+                headerView.configure(with: "내가 다녀온 단지의 다른 인사이트", type: .notTopten, showHorizontalCollection: insights.isEmpty ? false : true)
             case 2:
                 headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
             case 3:
