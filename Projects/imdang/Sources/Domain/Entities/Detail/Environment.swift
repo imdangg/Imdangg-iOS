@@ -25,3 +25,27 @@ struct Environment: Codable {
         return allArrays
     }
 }
+
+extension Environment {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        buildingCondition = try container.decodeStringOrArray(forKey: .buildingCondition)
+        security = try container.decodeStringOrArray(forKey: .security)
+        childrenFacility = try container.decodeStringOrArray(forKey: .childrenFacility)
+        seniorFacility = try container.decodeStringOrArray(forKey: .seniorFacility)
+        text = try container.decode(String.self, forKey: .text)
+    }
+}
+
+private extension KeyedDecodingContainer {
+    func decodeStringOrArray(forKey key: Key) throws -> [String] {
+        if let stringValue = try? decode(String.self, forKey: key) {
+            return [stringValue]
+        } else if let arrayValue = try? decode([String].self, forKey: key) {
+            return arrayValue
+        } else {
+            return []
+        }
+    }
+}

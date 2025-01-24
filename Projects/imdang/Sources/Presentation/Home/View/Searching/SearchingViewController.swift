@@ -13,6 +13,9 @@ import RxCocoa
 
 
 class SearchingViewController: UIViewController {
+    let searchingViewModel = SearchingViewModel()
+    private var insights: [Insight] = []
+    private var disposeBag = DisposeBag()
     private let currentPage = PublishSubject<Int>()
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout()).then {
         $0.backgroundColor = .white
@@ -27,6 +30,20 @@ class SearchingViewController: UIViewController {
         super.viewDidLoad()
         
         setupCollectionView()
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        searchingViewModel.loadMyInsight()
+            .subscribe { [self] data in
+                if let data = data {
+                    insights = data
+                    collectionView.reloadData()
+                }
+            }
+            .disposed(by: disposeBag)
     }
     
     private func setupCollectionView() {
@@ -174,7 +191,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch section {
         case 0: return 1
-        case 1: return 3
+        case 1: return insights.count > 3 ? 3 : insights.count
         case 2: return 20
         case 3: return 10
         default: return 0
@@ -188,9 +205,16 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             $0.kf.setImage(with: url)
             $0.contentMode = .scaleAspectFill
         }
-        let vc = InsightDetailViewController(image: textImage.image ?? UIImage(), state: testState[indexPath.row], insight: InsightDetail.testData)
-        vc.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(vc, animated: true)
+        
+        searchingViewModel.loadInsightDetail(id: insights[indexPath.row].id)
+            .subscribe { [self] data in
+                if let data = data {
+                    let vc = InsightDetailViewController(image: textImage.image ?? UIImage(), state: .done, insight: data)
+                    vc.hidesBottomBarWhenPushed = true
+                    navigationController?.pushViewController(vc, animated: true)
+                }
+            }
+            .disposed(by: disposeBag)
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -245,19 +269,18 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
         case 1:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
             
-            let insight = Insight(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
-            cell.configure(insight: insight, layoutType: .horizontal)
+            cell.configure(insight: insights[indexPath.row], layoutType: .horizontal)
             return cell
         case 2:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
             
-            let insight = Insight(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
+            let insight = Insight(id: "0", titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
             cell.configure(insight: insight, layoutType: .vertical)
             return cell
         case 3:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
             
-            let insight = Insight(id: 0, titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
+            let insight = Insight(id: "0", titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
             cell.configure(insight: insight, layoutType: .horizontal)
             return cell
         default:

@@ -145,6 +145,7 @@ class InsightAlertViewController: UIViewController {
             cancleButton.isHidden = true
             
             confirmButton.snp.makeConstraints {
+                $0.top.equalTo(descriptionLabel.snp.bottom).offset(24)
                 $0.bottom.equalToSuperview().inset(24)
                 $0.horizontalEdges.equalToSuperview().inset(24)
                 $0.height.equalTo(52)

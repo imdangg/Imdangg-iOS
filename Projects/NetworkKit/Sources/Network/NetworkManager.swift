@@ -9,6 +9,11 @@ import Foundation
 import RxSwift
 public import Alamofire
 
+public struct BasicResponse: Codable {
+    let code: String
+    let message: String
+}
+
 public final class NetworkManager: Network {
     var session: Session
     
@@ -76,7 +81,7 @@ public final class NetworkManager: Network {
                     } else {
                         if let errorData = response.data {
                             do {
-                                let decodedError = try JSONDecoder().decode(E.Response.self, from: errorData)
+                                let decodedError = try JSONDecoder().decode(BasicResponse.self, from: errorData)
                                 observer.onError(NSError(domain: "Network Error", code: response.response?.statusCode ?? -1, userInfo: ["data": decodedError]))
                             } catch {
                                 observer.onError(error)

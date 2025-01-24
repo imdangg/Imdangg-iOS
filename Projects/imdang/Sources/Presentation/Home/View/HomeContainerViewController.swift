@@ -54,6 +54,7 @@ class HomeContainerViewController: BaseViewController {
         configNavigationBarItem()
         makeConstraints()
         bindActions()
+//        presentTooltip()
         
         navigationViewBottomShadow.isHidden = true
     }
@@ -71,6 +72,13 @@ class HomeContainerViewController: BaseViewController {
         modalVC.modalPresentationStyle = .overFullScreen
         modalVC.modalTransitionStyle = .crossDissolve
         self.present(modalVC, animated: true, completion: nil)
+    }
+    
+    private func presentTooltip() {
+        let vc = HomeToolTipViewController(point: myPageButton)
+        vc.modalPresentationStyle = .overFullScreen
+        vc.modalTransitionStyle = .crossDissolve
+        self.present(vc, animated: true, completion: nil)
     }
     
     private func addSubviews() {

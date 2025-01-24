@@ -63,6 +63,7 @@ class InsightViewController: BaseViewController, View {
         
         configNavigationBarItem()
         layout()
+        presentAlert()
     }
     
     private func setupSubviews() {
@@ -122,6 +123,12 @@ class InsightViewController: BaseViewController, View {
         modalVC.modalPresentationStyle = .fullScreen
         modalVC.modalTransitionStyle = .crossDissolve
         self.present(modalVC, animated: true, completion: nil)
+    }
+    
+    private func presentAlert() {
+        showInsightAlert(text: "작성 완료시 인사이트가\n바로 업로드 돼요. 여유로운 시간에\n신중하게 작성해주세요.", type: .confirmOnly) { 
+        } cancelAction: {
+        }
     }
 
     func bind(reactor: InsightReactor) {

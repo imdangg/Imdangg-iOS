@@ -239,9 +239,9 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BaseInfoAddressCell.identifier, for: indexPath) as! BaseInfoAddressCell
             
             if indexPath.row == 0 {
-                baseInfo.adress.siDo == ""
+                baseInfo.address.siDo == ""
                 ? cell.configure(title: "지번 주소")
-                : cell.setData(title: "\(baseInfo.adress.siDo) \(baseInfo.adress.siGungu) \(baseInfo.adress.eupMyeonDong) \(baseInfo.adress.buildngNumber)")
+                : cell.setData(title: "\(baseInfo.address.siDo) \(baseInfo.address.siGunGu) \(baseInfo.address.eupMyeonDong) \(baseInfo.address.buildingNumber)")
             } else {
                 buildingName == ""
                 ? cell.configure(title: "아파트 단지 명")
@@ -254,22 +254,22 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                 
                 webViewController.onAddressSelected = { [self] data in
                     if let sido = (data["sido"]) as? String {
-                        baseInfo.adress.siDo = sido
+                        baseInfo.address.siDo = sido
                     }
                     
                     if let sigungu = (data["sigungu"]) as? String {
-                        baseInfo.adress.siGungu = sigungu
+                        baseInfo.address.siGunGu = sigungu
                     }
                     
                     if let query = (data["query"]) as? String {
                         let splited = query.split(separator: " ")
-                        baseInfo.adress.eupMyeonDong = String(splited[0])
-                        baseInfo.adress.buildngNumber = String(splited[1])
+                        baseInfo.address.eupMyeonDong = String(splited[0])
+                        baseInfo.address.buildingNumber = String(splited[1])
                     }
                     
                     if let buildingName = (data["buildingName"]) as? String {
                         self.buildingName = buildingName
-                        baseInfo.apartmentComplex = buildingName
+                        baseInfo.apartmentComplex.name = buildingName
                     }
                     
                     collectionView.reloadSections(IndexSet([2]))

@@ -7,8 +7,8 @@
 
 import UIKit
 
-struct Insight: Equatable{
-    let id: Int
+struct Insight: Equatable {
+    let id: String
     let titleName: String
     let titleImageUrl: String
     let userName: String

@@ -20,7 +20,7 @@ struct InsightDTO: Codable {
     }
     
     struct ApartmentComplex: Codable {
-        let name: String
+        var name: String
     }
     
     struct Infra: Codable {
