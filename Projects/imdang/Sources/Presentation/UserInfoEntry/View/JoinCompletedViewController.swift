@@ -68,6 +68,7 @@ final class JoinCompletedViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationViewBottomShadow.isHidden = true
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         
         addSubviews()
         makeConstraints()

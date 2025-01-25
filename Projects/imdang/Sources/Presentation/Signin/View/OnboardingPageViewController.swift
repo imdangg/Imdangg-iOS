@@ -48,7 +48,8 @@ class OnboardingPageViewController: UIPageViewController, UIPageViewControllerDa
         
         pageControl.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.centerY.equalTo(view.snp.bottom).offset(-253)
+            $0.height.equalTo(8)
+            $0.bottom.equalToSuperview().offset(-234)
         }
     }
     

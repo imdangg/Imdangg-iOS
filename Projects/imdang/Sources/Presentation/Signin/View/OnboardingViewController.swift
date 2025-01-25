@@ -30,8 +30,8 @@ class OnboardingViewController: UIViewController {
     
     init(title: String, description: String, image: UIImage) {
         super.init(nibName: nil, bundle: nil)
-        titleLabel.text = title
-        descriptionLabel.text = description
+        titleLabel.setTextWithLineHeight(text: title, lineHeight: 33.6, textAlignment: .center)
+        descriptionLabel.setTextWithLineHeight(text: description, lineHeight: 22.4, textAlignment: .center)
         guideImageView.image = image
     }
     
@@ -66,12 +66,12 @@ class OnboardingViewController: UIViewController {
         backView.snp.makeConstraints {
             $0.bottom.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(289)
+            $0.height.equalTo(266)
         }
         
         titleLabel.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.top.equalTo(backView.snp.top).offset(72)
+            $0.top.equalTo(backView.snp.top).offset(52)
         }
         
         descriptionLabel.snp.makeConstraints {

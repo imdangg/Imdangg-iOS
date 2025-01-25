@@ -130,7 +130,7 @@ class BaseViewController: UIViewController {
     
     private func bindAction() {
         customBackButton.rx.tap
-            .subscribe(onNext: { [weak self] _ in
+            .subscribe(onNext: { [weak self] in
                 self?.navigationController?.popViewController(animated: true)
             })
             .disposed(by: disposeBag)
