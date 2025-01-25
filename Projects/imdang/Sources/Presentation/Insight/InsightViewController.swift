@@ -51,19 +51,21 @@ class InsightViewController: BaseViewController, View {
     private let environVC = WriteInsightEtcViewController(info: InsightEtcInfo.environment, title: "단지 환경")
     private let facilVC = WriteInsightEtcViewController(info: InsightEtcInfo.facility, title: "단지 시설")
     private let newsVC = WriteInsightEtcViewController(info: InsightEtcInfo.goodNews, title: "호재")
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .grayScale25
         navigationViewBottomShadow.isHidden = true
+        backButtonActionEnable = false
         
-        
+//        super.disposeBag = DisposeBag()
         reactor = InsightReactor()
         setupSubviews()
         
         configNavigationBarItem()
         layout()
         presentAlert()
+        setBackButton()
     }
     
     private func setupSubviews() {
@@ -93,6 +95,18 @@ class InsightViewController: BaseViewController, View {
             $0.trailing.equalToSuperview()
         }
         
+    }
+    
+    private func setBackButton() {
+        customBackButton.rx.tap
+            .subscribe(onNext: {
+                self.showInsightAlert(text: "페이지 이동 시 작성된 내용이\n저장되지 않아요. 그래도 이동할까요?", type: .cancellable) {
+                    self.navigationController?.popViewController(animated: true)
+                } cancelAction: {
+                    
+                }
+            })
+            .disposed(by: disposeBag)
     }
 
     private func layout() {

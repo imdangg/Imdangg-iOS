@@ -84,6 +84,7 @@ class InsightAlertViewController: UIViewController {
         
         alertView.snp.makeConstraints {
             $0.center.equalToSuperview()
+            $0.width.equalTo(335)
         }
         
         icon.snp.makeConstraints {
@@ -94,7 +95,7 @@ class InsightAlertViewController: UIViewController {
         
         descriptionLabel.snp.makeConstraints {
             $0.top.equalTo(icon.snp.bottom).offset(12)
-            $0.horizontalEdges.equalToSuperview().inset(55)
+            $0.centerX.equalToSuperview()
         }
         
         cancleButton.snp.makeConstraints {
