@@ -263,8 +263,8 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                     
                     if let query = (data["query"]) as? String {
                         let splited = query.split(separator: " ")
-                        baseInfo.address.eupMyeonDong = String(splited[0])
-                        baseInfo.address.buildingNumber = String(splited[1])
+                        baseInfo.address.eupMyeonDong = String(splited[safe: 0] ?? "")
+                        baseInfo.address.buildingNumber = String(splited[safe: 1] ?? "")
                     }
                     
                     if let buildingName = (data["buildingName"]) as? String {
