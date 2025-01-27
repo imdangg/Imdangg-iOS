@@ -11,6 +11,10 @@ import RxSwift
 import RxCocoa
 import Then
 
+enum HomeTapState {
+    case search, exchange
+}
+
 class HomeContainerViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     
@@ -152,20 +156,14 @@ class HomeContainerViewController: BaseViewController {
     
     private func bindActions() {
         searchButton.rx.tap
-            .subscribe(onNext: { [weak self] state in
-                self?.searchView.isHidden = false
-                self?.exchangeView.isHidden = true
-                self?.exchangeButton.setTitleColor(.grayScale500, for: .normal)
-                self?.searchButton.setTitleColor(.grayScale900, for: .normal)
+            .subscribe(onNext: { [weak self] in
+                self?.changeView(showView: .search)
             })
             .disposed(by: disposeBag)
         
         exchangeButton.rx.tap
-            .subscribe(onNext: { [weak self] state in
-                self?.searchView.isHidden = true
-                self?.exchangeView.isHidden = false
-                self?.searchButton.setTitleColor(.grayScale500, for: .normal)
-                self?.exchangeButton.setTitleColor(.grayScale900, for: .normal)
+            .subscribe(onNext: { [weak self] in
+                self?.changeView(showView: .exchange)
             })
             .disposed(by: disposeBag)
         
@@ -176,5 +174,20 @@ class HomeContainerViewController: BaseViewController {
                 self?.navigationController?.pushViewController(vc, animated: true)
         })
         .disposed(by: disposeBag)
+    }
+    
+    func changeView(showView: HomeTapState) {
+        switch showView {
+        case .search:
+            searchView.isHidden = false
+            exchangeView.isHidden = true
+            exchangeButton.setTitleColor(.grayScale500, for: .normal)
+            searchButton.setTitleColor(.grayScale900, for: .normal)
+        case .exchange:
+            searchView.isHidden = true
+            exchangeView.isHidden = false
+            searchButton.setTitleColor(.grayScale500, for: .normal)
+            exchangeButton.setTitleColor(.grayScale900, for: .normal)
+        }
     }
 }

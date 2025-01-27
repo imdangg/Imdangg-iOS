@@ -38,6 +38,7 @@ class AreaModalViewController: UIViewController {
         tableView.dataSource = self
         tableView.separatorColor = .clear
         tableView.showsVerticalScrollIndicator = false
+        tableView(tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
         
         tableView.register(cell: AreaModalTableCell.self)
         

@@ -227,11 +227,11 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 }
                 .disposed(by: disposeBag)
         case 2:
-            let vc = InsightDetailViewController(url: todayInsight.value[indexPath.row].titleImageUrl, state: todayInsight.value[indexPath.row].state, insight: InsightDetail.testData)
+            let vc = InsightDetailViewController(url: todayInsight.value[indexPath.row].titleImageUrl, state: todayInsight.value[indexPath.row].state, insight: InsightDetail.testData, myInsights: myInsight.value)
             vc.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(vc, animated: true)
         case 3:
-            let vc = InsightDetailViewController(url: topInsight.value[indexPath.row].titleImageUrl, state: topInsight.value[indexPath.row].state, insight: InsightDetail.testData)
+            let vc = InsightDetailViewController(url: topInsight.value[indexPath.row].titleImageUrl, state: topInsight.value[indexPath.row].state, insight: InsightDetail.testData, myInsights: myInsight.value)
             vc.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(vc, animated: true)
         default:

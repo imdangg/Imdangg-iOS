@@ -85,15 +85,22 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     func bind(reactor: InsightReactor) {
         
         nextButtonView.nextButton.rx.tap
-            .map { InsightReactor.Action.tapBaseInfoConfirm(self.baseInfo, self.imageData) }
-            .bind(to: reactor.action)
+            .subscribe(with: self, onNext: { owner, _ in
+                if owner.nextButtonView.isEnable {
+                    owner.reactor?.action.onNext(
+                        .tapBaseInfoConfirm(owner.baseInfo, owner.imageData)
+                    )
+                } else {
+                    owner.showToast(message: "필수 항목을 모두 작성해주세요")
+                }
+            })
             .disposed(by: disposeBag)
-        
+
+
         checkSectionState
-            .subscribe(onNext: { [weak self] arr in
-                guard let self = self else { return }
-                self.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 8 ? true : false)
-//                self.nextButtonView.nextButtonEnable(value: true)
+            .subscribe(with: self, onNext: { owner, arr in
+                owner.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 8 ? true : false)
+//                owner.nextButtonView.nextButtonEnable(value: true)
             })
             .disposed(by: disposeBag)
     }

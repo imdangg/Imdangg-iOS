@@ -107,6 +107,7 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
     }
     
     override func prepareForReuse() {
+        descriptionImageView.image = nil
     }
     
     required init?(coder: NSCoder) {
@@ -208,7 +209,7 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
         adressLabel.text = "\(info.address.toString())\n(\(info.apartmentComplex.name))"
         dateLabel.text = info.visitAt
         transLabel.text = info.visitMethods.joined(separator: " ")
-        accessLabel.text = info.access
+        accessLabel.text = info.access.replacingOccurrences(of: "_", with: " ")
         summaryLabel.setTextWithLineHeight(text: info.summary, lineHeight: 22.4)
         
         switch state {
@@ -229,6 +230,8 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
                 $0.width.equalTo(width)
                 $0.height.equalTo(608 + calculateLabelHeight(text: info.summary))
             }
+            
+            separatorView.isHidden = false
         } else {
             contentView.snp.remakeConstraints {
                 $0.edges.equalToSuperview()
@@ -241,7 +244,7 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
                 $0.horizontalEdges.equalToSuperview()
             }
             
-            separatorView.removeFromSuperview()
+            separatorView.isHidden = true
         }
     }
 }

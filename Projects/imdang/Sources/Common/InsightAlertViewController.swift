@@ -11,8 +11,12 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
+enum AlertImageType {
+    case circleWarning, circleCheck
+}
+
 enum AlertType {
-    case confirmOnly, cancellable, write
+    case confirmOnly, cancellable, moveButton
 }
 
 class InsightAlertViewController: UIViewController {
@@ -57,7 +61,7 @@ class InsightAlertViewController: UIViewController {
         $0.layer.cornerRadius = 8
     }
     
-    private let storegeBoxButton = UIButton().then {
+    private let moveButton = UIButton().then {
         $0.setTitle("보관함 확인하기", for: .normal)
         $0.setTitleColor(.grayScale700, for: .normal)
         $0.titleLabel?.font = .pretenSemiBold(14)
@@ -73,7 +77,7 @@ class InsightAlertViewController: UIViewController {
     }
     
     private func addSubviews() {
-        [icon, descriptionLabel, cancleButton, confirmButton, storegeBoxButton].forEach { alertView.addSubview($0) }
+        [icon, descriptionLabel, cancleButton, confirmButton, moveButton].forEach { alertView.addSubview($0) }
         [dimView, alertView].forEach { view.addSubview($0) }
     }
     
@@ -127,7 +131,7 @@ class InsightAlertViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        storegeBoxButton.rx.tap
+        moveButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
                 self?.dismiss(animated: true, completion: nil)
                 self?.cancelAction?()
@@ -135,10 +139,17 @@ class InsightAlertViewController: UIViewController {
             .disposed(by: disposeBag)
     }
     
-    func config(text: String, type: AlertType) {
+    func config(text: String, type: AlertType, imageType: AlertImageType) {
         addSubviews()
         makeConstrints()
         descriptionLabel.setTextWithLineHeight(text: text, lineHeight: 25.2, textAlignment: .center)
+        
+        switch imageType {
+        case .circleWarning:
+            icon.image = ImdangImages.Image(resource: .circleWarning)
+        case .circleCheck:
+            icon.image = ImdangImages.Image(resource: .circleCheck64)
+        }
         
         switch type {
         case .confirmOnly:
@@ -163,12 +174,12 @@ class InsightAlertViewController: UIViewController {
                 $0.height.equalTo(52)
             }
             
-        case .write:
+        case .moveButton:
             confirmButton.setTitle("확인", for: .normal)
             cancleButton.isHidden = true
             
             
-            storegeBoxButton.snp.makeConstraints {
+            moveButton.snp.makeConstraints {
                 $0.top.equalTo(descriptionLabel.snp.bottom).offset(16)
                 $0.centerX.equalToSuperview()
                 $0.width.equalTo(121)
@@ -176,17 +187,11 @@ class InsightAlertViewController: UIViewController {
             }
             
             confirmButton.snp.makeConstraints {
-                $0.top.equalTo(storegeBoxButton.snp.bottom).offset(24)
+                $0.top.equalTo(moveButton.snp.bottom).offset(24)
                 $0.bottom.equalToSuperview().inset(24)
                 $0.horizontalEdges.equalToSuperview().inset(24)
                 $0.height.equalTo(52)
             }
         }
-    }
-}
-
-extension UIButton {
-    func capsulLayer(height: Int) {
-        self.layer.cornerRadius = Double(height) / 2
     }
 }

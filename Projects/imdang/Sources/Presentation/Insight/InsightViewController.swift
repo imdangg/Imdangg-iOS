@@ -102,7 +102,7 @@ class InsightViewController: BaseViewController, View {
             .subscribe(onNext: {
                 self.showInsightAlert(text: "페이지 이동 시 작성된 내용이\n저장되지 않아요. 그래도 이동할까요?", type: .cancellable) {
                     self.navigationController?.popViewController(animated: true)
-                } cancelAction: {
+                } etcAction: {
                     
                 }
             })
@@ -140,9 +140,7 @@ class InsightViewController: BaseViewController, View {
     }
     
     private func presentAlert() {
-        showInsightAlert(text: "작성 완료시 인사이트가\n바로 업로드 돼요. 여유로운 시간에\n신중하게 작성해주세요.", type: .confirmOnly) { 
-        } cancelAction: {
-        }
+        showInsightAlert(text: "작성 완료시 인사이트가\n바로 업로드 돼요. 여유로운 시간에\n신중하게 작성해주세요.", type: .confirmOnly)
     }
 
     func bind(reactor: InsightReactor) {

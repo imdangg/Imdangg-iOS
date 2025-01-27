@@ -60,8 +60,12 @@ class CommonButton: UIButton {
         setState(initialButtonType)
     }
     
-    func setState(_ state: CommonButtonType) {
+    func setState(_ state: CommonButtonType, title: String? = nil) {
         UIView.animate(withDuration: 0.1) {
+            if let title = title {
+                self.setTitle(title, for: .normal)
+            }
+            
             switch state {
             case .enabled:
                 self.isEnabled = true

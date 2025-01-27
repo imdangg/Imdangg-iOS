@@ -78,39 +78,35 @@ class WriteInsightEtcViewController: UIViewController, View {
             $0.bottom.equalToSuperview()
             $0.height.equalTo(96)
         }
+        if categoryName == "호재" {
+            nextButtonView.config(needBack: false, title: "작성완료 및 업로드")
+        } else {
+            nextButtonView.config(needBack: true)
+        }
     }
     
     func bind(reactor: InsightReactor) {
-        if categoryName == "인프라" {
-            nextButtonView.config(needBack: true)
-            nextButtonView.nextButton.rx.tap
-                .map { InsightReactor.Action.tapInfraInfoConfirm(self.baseInfo.infra) }
-                .bind(to: reactor.action)
-                .disposed(by: disposeBag)
-            
-        } else if categoryName == "단지 환경" {
-            nextButtonView.config(needBack: true)
-            nextButtonView.nextButton.rx.tap
-                .map { InsightReactor.Action.tapEnvironmentInfoConfirm(self.baseInfo.complexEnvironment) }
-                .bind(to: reactor.action)
-                .disposed(by: disposeBag)
-            
-        } else if categoryName == "단지 시설" {
-            nextButtonView.config(needBack: true)
-            nextButtonView.nextButton.rx.tap
-                .map { InsightReactor.Action.tapFacilityInfoConfirm(self.baseInfo.complexFacility) }
-                .bind(to: reactor.action)
-                .disposed(by: disposeBag)
-            
-        } else if categoryName == "호재" {
-            nextButtonView.config(needBack: false)
-            nextButtonView.nextButton.setTitle("작성완료 및 업로드", for: .normal)
-            
-            nextButtonView.nextButton.rx.tap
-                .map { InsightReactor.Action.tapFavorableNewsInfoConfirm(self.baseInfo.favorableNews) }
-                .bind(to: reactor.action)
-                .disposed(by: disposeBag)
-        }
+        nextButtonView.nextButton.rx.tap
+            .subscribe(with: self, onNext: { owner, _ in
+                guard owner.nextButtonView.isEnable else {
+                    owner.showToast(message: "필수 항목을 모두 작성해주세요")
+                    return
+                }
+                
+                switch owner.categoryName {
+                case "인프라":
+                    owner.reactor?.action.onNext( .tapInfraInfoConfirm(owner.baseInfo.infra) )
+                case "단지 환경":
+                    owner.reactor?.action.onNext( .tapEnvironmentInfoConfirm(owner.baseInfo.complexEnvironment) )
+                case "단지 시설":
+                    owner.reactor?.action.onNext( .tapFacilityInfoConfirm(owner.baseInfo.complexFacility) )
+                case "호재":
+                    owner.reactor?.action.onNext( .tapFavorableNewsInfoConfirm(owner.baseInfo.favorableNews) )
+                default:
+                    break
+                }
+            })
+            .disposed(by: disposeBag)
         
         nextButtonView.backButton.rx.tap
             .map { InsightReactor.Action.tapBackButton }
@@ -118,9 +114,8 @@ class WriteInsightEtcViewController: UIViewController, View {
             .disposed(by: disposeBag)
         
         checkSectionState
-            .subscribe(onNext: { [weak self] arr in
-                guard let self = self else { return }
-                self.nextButtonView.nextButtonEnable(value: arr.count == insightSectionInfo.count ? true : false)
+            .subscribe(with: self, onNext: { owner, arr in
+                owner.nextButtonView.nextButtonEnable(value: arr.count == owner.insightSectionInfo.count ? true : false)
 //                self.nextButtonView.nextButtonEnable(value: true)
             })
             .disposed(by: disposeBag)
@@ -129,7 +124,7 @@ class WriteInsightEtcViewController: UIViewController, View {
             .map { $0.isUploadSuccess }
             .distinctUntilChanged()
             .subscribe(onNext: { result in
-                self.showInsightAlert(text: "인사이트 업로드가 완료되었어요.\n작성한 내 인사이트는 보관함에서\n확인할 수 있어요.", type: .write) { [self] in
+                self.showInsightAlert(text: "인사이트 업로드가 완료되었어요.\n작성한 내 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton) { [self] in
                     if let image = reactor.mainImage {
                         let vc = InsightDetailViewController(url: "", image: image, state: .done, insight: reactor.detail)
                         self.navigationController?.pushViewController(vc, animated: true)
@@ -137,7 +132,7 @@ class WriteInsightEtcViewController: UIViewController, View {
                             self.navigationController?.setViewControllers([firstVC, vc], animated: true)
                         }
                     }
-                } cancelAction: {
+                } etcAction: {
                     self.navigationController?.popToRootViewController(animated: true)
                     guard let tabBarController = self.tabBarController else { return }
                     tabBarController.selectedIndex = 2
@@ -291,7 +286,7 @@ extension WriteInsightEtcViewController {
                                         }
                                         selectedButtonNames[visibleIndexPath.section] = [selectedText]
                                         setInfoData(title: insightSectionInfo[indexPath.section].title, items: Array(selectedButtonNames[indexPath.section, default: []]))
-                                    } cancelAction: {
+                                    } etcAction: {
                                         cell.isClicked = false
                                     }
                                 } else {
