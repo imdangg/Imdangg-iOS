@@ -45,5 +45,29 @@ class ServerJoinService {
                 return Observable.just(false)
             }
     }
+    
+    func termsAgree() -> Observable<Bool> {
+        let parameters: [String: Any] = [
+            "termsIds": [0, 1, 2],
+            "memberId": UserdefaultKey.memberId
+        ]
+        
+        let endpoint = Endpoint<BasicResponse>(
+            baseURL: .imdangAPI,
+            path: "/terms/agree",
+            method: .post,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
+        )
+        
+        return networkManager.requestOptional(with: endpoint)
+            .map { _ in
+                return true
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(false)
+            }
+    }
 }
 

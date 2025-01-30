@@ -14,17 +14,43 @@ final class SearchingViewModel {
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager()
     
-    func loadMyInsight() -> Observable<[Insight]?> {
+    func loadMyInsights() -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
             "pageNumber": 0,
             "pageSize": 10,
-            "direction": "ASC",
+            "direction": "DESC",
+            "properties": [ "created_at" ]
+        ]
+        
+        let endpoint = Endpoint<MyInsightResponse>(
+            baseURL: .imdangAPI,
+            path: "/my-insights/created-by-me",
+            method: .get,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
+        )
+        
+        return networkManager.request(with: endpoint)
+            .map { data in
+                return data.toEntitiy()
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(nil)
+            }
+    }
+    
+    func loadTodayInsights() -> Observable<[Insight]?> {
+        let parameters: [String: Any] = [
+            "pageNumber": 0,
+            "pageSize": 10,
+            "direction": "DESC",
             "properties": [ "created_at" ]
         ]
         
         let endpoint = Endpoint<InsightResponse>(
             baseURL: .imdangAPI,
-            path: "/my-insights/created-by-me",
+            path: "/insights",
             method: .get,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
             parameters: parameters

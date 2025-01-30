@@ -356,7 +356,7 @@ final class UserInfoEntryViewController: BaseViewController, View {
     }
     
     private func presentModal() {
-        let modalVC = TermsModelViewController()
+        let modalVC = TermsModalViewController()
         modalVC.modalPresentationStyle = .overFullScreen
         modalVC.modalTransitionStyle = .crossDissolve
         self.present(modalVC, animated: true, completion: nil)

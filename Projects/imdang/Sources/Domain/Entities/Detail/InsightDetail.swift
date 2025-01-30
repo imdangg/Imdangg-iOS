@@ -15,8 +15,8 @@ struct Address: Codable {
     var roadName: String? = ""
     var buildingNumber: String
     var detail: String? = ""
-    var latitude: Double
-    var longitude: Double
+    var latitude: Double?
+    var longitude: Double?
     
     func toString() -> String {
         return "\(siDo) \(siGunGu) \(eupMyeonDong) \(buildingNumber)\( detail ?? "")"

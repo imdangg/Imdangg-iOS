@@ -11,7 +11,8 @@ import SnapKit
 import RxSwift
 import RxRelay
 
-class TermsModelViewController: UIViewController {
+class TermsModalViewController: UIViewController {
+    private let joinService = ServerJoinService()
     private var disposeBag = DisposeBag()
     private var countRelay = PublishRelay<Set<Int>>()
     private var currentSelected = Set<Int>()
@@ -121,20 +122,21 @@ class TermsModelViewController: UIViewController {
         }
         
         termsButton.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+            $0.height.equalTo(24)
             $0.top.equalTo(allCheckButton.snp.bottom).offset(16)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalTo(termsPageButton.snp.leading).offset(-4)
         }
         
         personalInfoButton.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+            $0.height.equalTo(24)
             $0.top.equalTo(termsButton.snp.bottom).offset(16)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalTo(personalInfoPageButton.snp.leading).offset(-4)
         }
+        
         marketingButton.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+            $0.height.equalTo(24)
             $0.top.equalTo(personalInfoButton.snp.bottom).offset(16)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalTo(marketingPageButton.snp.leading).offset(-4)
@@ -270,8 +272,17 @@ class TermsModelViewController: UIViewController {
             .disposed(by: disposeBag)
         
         acceptButton.rx.tap
-            .subscribe(onNext: { [weak self] _ in
-                self?.dismiss(animated: true, completion: nil)
+            .subscribe(with: self, onNext: { owner, _ in
+                
+                owner.joinService.termsAgree()
+                        .subscribe { success in
+                            if success {
+                                owner.dismiss(animated: true, completion: nil)
+                            } else {
+                                print("약관 동의 실패")
+                            }
+                        }
+                        .disposed(by: owner.disposeBag)
             })
             .disposed(by: disposeBag)
         

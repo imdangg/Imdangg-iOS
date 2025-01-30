@@ -50,8 +50,7 @@ class EmptyMyInsightCollectionCell: UICollectionViewCell {
     
     private func makeConstraints() {
         imageView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-            $0.width.equalTo(335)
+            $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(72)
         }
         
