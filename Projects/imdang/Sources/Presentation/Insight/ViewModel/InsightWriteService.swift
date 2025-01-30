@@ -9,6 +9,7 @@ import UIKit
 import NetworkKit
 import RxSwift
 import Alamofire
+import CoreLocation
 
 final class InsightWriteService {
     static let shared = InsightWriteService()
@@ -111,6 +112,25 @@ final class InsightWriteService {
             text: "string"
         )
     )
+    
+    func getCoordinates(for address: String, completion: @escaping (CLLocationCoordinate2D?, Error?) -> Void) {
+        let geocoder = CLGeocoder()
+        geocoder.geocodeAddressString(address) { placemarks, error in
+            if let error = error {
+                print("Geocoding failed: \(error.localizedDescription)")
+                completion(nil, error)
+                return
+            }
+
+            if let placemark = placemarks?.first, let location = placemark.location {
+                let coordinate = location.coordinate
+                completion(coordinate, nil)
+            } else {
+                print("No coordinates found for \(address)")
+                completion(nil, nil)
+            }
+        }
+    }
 }
 
 

@@ -24,6 +24,7 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     
     var disposeBag = DisposeBag()
     
+    private let insightService = InsightWriteService()
     private var baseInfo = InsightDetail.emptyInsight
     private var imageData: UIImage?
     private var buildingName = ""
@@ -248,7 +249,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             if indexPath.row == 0 {
                 baseInfo.address.siDo == ""
                 ? cell.configure(title: "지번 주소")
-                : cell.setData(title: "\(baseInfo.address.siDo) \(baseInfo.address.siGunGu) \(baseInfo.address.eupMyeonDong) \(baseInfo.address.buildingNumber)")
+                : cell.setData(title: baseInfo.address.toString())
             } else {
                 buildingName == ""
                 ? cell.configure(title: "아파트 단지 명")
@@ -256,22 +257,45 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             }
             
             cell.buttonAction = { result in
-                let webViewController = WebViewController()
+                let webViewController = WebViewController(url: "https://daejinlim.github.io/daumAdressSearch/")
                 self.present(webViewController, animated: true, completion: nil)
                 
                 webViewController.onAddressSelected = { [self] data in
-                    if let sido = (data["sido"]) as? String {
-                        baseInfo.address.siDo = sido
+                    
+                    if let jibunAddress = (data["jibunAddress"]) as? String {
+                        print("jibunAddress: \(jibunAddress)")
+                        let splited = jibunAddress.split(separator: " ")
+                        baseInfo.address.siDo = String(splited[safe: 0] ?? "")
+                        baseInfo.address.siGunGu = String(splited[safe: 1] ?? "")
+                        baseInfo.address.eupMyeonDong = String(splited[safe: 2] ?? "")
+                        baseInfo.address.buildingNumber = String(splited[safe: 3] ?? "")
                     }
                     
-                    if let sigungu = (data["sigungu"]) as? String {
-                        baseInfo.address.siGunGu = sigungu
-                    }
-                    
-                    if let query = (data["query"]) as? String {
-                        let splited = query.split(separator: " ")
-                        baseInfo.address.eupMyeonDong = String(splited[safe: 0] ?? "")
-                        baseInfo.address.buildingNumber = String(splited[safe: 1] ?? "")
+                        
+                    insightService.getCoordinates(for: baseInfo.address.toString()) { [self] coordinate, error in
+                        if let error = error {
+                            print("Error: \(error.localizedDescription)")
+                        } else if let coordinate = coordinate {
+                            baseInfo.address.latitude = coordinate.latitude
+                            baseInfo.address.longitude = coordinate.longitude
+                            
+                        } else {
+                            if let roadAddress = (data["roadAddress"]) as? String {
+                                print("roadAddress: \(roadAddress)")
+                                insightService.getCoordinates(for: roadAddress) { [self] coordinate, error in
+                                    if let error = error {
+                                        print("Error: \(error.localizedDescription)")
+                                    } else if let coordinate = coordinate {
+                                        baseInfo.address.latitude = coordinate.latitude
+                                        baseInfo.address.longitude = coordinate.longitude
+                                        
+                                    } else {
+                                        print("No coordinates found.")
+                                    }
+                                }
+                            }
+                        }
+                        print("Latitude: \(baseInfo.address.latitude), Longitude: \(baseInfo.address.longitude)")
                     }
                     
                     if let buildingName = (data["buildingName"]) as? String {
