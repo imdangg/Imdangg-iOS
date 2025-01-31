@@ -234,16 +234,16 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
         let width = UIScreen.main.bounds.width
         if state == .done {
             contentView.snp.makeConstraints {
-                $0.edges.equalToSuperview()
-                $0.width.equalTo(width)
+                $0.top.equalToSuperview()
+                $0.horizontalEdges.equalToSuperview()
                 $0.height.equalTo(608 + calculateLabelHeight(text: info.summary))
             }
             
             separatorView.isHidden = false
         } else {
             contentView.snp.remakeConstraints {
-                $0.edges.equalToSuperview()
-                $0.width.equalTo(width)
+                $0.top.equalToSuperview()
+                $0.horizontalEdges.equalToSuperview()
                 $0.height.equalTo(608 + calculateLabelHeight(text: info.summary) + 312).priority(999)
             }
             

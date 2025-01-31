@@ -127,7 +127,7 @@ final class InsightDetailViewController: BaseViewController {
         self.view.addSubview(tableView)
         tableView.snp.makeConstraints {
             $0.topEqualToNavigationBottom(vc: self)
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview().offset(-96)
         }
     }
