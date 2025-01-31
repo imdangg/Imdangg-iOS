@@ -66,16 +66,24 @@ class HomeContainerViewController: BaseViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if !UserdefaultKey.dontSeeToday {
+        if !UserdefaultKey.ticketReceived {
             presentModal()
         }
     }
     
     private func presentModal() {
-        let modalVC = TicketModalViewController()
-        modalVC.modalPresentationStyle = .overFullScreen
-        modalVC.modalTransitionStyle = .crossDissolve
-        self.present(modalVC, animated: true, completion: nil)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        
+        let todayString = formatter.string(from: Date())
+        let savedDate = UserdefaultKey.dontSeeToday
+        
+        if todayString != savedDate {
+            let modalVC = TicketModalViewController()
+            modalVC.modalPresentationStyle = .overFullScreen
+            modalVC.modalTransitionStyle = .crossDissolve
+            self.present(modalVC, animated: true, completion: nil)
+        }
     }
     
     private func presentTooltip() {

@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 enum UserdefaultKey {
     // 저장: UserdefaultKey.test = "~~"
     // 읽기: let test = UserdefaultKey.test
@@ -20,8 +19,11 @@ enum UserdefaultKey {
     @UserDefault(key: "accessToken", defaultValue: "")
     static var accessToken: String
     
-    @UserDefault(key: "dontSeeToday", defaultValue: false)
-    static var dontSeeToday: Bool
+    @UserDefault(key: "dontSeeToday", defaultValue: "")
+    static var dontSeeToday: String
+    
+    @UserDefault(key: "ticketReceived", defaultValue: false)
+    static var ticketReceived: Bool
 }
 
 
