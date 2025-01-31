@@ -46,9 +46,9 @@ class ServerJoinService {
             }
     }
     
-    func termsAgree() -> Observable<Bool> {
+    func termsAgree(agreeIndex: [Int]) -> Observable<Bool> {
         let parameters: [String: Any] = [
-            "termsIds": [0, 1, 2],
+            "termsIds": agreeIndex.sorted(),
             "memberId": UserdefaultKey.memberId
         ]
         

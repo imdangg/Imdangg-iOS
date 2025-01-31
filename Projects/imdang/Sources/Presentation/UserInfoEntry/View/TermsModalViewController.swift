@@ -54,7 +54,7 @@ class TermsModalViewController: UIViewController {
     }
     
     private let marketingButton = CheckButton().then {
-        $0.configure(isBackground: false, title: "[필수] 마케팅 수신 및 앱 알림 동의")
+        $0.configure(isBackground: false, title: "[선택] 마케팅 수신 및 앱 알림 동의")
         $0.setState(isSelected: false)
     }
     
@@ -274,7 +274,7 @@ class TermsModalViewController: UIViewController {
         acceptButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
                 
-                owner.joinService.termsAgree()
+                owner.joinService.termsAgree(agreeIndex: Array(owner.currentSelected))
                         .subscribe { success in
                             if success {
                                 owner.dismiss(animated: true, completion: nil)
@@ -289,8 +289,12 @@ class TermsModalViewController: UIViewController {
         countRelay
             .subscribe(onNext: { [weak self] arr in
                 guard let self else { return }
-                if arr.count == 3 {
+                if  arr == [0, 1] {
                     acceptButton.setState(.enabled)
+                    allCheckButton.setState(isSelected: false)
+                } else if arr.count == 3 {
+                    acceptButton.setState(.enabled)
+                    allCheckButton.setState(isSelected: true)
                 } else {
                     acceptButton.setState(.disabled)
                     allCheckButton.setState(isSelected: false)
