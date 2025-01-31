@@ -14,8 +14,12 @@ import RxCocoa
 class MyInsightsModalViewController: UIViewController {
     var resultSend: ((Bool) -> Void)?
     private var tableView: UITableView!
-    private var insights: [Insight] = []
+    private var insightId: String
+    private var selectedInsightId: String?
+    private var myInsights: [Insight] = []
     private let disposeBag = DisposeBag()
+    private let insightDetailViewModel = InsightDetailViewModel()
+    
     private let grabber = UIButton().then {
         $0.backgroundColor = .grayScale200
         $0.layer.cornerRadius = 3
@@ -31,9 +35,10 @@ class MyInsightsModalViewController: UIViewController {
         $0.applyTopBlur()
     }
     
-    init(insights: [Insight]) {
+    init(insightId: String, myInsights: [Insight]) {
+        self.insightId = insightId
+        self.myInsights = myInsights
         super.init(nibName: nil, bundle: nil)
-        self.insights = insights
     }
     
     required init?(coder: NSCoder) {
@@ -103,12 +108,23 @@ class MyInsightsModalViewController: UIViewController {
         configButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
                 
-                owner.showInsightAlert(text: "교환 요청을 완료했어요.\n교환 내역은 교환소에서 확인해보세요.", type: .moveButton) {
-                    owner.dismiss(animated: true)
-                    owner.resultSend?(true)
-                } etcAction: {
-                    owner.dismiss(animated: true)
-                    NotificationCenter.default.post(name: .detailModalDidDismiss, object: nil)
+                if let selectedInsightId = owner.selectedInsightId {
+                    
+                    owner.insightDetailViewModel.createInsight(thisInsightId: owner.insightId, myInsightId: selectedInsightId)
+                        .subscribe(onNext: {
+                            if $0 {
+                                owner.showInsightAlert(text: "교환 요청을 완료했어요.\n교환 내역은 교환소에서 확인해보세요.", type: .moveButton) {
+                                    owner.dismiss(animated: true)
+                                    owner.resultSend?(true)
+                                } etcAction: {
+                                    owner.dismiss(animated: true)
+                                    NotificationCenter.default.post(name: .detailModalDidDismiss, object: nil)
+                                }
+                            }
+                        })
+                        .disposed(by: owner.disposeBag)
+                } else {
+                    owner.showInsightAlert(text: "쿠폰사용 준비중", type: .confirmOnly)
                 }
             })
             .disposed(by: disposeBag)
@@ -117,7 +133,7 @@ class MyInsightsModalViewController: UIViewController {
 
 extension MyInsightsModalViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1 + insights.count
+        return 1 + myInsights.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -127,12 +143,18 @@ extension MyInsightsModalViewController: UITableViewDelegate, UITableViewDataSou
         case 0:
             cell.config(type: .ticket, ticketCount: 0)
         default:
-            cell.config(type: .insight, insight: insights[indexPath.row - 1])
+            cell.config(type: .insight, insight: myInsights[indexPath.row - 1])
         }
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        switch indexPath.row {
+        case 0:
+            selectedInsightId = nil
+        default:
+            selectedInsightId = myInsights[indexPath.row - 1].insightId
+        }
     }
 }

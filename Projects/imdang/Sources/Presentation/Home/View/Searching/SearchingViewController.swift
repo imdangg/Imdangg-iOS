@@ -229,7 +229,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
         switch indexPath.section {
         case 1:
             if !myInsights.value.isEmpty {
-                searchingViewModel.loadInsightDetail(id: myInsights.value[indexPath.row].id)
+                searchingViewModel.loadInsightDetail(id: myInsights.value[indexPath.row].insightId)
                     .subscribe { [self] data in
                         if let data = data {
                             let vc = InsightDetailViewController(url: "", insight: data, likeCount: myInsights.value[indexPath.row].likeCount)
@@ -240,7 +240,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                     .disposed(by: disposeBag)
             }
         case 2:
-            searchingViewModel.loadInsightDetail(id: todayInsights.value[indexPath.row].id)
+            searchingViewModel.loadInsightDetail(id: todayInsights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
                         let vc = InsightDetailViewController(url: "", insight: data, likeCount: todayInsights.value[indexPath.row].likeCount, myInsights: myInsights.value)
@@ -250,7 +250,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 }
                 .disposed(by: disposeBag)
         case 3:
-            searchingViewModel.loadInsightDetail(id: topInsights.value[indexPath.row].id)
+            searchingViewModel.loadInsightDetail(id: topInsights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
                         let vc = InsightDetailViewController(url: "", insight: data, likeCount: topInsights.value[indexPath.row].likeCount, myInsights: myInsights.value)

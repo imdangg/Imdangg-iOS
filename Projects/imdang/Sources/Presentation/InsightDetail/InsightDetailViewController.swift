@@ -176,6 +176,9 @@ final class InsightDetailViewController: BaseViewController {
                 requestButton.isHidden = false
             } else {
                 buttonBackView.isHidden = true
+                tableView.snp.updateConstraints {
+                    $0.bottom.equalToSuperview()
+                }
             }
         case .pending:
             if let state = insight.exchangeRequestCreatedByMe {
@@ -192,6 +195,9 @@ final class InsightDetailViewController: BaseViewController {
             if let state = insight.exchangeRequestCreatedByMe {
                 if state {
                     buttonBackView.isHidden = true
+                    tableView.snp.updateConstraints {
+                        $0.bottom.equalToSuperview()
+                    }
                 } else {
                     degreeButton.isHidden = false
                     agreeButton.isHidden = false
@@ -201,6 +207,9 @@ final class InsightDetailViewController: BaseViewController {
             if let state = insight.exchangeRequestCreatedByMe {
                 if state {
                     buttonBackView.isHidden = true
+                    tableView.snp.updateConstraints {
+                        $0.bottom.equalToSuperview()
+                    }
                 } else {
                     doneButton.isHidden = false
                 }
@@ -215,7 +224,7 @@ final class InsightDetailViewController: BaseViewController {
             .subscribe(with: self, onNext: { owner, _ in
                 
                 if let insights = owner.myInsights {
-                    let vc = MyInsightsModalViewController(insights: insights)
+                    let vc = MyInsightsModalViewController(insightId: owner.insight.insightId, myInsights: insights)
                     
                     vc.resultSend = {
                         if $0 {
