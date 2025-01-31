@@ -28,7 +28,8 @@ let project = Project(
                         "kakaokompassauth",
                         "kakaolink",
                         "kakaoplus",
-                        "kakaotalk"
+                        "kakaotalk",
+                        "nmap"
                     ],
                     "CFBundleURLTypes" : [
                         [
@@ -42,6 +43,7 @@ let project = Project(
                     ],
                     "KAKAO_URL_KEY": "$(KAKAO_URL_KEY)",
                     "KAKAO_APP_KEY": "$(KAKAO_APP_KEY)",
+                    "NAVER_APP_KEY": "$(NAVER_APP_KEY)",
                     "NSAppTransportSecurity": [
                         "NSExceptionDomains": [
                             "imdang.info": [
@@ -76,6 +78,7 @@ let project = Project(
                 .external(name: "FirebasePerformance"),
                 .external(name: "FirebaseRemoteConfig"),
                 .external(name: "FirebaseAnalytics"),
+                .external(name: "NMapsMap"),
                 .project(target: "NetworkKit", path: "../NetworkKit"),
                 .target(name: "SharedLibraries")
             ],

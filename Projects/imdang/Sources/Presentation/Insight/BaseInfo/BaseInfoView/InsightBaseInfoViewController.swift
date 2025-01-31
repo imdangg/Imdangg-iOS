@@ -271,7 +271,16 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                         baseInfo.address.buildingNumber = String(splited[safe: 3] ?? "")
                     }
                     
-                        
+                    DispatchQueue.main.async {
+                        if self.baseInfo.address.siDo != "서울" {
+                            self.showInsightAlert(text: "지금은 서울 지역만 서비스가 가능합니다.", type: .confirmOnly, dimAction: false , comfrimAction: {
+                                self.baseInfo.address = Address(siDo: "", siGunGu: "", eupMyeonDong: "", buildingNumber: "")
+                                self.buildingName = ""
+                                collectionView.reloadSections(IndexSet([2]))
+                            })
+                        }
+                    }
+                    
                     insightService.getCoordinates(for: baseInfo.address.toString()) { [self] coordinate, error in
                         if let error = error {
                             print("Error: \(error.localizedDescription)")
@@ -295,7 +304,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                                 }
                             }
                         }
-                        print("Latitude: \(baseInfo.address.latitude), Longitude: \(baseInfo.address.longitude)")
+                        print("Latitude: \(baseInfo.address.latitude ?? 0), Longitude: \(baseInfo.address.longitude ?? 0)")
                     }
                     
                     if let buildingName = (data["buildingName"]) as? String {

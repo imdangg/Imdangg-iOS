@@ -3,6 +3,7 @@ import RxKakaoSDKCommon
 import FirebaseCore
 import GoogleSignIn
 import FirebaseMessaging
+import NMapsMap
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -27,10 +28,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             RxKakaoSDK.initSDK(appKey: APIKey)
         }
         
+        if let APIKey = Bundle.main.object(forInfoDictionaryKey: "NAVER_APP_KEY") as? String {
+            NMFAuthManager.shared().clientId = APIKey
+        }
+        
         if let clientID = FirebaseApp.app()?.options.clientID {
             let config = GIDConfiguration(clientID: clientID)
             GIDSignIn.sharedInstance.configuration = config
         }
+        
         
         return true
     }

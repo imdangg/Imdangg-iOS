@@ -42,6 +42,7 @@ class BaseInfoAddressCell: UICollectionViewCell {
     
     func configure(title: String) {
         firstButton.setTitle(title, for: .normal)
+        firstButton.setTitleColor(.grayScale400, for: .normal)
     }
     
     func setData(title: String) {

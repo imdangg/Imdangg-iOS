@@ -111,11 +111,6 @@ class InsightAlertViewController: UIViewController {
     }
     
     private func bindActions() {
-        dimView.rx.tap
-            .subscribe(onNext: { [weak self] _ in
-                self?.dismiss(animated: true, completion: nil)
-            })
-            .disposed(by: disposeBag)
         
         cancleButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
@@ -139,7 +134,7 @@ class InsightAlertViewController: UIViewController {
             .disposed(by: disposeBag)
     }
     
-    func config(text: String, type: AlertType, imageType: AlertImageType) {
+    func config(text: String, type: AlertType, imageType: AlertImageType, dimAction: Bool) {
         addSubviews()
         makeConstrints()
         descriptionLabel.setTextWithLineHeight(text: text, lineHeight: 25.2, textAlignment: .center)
@@ -192,6 +187,14 @@ class InsightAlertViewController: UIViewController {
                 $0.horizontalEdges.equalToSuperview().inset(24)
                 $0.height.equalTo(52)
             }
+        }
+        
+        if dimAction {
+            dimView.rx.tap
+                .subscribe(onNext: { [weak self] _ in
+                    self?.dismiss(animated: true, completion: nil)
+                })
+                .disposed(by: disposeBag)
         }
     }
 }
