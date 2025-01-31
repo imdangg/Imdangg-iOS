@@ -58,9 +58,20 @@ final class SigninViewController: UIViewController, View {
         $0.image = ImdangImages.Image(resource: .appleLogo)
     }
     
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        
+        self.reactor = SigninReactor()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        
         addSubView()
         makeConstraints()
     }

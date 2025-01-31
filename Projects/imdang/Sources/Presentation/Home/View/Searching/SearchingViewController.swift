@@ -219,7 +219,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
         switch section {
         case 0: return 1
         case 1: return myInsights.value.isEmpty ? 1 : myInsights.value.count > 3 ? 3 : myInsights.value.count
-        case 2: return todayInsights.value.count
+        case 2: return todayInsights.value.count > 5 ? 5 : todayInsights.value.count
         case 3: return topInsights.value.count
         default: return 0
         }
@@ -228,16 +228,17 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch indexPath.section {
         case 1:
-            
-            searchingViewModel.loadInsightDetail(id: myInsights.value[indexPath.row].id)
-                .subscribe { [self] data in
-                    if let data = data {
-                        let vc = InsightDetailViewController(url: "", state: .done, insight: data)
-                        vc.hidesBottomBarWhenPushed = true
-                        navigationController?.pushViewController(vc, animated: true)
+            if !myInsights.value.isEmpty {
+                searchingViewModel.loadInsightDetail(id: myInsights.value[indexPath.row].id)
+                    .subscribe { [self] data in
+                        if let data = data {
+                            let vc = InsightDetailViewController(url: "", state: .done, insight: data)
+                            vc.hidesBottomBarWhenPushed = true
+                            navigationController?.pushViewController(vc, animated: true)
+                        }
                     }
-                }
-                .disposed(by: disposeBag)
+                    .disposed(by: disposeBag)
+            }
         case 2:
             searchingViewModel.loadInsightDetail(id: todayInsights.value[indexPath.row].id)
                 .subscribe { [self] data in

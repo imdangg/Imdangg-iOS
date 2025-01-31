@@ -118,7 +118,7 @@ final class DeleteAccountViewController: BaseViewController {
                 
                 vc.confirmAction = {
                     vc.dismiss(animated: true)
-                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(SigninViewController(), animated: true)
+                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(), animated: true)
                 }
                 vc.cancelAction = {
                     print("취소핑")

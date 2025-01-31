@@ -174,9 +174,8 @@ class TermsModalViewController: UIViewController {
         xButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
                 self?.dismiss(animated: true, completion: nil)
-                if let rootNavController = self?.presentingViewController as? UINavigationController {
-                    rootNavController.popToRootViewController(animated: true)
-                }
+                
+                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(), animated: true)
             })
             .disposed(by: disposeBag)
         
