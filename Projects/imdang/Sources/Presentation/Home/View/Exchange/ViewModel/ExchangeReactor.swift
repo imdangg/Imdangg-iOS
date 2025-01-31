@@ -45,7 +45,7 @@ final class ExchangeReactor: Reactor {
                     userName: "User \(index)",
                     profileImageUrl: "",
                     adress: "Seoul",
-                    likeCount: index * 5, state: .beforeRequest
+                    likeCount: index * 5
                 )
             }
             return Observable.just(.setInsights(insights))

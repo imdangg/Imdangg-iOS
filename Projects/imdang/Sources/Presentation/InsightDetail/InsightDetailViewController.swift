@@ -9,20 +9,13 @@ import UIKit
 import SnapKit
 import Then
 import RxSwift
-
-enum DetailExchangeState {
-    case beforeRequest
-    case afterRequest
-    case waiting
-    case done
-}
-
 final class InsightDetailViewController: BaseViewController {
 
     private var insight: InsightDetail!
     private var mainImage: UIImage?
     private var tableView: UITableView!
     private var insightImageUrl = ""
+    private var likeCount: Int
     private var exchangeState: DetailExchangeState
     private var disposeBag = DisposeBag()
     private let myInsights: [Insight]?
@@ -46,12 +39,14 @@ final class InsightDetailViewController: BaseViewController {
     private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }.then { $0.applyTopBlur() }
     
-    init(url: String, image: UIImage? = nil,state: DetailExchangeState, insight: InsightDetail, myInsights: [Insight]? = nil) {
-        exchangeState = state
+    init(url: String, image: UIImage? = nil, insight: InsightDetail, likeCount: Int, myInsights: [Insight]? = nil) {
+        exchangeState = insight.exchangeRequestStatus
         insightImageUrl = url
         mainImage = image
+        self.likeCount = likeCount
         self.myInsights = myInsights
         self.insight = insight
+        
         super.init(nibName: nil, bundle: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleModalDismiss), name: .detailModalDidDismiss, object: nil)
     }
@@ -176,15 +171,42 @@ final class InsightDetailViewController: BaseViewController {
         }
         
         switch exchangeState {
-        case .beforeRequest:
-            requestButton.isHidden = false
-        case .afterRequest:
-            degreeButton.isHidden = false
-            agreeButton.isHidden = false
-        case .waiting:
-            waitButton.isHidden = false
-        case .done:
-            doneButton.isHidden = false
+        case .null:
+            if myInsights != nil  {
+                requestButton.isHidden = false
+            } else {
+                buttonBackView.isHidden = true
+            }
+        case .pending:
+            if let state = insight.exchangeRequestCreatedByMe {
+                if state {
+                    waitButton.isHidden = false
+                } else {
+                    degreeButton.isHidden = false
+                    agreeButton.isHidden = false
+                }
+            } else {
+                waitButton.isHidden = false
+            }
+        case .rejected:
+            if let state = insight.exchangeRequestCreatedByMe {
+                if state {
+                    buttonBackView.isHidden = true
+                } else {
+                    degreeButton.isHidden = false
+                    agreeButton.isHidden = false
+                }
+            }
+        case .accepted:
+            if let state = insight.exchangeRequestCreatedByMe {
+                if state {
+                    buttonBackView.isHidden = true
+                } else {
+                    doneButton.isHidden = false
+                }
+            } else {
+                doneButton.isHidden = false
+            }
         }
     }
     
@@ -197,7 +219,7 @@ final class InsightDetailViewController: BaseViewController {
                     
                     vc.resultSend = {
                         if $0 {
-                            owner.exchangeState = .waiting
+                            owner.exchangeState = .pending
                             owner.updateButton()
                             owner.tableView.reloadData()
                         }
@@ -215,10 +237,11 @@ final class InsightDetailViewController: BaseViewController {
         agreeButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
                 owner.showInsightAlert(text: "교환을 수락했어요.\n교환한 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton, imageType: .circleCheck) {
-                    owner.exchangeState = .done
+                    owner.exchangeState = .accepted
                     owner.updateButton()
                     owner.tableView.reloadData()
                 } etcAction: {
+                    self.dismiss(animated: true)
                     self.navigationController?.popToRootViewController(animated: true)
                     guard let tabBarController = self.tabBarController else { return }
                     UIView.animate(withDuration: 5) {
@@ -238,7 +261,7 @@ final class InsightDetailViewController: BaseViewController {
 
 extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return exchangeState == .done ? 7 : 3
+        return exchangeState == .null ? myInsights == nil ? 7 : 3 : exchangeState == .accepted ? 7 : 3
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -256,12 +279,12 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
-            cell.config(info: insight)
+            cell.config(info: insight, likeCount: likeCount)
             cell.selectionStyle = .none
             return cell
         case 2:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailDefaultInfoTableCell.self)
-            cell.config(info: insight, state: exchangeState)
+            cell.config(info: insight, state: exchangeState, isMyInsight: myInsights == nil)
             cell.selectionStyle = .none
             return cell
         case 3:

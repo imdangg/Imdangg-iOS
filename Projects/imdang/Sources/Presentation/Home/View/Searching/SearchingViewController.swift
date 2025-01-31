@@ -87,7 +87,7 @@ class SearchingViewController: UIViewController {
         collectionView.snp.makeConstraints {
             $0.top.equalTo(searchBoxView.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.bottom.equalToSuperview().offset(-20)
         }
     }
     
@@ -232,7 +232,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 searchingViewModel.loadInsightDetail(id: myInsights.value[indexPath.row].id)
                     .subscribe { [self] data in
                         if let data = data {
-                            let vc = InsightDetailViewController(url: "", state: .done, insight: data)
+                            let vc = InsightDetailViewController(url: "", insight: data, likeCount: myInsights.value[indexPath.row].likeCount)
                             vc.hidesBottomBarWhenPushed = true
                             navigationController?.pushViewController(vc, animated: true)
                         }
@@ -243,7 +243,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             searchingViewModel.loadInsightDetail(id: todayInsights.value[indexPath.row].id)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", state: .done, insight: data, myInsights: myInsights.value)
+                        let vc = InsightDetailViewController(url: "", insight: data, likeCount: todayInsights.value[indexPath.row].likeCount, myInsights: myInsights.value)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }
@@ -253,7 +253,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             searchingViewModel.loadInsightDetail(id: topInsights.value[indexPath.row].id)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", state: .done, insight: data, myInsights: myInsights.value)
+                        let vc = InsightDetailViewController(url: "", insight: data, likeCount: topInsights.value[indexPath.row].likeCount, myInsights: myInsights.value)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }

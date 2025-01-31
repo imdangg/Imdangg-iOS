@@ -208,7 +208,7 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
         return ceil(boundingBox.height)
     }
     
-    func config(info: InsightDetail, state: DetailExchangeState) {
+    func config(info: InsightDetail, state: DetailExchangeState, isMyInsight: Bool) {
         address = "\(info.address.toString())"
         addressLabel.text = "\(info.address.toString())\n(\(info.apartmentComplex.name))"
         dateLabel.text = info.visitAt
@@ -221,18 +221,19 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
         }
         
         switch state {
-        case .beforeRequest:
+        case .null:
             descriptionImageView.image = ImdangImages.Image(resource: .detailExchangeRequest)
-        case .afterRequest:
-            descriptionImageView.image = ImdangImages.Image(resource: .detailRequestReply)
-        case .waiting:
-            descriptionImageView.image = ImdangImages.Image(resource: .detailWaiting)
+        case .pending:
+            if isMyInsight {
+                descriptionImageView.image = ImdangImages.Image(resource: .detailRequestReply)
+            } else {
+                descriptionImageView.image = ImdangImages.Image(resource: .detailWaiting)
+            }
         default:
             break
         }
         
-        let width = UIScreen.main.bounds.width
-        if state == .done {
+        if state == .accepted || state == .null && isMyInsight {
             contentView.snp.makeConstraints {
                 $0.top.equalToSuperview()
                 $0.horizontalEdges.equalToSuperview()
@@ -246,7 +247,6 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
                 $0.horizontalEdges.equalToSuperview()
                 $0.height.equalTo(608 + calculateLabelHeight(text: info.summary) + 312).priority(999)
             }
-            
             descriptionImageView.snp.makeConstraints {
                 $0.top.equalTo(summaryLabel.snp.bottom).offset(32)
                 $0.horizontalEdges.equalToSuperview()

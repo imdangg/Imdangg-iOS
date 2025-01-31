@@ -107,6 +107,7 @@ class MyInsightsModalViewController: UIViewController {
                     owner.dismiss(animated: true)
                     owner.resultSend?(true)
                 } etcAction: {
+                    owner.dismiss(animated: true)
                     NotificationCenter.default.post(name: .detailModalDidDismiss, object: nil)
                 }
             })

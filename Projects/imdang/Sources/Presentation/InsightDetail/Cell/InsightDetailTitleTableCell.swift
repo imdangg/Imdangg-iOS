@@ -120,11 +120,11 @@ final class InsightDetailTitleTableCell: UITableViewCell {
             .disposed(by: disposeBag)
     }
     
-    func config(info: InsightDetail) {
+    func config(info: InsightDetail, likeCount: Int) {
         profileImageView.image = ImdangImages.Image(resource: .person)
-        userNameLabel.text = "홍길동"
-        likeCount = 0
-        likeButton.customText.text = "추천 \(0)"
+        userNameLabel.text = info.memberNickname
+        self.likeCount = likeCount
+        likeButton.customText.text = "추천 \(likeCount)"
         titleLabel.text = info.title
     }
 }
