@@ -52,13 +52,12 @@ final class NotificationReactor: Reactor {
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .loadNotifications:
-            // 임의의 Mock 데이터를 생성
-            let mockNotifications = (1...20).map { index in
+            // Mock
+            let mockNotifications = (1...6).map { index in
                 MockNoti(
                     username: "User \(index)",
                     type: index % 3 == 0 ? .request_accept : (index % 2 == 0 ? .request_reject : .response)
                 )
-                
             }
             return Observable.just(.setNotifications(mockNotifications))
             
@@ -73,13 +72,9 @@ final class NotificationReactor: Reactor {
         switch mutation {
         case .changeSelectedNotificationType(let notificationType):
             state.selectedNotificationType = notificationType
-            print("Selected Notification Type: \(notificationType.rawValue)")
-            
         case .setNotifications(let notifications):
             state.notifications = notifications
-            print("필터링 request")
         }
-        
         return state
-    }
+    }  
 }

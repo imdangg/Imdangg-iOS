@@ -2,7 +2,7 @@
 //  NotificationViewController.swift
 //  imdang
 //
-//  Created by markany on 1/20/25.
+//  Created by daye on 1/20/25.
 //
 
 import UIKit
@@ -10,11 +10,9 @@ import SnapKit
 import Then
 import ReactorKit
 
-final class NotificationViewController: BaseViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, View {
-    
+final class NotificationViewController: BaseViewController, View {
     
     var disposeBag = DisposeBag()
-    
     
     private var collectionView: UICollectionView!
 
@@ -33,6 +31,7 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .grayScale25
@@ -50,11 +49,8 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
         }
     }
     
-    func bind(reactor: NotificationReactor) {
-        reactor.action.onNext(.loadNotifications)
-    }
-    
     private func setupCollectionView() {
+        
         let layout = UICollectionViewFlowLayout().then {
             $0.minimumLineSpacing = 10
             $0.headerReferenceSize = CGSize(width: view.frame.width, height: 50)
@@ -65,8 +61,8 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
             $0.backgroundColor = .grayScale25
             $0.dataSource = self
             $0.delegate = self
-            $0.register(CustomCollectionViewCell.self, forCellWithReuseIdentifier: "CustomCell")
-            $0.register(CustomHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CustomHeaderView.reuseIdentifier)
+            $0.register(NotifivationCollectionViewCell.self, forCellWithReuseIdentifier: "NotifivationCollectionViewCell")
+            $0.register(NotificationTitleHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: NotificationTitleHeaderView.reuseIdentifier)
             $0.register(NotificationTypeHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: NotificationTypeHeaderView.reuseIdentifier)
         }
 
@@ -76,11 +72,19 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
             $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
-
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 3 // 0번 섹션: 버튼 뷰, 1번 섹션: 신규 알림, 2번 섹션: 지난 알림
+    
+    
+    func bind(reactor: NotificationReactor) {
+        reactor.action.onNext(.loadNotifications)
     }
+}
 
+extension NotificationViewController:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 3
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let reactor = self.reactor else { return 0 }
         let notifications = reactor.currentState.notifications
@@ -89,7 +93,6 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
         case 0:
             return 0
         case 1:
-            print("count !\(notifications.count)")
             return notifications.count
         case 2:
             return notifications.count
@@ -99,11 +102,11 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CustomCell", for: indexPath) as! CustomCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "NotifivationCollectionViewCell", for: indexPath) as! NotifivationCollectionViewCell
 
         guard let reactor = self.reactor else { return cell }
         let notifications = reactor.currentState.notifications
-
+        
         if indexPath.section == 1 || indexPath.section == 2 {
             let notification = notifications[indexPath.row]
             
@@ -111,8 +114,33 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
                 type: notification.type,
                 userName: notification.username
             )
+            
+            // Dummy
+            let testState: [DetailExchangeState] = [.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,]
+            
+            let textImage = UIImageView().then {
+                guard let url = URL(string: "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg") else { return }
+                $0.kf.setImage(with: url)
+                $0.contentMode = .scaleAspectFill
+            }
+            
+            cell.tapAction = { [weak self] type in
+                guard let self = self else { return }
+                switch type {
+                case .request_accept:
+                    UIView.animate(withDuration: 5) {
+                        self.tabBarController?.selectedIndex = 2
+                        self.navigationController?.popViewController(animated: true)
+                    }
+                case .request_reject:
+                    let view2 = InsightDetailViewController(image: textImage.image ?? UIImage(), state: .beforeRequest)
+                    self.navigationController?.pushViewController(view2, animated: true)
+                case .response:
+                    let view3 = InsightDetailViewController(image: textImage.image ?? UIImage(), state: .done)
+                    self.navigationController?.pushViewController(view3, animated: true)
+                }
+            }
         }
-
         return cell
     }
     
@@ -124,10 +152,21 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
         if indexPath.section == 0 {
             let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: NotificationTypeHeaderView.reuseIdentifier, for: indexPath) as! NotificationTypeHeaderView
             
+            if let reactor = self.reactor {
+                header.bind(reactor: reactor)
+            }
+            
+            header.tapSubject
+                .subscribe(onNext: { [weak self] selectedType in
+                    guard let self = self else { return }
+                    self.reactor?.action.onNext(.tapNotificationTypeButton(selectedType))
+                })
+                .disposed(by: disposeBag)
+            
             return header
         }
 
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: CustomHeaderView.reuseIdentifier, for: indexPath) as! CustomHeaderView
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: NotificationTitleHeaderView.reuseIdentifier, for: indexPath) as! NotificationTitleHeaderView
         if indexPath.section == 1 {
             header.configure(title: "신규 알림")
         } else if indexPath.section == 2 {
@@ -138,7 +177,7 @@ final class NotificationViewController: BaseViewController, UICollectionViewData
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         if section == 0 {
-            return CGSize(width: collectionView.frame.width, height: 60) // 버튼 뷰 높이
+            return CGSize(width: collectionView.frame.width, height: 60)
         }
         return CGSize(width: collectionView.frame.width, height: 68)
     }

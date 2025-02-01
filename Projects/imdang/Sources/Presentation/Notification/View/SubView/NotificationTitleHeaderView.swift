@@ -2,15 +2,15 @@
 //  Untitled.swift
 //  imdang
 //
-//  Created by markany on 1/20/25.
+//  Created by daye on 1/20/25.
 //
 
 import UIKit
 import SnapKit
 import Then
 
-final class CustomHeaderView: UICollectionReusableView {
-    static let reuseIdentifier = "CustomHeaderView"
+final class NotificationTitleHeaderView: UICollectionReusableView {
+    static let reuseIdentifier = "NotificationTitleHeaderView"
 
     private let titleLabel = UILabel().then {
         $0.font = .pretenBold(22)

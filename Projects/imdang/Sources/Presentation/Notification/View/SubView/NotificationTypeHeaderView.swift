@@ -1,8 +1,8 @@
 //
 //  NotificationTypeHeaderView.swift
-//  segmentedControl
+//  imdang
 //
-//  Created by markany on 1/20/25.
+//  Created by daye on 1/20/25.
 //
 
 
@@ -12,62 +12,35 @@ import Then
 import SnapKit
 import ReactorKit
 
-
-//enum NotificationType: String, Equatable {
-//    case all = "전체"
-//    case request = "내가 요청한 내역"
-//    case response = "요청 받은 내역"
-//}
-
 final class NotificationTypeHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "NotificationTypeHeaderView"
-
-    private let notificationTypeView = NotificationTypeButtonView()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        addSubview(notificationTypeView)
-        notificationTypeView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-final class NotificationTypeButtonView: UIView {
+    
     var allButton = CommonButton(title: NotificationType.all.rawValue, initialButtonType: .unselectedBorderStyle, radius: 18)
     var requestButton = CommonButton(title: NotificationType.request.rawValue, initialButtonType: .unselectedBorderStyle, radius: 18)
     var responseButton = CommonButton(title: NotificationType.response.rawValue, initialButtonType: .unselectedBorderStyle, radius: 18)
     
-    lazy var views = UIView().then  {
-        $0.addSubview(allButton)
-        $0.addSubview(requestButton)
-        $0.addSubview(responseButton)
-    }
-    
+    let tapSubject = PublishSubject<NotificationType>()
     private let disposeBag = DisposeBag()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addSubview(views)
+        setupUI()
         setupConstraints()
+        bind()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private func setupUI() {
+        [allButton, requestButton, responseButton].forEach {addSubview($0)}
+    }
+    
     private func setupConstraints() {
-        views.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(12)
-            $0.leading.equalToSuperview().inset(20)
-        }
-        
         allButton.snp.makeConstraints {
-            $0.verticalEdges.equalTo(views.snp.verticalEdges)
+            $0.leading.equalToSuperview().inset(20)
+            $0.verticalEdges.equalToSuperview().inset(12)
             $0.height.equalTo(36)
         }
         
@@ -84,41 +57,45 @@ final class NotificationTypeButtonView: UIView {
         }
     }
     
-//    func bind(reactor: NotificationReactor) {
-//           // 버튼 탭 액션을 Reactor에 바인딩
-//           allButton.rx.tap
-//               .map { NotificationReactor.Action.tapNotificationTypeButton(.all) }
-//               .bind(to: reactor.action)
-//               .disposed(by: disposeBag)
-//
-//           requestButton.rx.tap
-//               .map { NotificationReactor.Action.tapNotificationTypeButton(.request) }
-//               .bind(to: reactor.action)
-//               .disposed(by: disposeBag)
-//
-//           responseButton.rx.tap
-//               .map { NotificationReactor.Action.tapNotificationTypeButton(.response) }
-//               .bind(to: reactor.action)
-//               .disposed(by: disposeBag)
-//
-//           // 상태 변경에 따른 버튼 스타일 업데이트
-//           reactor.state
-//               .map { $0.selectedNotificationType }
-//               .distinctUntilChanged()
-//               .subscribe(onNext: { [weak self] selectedType in
-//                   guard let self = self else { return }
-//
-//                   self.allButton.rx.commonButtonState.onNext(
-//                       selectedType == .all ? .enabled : .unselectedBorderStyle
-//                   )
-//                   self.requestButton.rx.commonButtonState.onNext(
-//                       selectedType == .request ? .enabled : .unselectedBorderStyle
-//                   )
-//                   self.responseButton.rx.commonButtonState.onNext(
-//                       selectedType == .response ? .enabled : .unselectedBorderStyle
-//                   )
-//               })
-//               .disposed(by: disposeBag)
-//       }
+    private func bind() {
+        allButton.rx.tap
+            .map { NotificationType.all }
+            .bind(to: tapSubject)
+            .disposed(by: disposeBag)
+        
+        requestButton.rx.tap
+            .map { NotificationType.request }
+            .bind(to: tapSubject)
+            .disposed(by: disposeBag)
+        
+        responseButton.rx.tap
+            .map { NotificationType.response }
+            .bind(to: tapSubject)
+            .disposed(by: disposeBag)
+    }
+    
+    func bind(reactor: NotificationReactor) {
+        tapSubject
+            .map { NotificationReactor.Action.tapNotificationTypeButton($0) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.selectedNotificationType }
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] selectedType in
+                guard let self = self else { return }
+                
+                self.allButton.rx.commonButtonState.onNext(
+                    selectedType == .all ? .enabled : .unselectedBorderStyle
+                )
+                self.requestButton.rx.commonButtonState.onNext(
+                    selectedType == .request ? .enabled : .unselectedBorderStyle
+                )
+                self.responseButton.rx.commonButtonState.onNext(
+                    selectedType == .response ? .enabled : .unselectedBorderStyle
+                )
+            })
+            .disposed(by: disposeBag)
+    }
 }
-
