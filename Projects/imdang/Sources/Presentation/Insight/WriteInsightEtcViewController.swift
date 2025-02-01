@@ -124,7 +124,7 @@ class WriteInsightEtcViewController: UIViewController, View {
             .map { $0.isUploadSuccess }
             .distinctUntilChanged()
             .subscribe(onNext: { result in
-                self.showInsightAlert(text: "인사이트 업로드가 완료되었어요.\n작성한 내 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton) { [self] in
+                self.showAlert(text: "인사이트 업로드가 완료되었어요.\n작성한 내 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton) { [self] in
                     if let image = reactor.mainImage {
                         let vc = InsightDetailViewController(url: "", image: image, insight: reactor.detail, likeCount: 0)
                         self.navigationController?.pushViewController(vc, animated: true)
@@ -279,7 +279,7 @@ extension WriteInsightEtcViewController {
                                 
                                 // 클릭되어있는 셀 있을시 모달
                                 if otherCells.filter({ $0.isClicked == true }).count > 0 {
-                                    showInsightAlert(text: "해당 없음, 잘 모르겠어요\n선택시 다른 항목들은\n선택이 해제돼요. 괜찮으신가요?", type: .cancellable) { [self] in
+                                    showAlert(text: "해당 없음, 잘 모르겠어요\n선택시 다른 항목들은\n선택이 해제돼요. 괜찮으신가요?", type: .cancellable) { [self] in
                                         cell.isClicked = true
                                         for otherCell in otherCells {
                                             otherCell.isClicked = false

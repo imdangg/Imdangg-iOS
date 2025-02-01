@@ -273,7 +273,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                     
                     DispatchQueue.main.async {
                         if self.baseInfo.address.siDo != "서울" {
-                            self.showInsightAlert(text: "지금은 서울 지역만 서비스가 가능합니다.", type: .confirmOnly, dimAction: false , comfrimAction: {
+                            self.showAlert(text: "지금은 서울 지역만 서비스가 가능합니다.", type: .confirmOnly, dimAction: false , comfrimAction: {
                                 self.baseInfo.address = Address(siDo: "", siGunGu: "", eupMyeonDong: "", buildingNumber: "")
                                 self.buildingName = ""
                                 collectionView.reloadSections(IndexSet([2]))

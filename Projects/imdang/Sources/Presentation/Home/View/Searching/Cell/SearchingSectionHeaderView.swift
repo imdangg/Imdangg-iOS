@@ -16,6 +16,8 @@ enum HeaderType {
 
 class SearchingSectionHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "SearchingSectionHeaderView"
+    
+    var buttonAction: (() -> Void)?
     private let disposeBag = DisposeBag()
     private var collectionView: UICollectionView?
     private var currentPage = 1 {
@@ -72,6 +74,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        bindAction()
     }
     
     required init?(coder: NSCoder) {
@@ -136,6 +139,14 @@ class SearchingSectionHeaderView: UICollectionReusableView {
         }
     }
     
+    private func bindAction() {
+        fullViewBotton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                owner.buttonAction?()
+            }
+            .disposed(by: disposeBag)
+    }
+    
     func configure(with title: String, type: HeaderType, showHorizontalCollection: Bool) {
         titleLabel.text = title
         headerType = type
@@ -160,5 +171,4 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             .disposed(by: disposeBag)
 
     }
-
 }

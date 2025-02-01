@@ -238,14 +238,14 @@ final class InsightDetailViewController: BaseViewController {
                     vc.modalTransitionStyle = .coverVertical
                     self.present(vc, animated: true, completion: nil)
                 } else {
-                    owner.showInsightAlert(text: "교환할 인사이트가 없어요.\n임장을 다녀온 후 인사이트를\n작성해주세요.", type: .confirmOnly, imageType: .circleCheck)
+                    owner.showAlert(text: "교환할 인사이트가 없어요.\n임장을 다녀온 후 인사이트를\n작성해주세요.", type: .confirmOnly, imageType: .circleCheck)
                 }
             })
             .disposed(by: disposeBag)
         
         agreeButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
-                owner.showInsightAlert(text: "교환을 수락했어요.\n교환한 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton, imageType: .circleCheck) {
+                owner.showAlert(text: "교환을 수락했어요.\n교환한 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton, imageType: .circleCheck) {
                     owner.exchangeState = .accepted
                     owner.updateButton()
                     owner.tableView.reloadData()
@@ -262,7 +262,7 @@ final class InsightDetailViewController: BaseViewController {
         
         degreeButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
-                owner.showInsightAlert(text: "교환을 거절했어요.", type: .confirmOnly, imageType: .circleCheck)
+                owner.showAlert(text: "교환을 거절했어요.", type: .confirmOnly, imageType: .circleCheck)
             })
             .disposed(by: disposeBag)
     }

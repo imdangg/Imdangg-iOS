@@ -17,7 +17,7 @@ final class SearchingViewModel {
     func loadMyInsights() -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
             "pageNumber": 0,
-            "pageSize": 10,
+            "pageSize": 100,
             "direction": "DESC",
             "properties": [ "created_at" ]
         ]
@@ -43,9 +43,8 @@ final class SearchingViewModel {
     func loadTodayInsights() -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
             "pageNumber": 0,
-            "pageSize": 10,
+            "pageSize": 100,
             "direction": "DESC",
-            "properties": [ "created_at" ]
         ]
         
         let endpoint = Endpoint<InsightResponse>(

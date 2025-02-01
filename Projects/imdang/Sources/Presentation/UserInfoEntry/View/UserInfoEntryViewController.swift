@@ -296,7 +296,7 @@ final class UserInfoEntryViewController: BaseViewController, View {
                             let vc = JoinCompletedViewController()
                             self.navigationController?.pushViewController(vc, animated: true)
                         } else {
-                            print("사용자 정보 등록 실패")
+                            self.showAlert(text: "이미 등록된 닉네임입니다.", type: .confirmOnly)
                         }
                     }
                     .disposed(by: disposeBag)

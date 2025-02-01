@@ -113,7 +113,7 @@ class MyInsightsModalViewController: UIViewController {
                     owner.insightDetailViewModel.createInsight(thisInsightId: owner.insightId, myInsightId: selectedInsightId)
                         .subscribe(onNext: {
                             if $0 {
-                                owner.showInsightAlert(text: "교환 요청을 완료했어요.\n교환 내역은 교환소에서 확인해보세요.", type: .moveButton) {
+                                owner.showAlert(text: "교환 요청을 완료했어요.\n교환 내역은 교환소에서 확인해보세요.", type: .moveButton) {
                                     owner.dismiss(animated: true)
                                     owner.resultSend?(true)
                                 } etcAction: {
@@ -124,7 +124,7 @@ class MyInsightsModalViewController: UIViewController {
                         })
                         .disposed(by: owner.disposeBag)
                 } else {
-                    owner.showInsightAlert(text: "쿠폰사용 준비중", type: .confirmOnly)
+                    owner.showAlert(text: "쿠폰사용 준비중", type: .confirmOnly)
                 }
             })
             .disposed(by: disposeBag)

@@ -267,14 +267,24 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: SearchingSectionHeaderView.reuseIdentifier, for: indexPath) as! SearchingSectionHeaderView
+            let fullVC = FullInsightViewController()
+            fullVC.hidesBottomBarWhenPushed = true
             
             switch indexPath.section {
             case 0:
                 return UICollectionReusableView()
             case 1:
                 headerView.configure(with: "내가 다녀온 단지의 다른 인사이트", type: .notTopten, showHorizontalCollection: myInsights.value.isEmpty ? false : true)
+                headerView.buttonAction = {
+                    fullVC.config(title: "내가 다녀온 단지의 다른 인사이트", insights: self.myInsights.value)
+                    self.navigationController?.pushViewController(fullVC, animated: true)
+                }
             case 2:
                 headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
+                headerView.buttonAction = {
+                    fullVC.config(title: "오늘 새롭게 올라온 인사이트", insights: self.todayInsights.value, chipViewHidden: true)
+                    self.navigationController?.pushViewController(fullVC, animated: true)
+                }
             case 3:
                 headerView.configure(with: "추천수 TOP 10 인사이트", type: .topten, showHorizontalCollection: false)
                 headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
