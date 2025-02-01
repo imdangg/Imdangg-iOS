@@ -134,7 +134,11 @@ final class SigninViewController: UIViewController, View {
                 switch result {
                 case .success(let credential):
                     print("Apple ID 로그인 성공:", credential.user)
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    if UserdefaultKey.isJoined {
+                        (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+                    } else {
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
                 case .failure(let error):
                     print("로그인 실패:", error.localizedDescription)
                 }
@@ -151,7 +155,12 @@ final class SigninViewController: UIViewController, View {
 //            .distinctUntilChanged()
             .filter { $0 }
             .subscribe(onNext: { [weak self] _ in
-                self?.navigationController?.pushViewController(vc, animated: true)
+                guard let self = self else { return }
+                if UserdefaultKey.isJoined {
+                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+                } else {
+                    navigationController?.pushViewController(vc, animated: true)
+                }
             })
             .disposed(by: disposeBag)
         
@@ -166,7 +175,12 @@ final class SigninViewController: UIViewController, View {
 //            .distinctUntilChanged()
             .filter { $0 }
             .subscribe(onNext: { [weak self] _ in
-                self?.navigationController?.pushViewController(vc, animated: true)
+                guard let self = self else { return }
+                if UserdefaultKey.isJoined {
+                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(TabBarController(), animated: true)
+                } else {
+                    navigationController?.pushViewController(vc, animated: true)
+                }
             })
             .disposed(by: disposeBag)
     }

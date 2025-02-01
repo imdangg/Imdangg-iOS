@@ -10,6 +10,9 @@ import Foundation
 enum UserdefaultKey {
     // 저장: UserdefaultKey.test = "~~"
     // 읽기: let test = UserdefaultKey.test
+    @UserDefault(key: "isJoined", defaultValue: false)
+    static var isJoined: Bool
+    
     @UserDefault(key: "memberId", defaultValue: "")
     static var memberId: String
     
