@@ -80,7 +80,7 @@ final class InsightDetailViewController: BaseViewController {
     
     
     @objc private func handleModalDismiss() {
-        self.navigationController?.popViewController(animated: true)
+        self.navigationController?.popToRootViewController(animated: true)
         self.navigationController?.viewControllers.forEach {
             if let homeVC = $0 as? HomeContainerViewController {
                 homeVC.changeView(showView: .exchange)

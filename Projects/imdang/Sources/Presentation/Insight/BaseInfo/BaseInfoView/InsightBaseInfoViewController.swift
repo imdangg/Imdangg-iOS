@@ -257,7 +257,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             }
             
             cell.buttonAction = { result in
-                let webViewController = WebViewController(url: "https://daejinlim.github.io/daumAdressSearch/")
+                let webViewController = WebViewController(url: "https://daejinlim.github.io/kakaoAddress/")
                 self.present(webViewController, animated: true, completion: nil)
                 
                 webViewController.onAddressSelected = { [self] data in
@@ -269,6 +269,12 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                         baseInfo.address.siGunGu = String(splited[safe: 1] ?? "")
                         baseInfo.address.eupMyeonDong = String(splited[safe: 2] ?? "")
                         baseInfo.address.buildingNumber = String(splited[safe: 3] ?? "")
+                        
+                        insightService.getCoordinates(address: jibunAddress) { [self] latitude, longitude in
+                            baseInfo.address.latitude = latitude
+                            baseInfo.address.longitude = longitude
+                            print("Latitude: \(latitude ?? 0), Longitude: \(longitude ?? 0)")
+                        }
                     }
                     
                     DispatchQueue.main.async {
@@ -279,32 +285,6 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                                 collectionView.reloadSections(IndexSet([2]))
                             })
                         }
-                    }
-                    
-                    insightService.getCoordinates(for: baseInfo.address.toString()) { [self] coordinate, error in
-                        if let error = error {
-                            print("Error: \(error.localizedDescription)")
-                        } else if let coordinate = coordinate {
-                            baseInfo.address.latitude = coordinate.latitude
-                            baseInfo.address.longitude = coordinate.longitude
-                            
-                        } else {
-                            if let roadAddress = (data["roadAddress"]) as? String {
-                                print("roadAddress: \(roadAddress)")
-                                insightService.getCoordinates(for: roadAddress) { [self] coordinate, error in
-                                    if let error = error {
-                                        print("Error: \(error.localizedDescription)")
-                                    } else if let coordinate = coordinate {
-                                        baseInfo.address.latitude = coordinate.latitude
-                                        baseInfo.address.longitude = coordinate.longitude
-                                        
-                                    } else {
-                                        print("No coordinates found.")
-                                    }
-                                }
-                            }
-                        }
-                        print("Latitude: \(baseInfo.address.latitude ?? 0), Longitude: \(baseInfo.address.longitude ?? 0)")
                     }
                     
                     if let buildingName = (data["buildingName"]) as? String {

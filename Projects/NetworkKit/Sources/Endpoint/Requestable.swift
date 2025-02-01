@@ -11,6 +11,10 @@ public import Alamofire
 
 public typealias HTTPRequestParameter = [String: Any]
 
+public enum EncodingType {
+    case body, query
+}
+
 public protocol Requestable {
     
     associatedtype Response: Decodable
@@ -18,6 +22,7 @@ public protocol Requestable {
     var baseURL: String { get }
     var path: String { get }
     var method: HTTPMethod { get }
+    var encodingType: EncodingType? { get } 
     var headers: HTTPHeaders { get }
     var parameters: HTTPRequestParameter? { get }
     var encoding: ParameterEncoding { get }
@@ -28,11 +33,20 @@ public protocol Requestable {
 public extension Requestable {
     
     var encoding: ParameterEncoding {
-        switch method {
+        if let encodingType = encodingType {
+            switch encodingType {
+            case .body:
+                return JSONEncoding.default
+            case .query:
+                return URLEncoding.default
+            }
+        } else {
+            switch method {
             case .post, .put:
                 return JSONEncoding.default
             default:
                 return URLEncoding.default
+            }
         }
     }
     

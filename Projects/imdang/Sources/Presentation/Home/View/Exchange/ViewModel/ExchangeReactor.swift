@@ -9,9 +9,10 @@ import Foundation
 import ReactorKit
 
 final class ExchangeReactor: Reactor {
+    private var disposeBag = DisposeBag()
     
     struct State {
-        var insights: [Insight] = []
+        var insights: [Insight]?
         var selectedExchangeState: ExchangeState
         var selectedRequestState: ExchangeRequestState
     }
@@ -25,10 +26,11 @@ final class ExchangeReactor: Reactor {
     enum Mutation {
         case changeSelectedExchangeState(ExchangeState)
         case changeSelectedRequestState(ExchangeRequestState)
-        case setInsights([Insight])
+        case setInsights([Insight]?)
     }
     
     var initialState: State
+    let exChangeViewModel = ExchangeViewModel()
     
     init() {
         self.initialState = State(selectedExchangeState: .waiting, selectedRequestState: .request)
@@ -37,22 +39,50 @@ final class ExchangeReactor: Reactor {
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .loadInsights:
-            let insights = (1...20).map { index in
-                Insight(
-                    insightId: "index",
-                    titleName: "Insight \(index)",
-                    titleImageUrl: "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg",
-                    userName: "User \(index)",
-                    profileImageUrl: "",
-                    adress: "Seoul",
-                    likeCount: index * 5
-                )
+            let selectedRequestState = currentState.selectedRequestState
+            let selectedExchangeState = currentState.selectedExchangeState
+            
+            switch selectedRequestState {
+            case .request:
+                switch selectedExchangeState {
+                case .waiting:
+                    return exChangeViewModel.loadRequestedByMe(state: .pending)
+                        .map { Mutation.setInsights($0) }
+                case .done:
+                    return exChangeViewModel.loadRequestedByMe(state: .accepted)
+                        .map { Mutation.setInsights($0) }
+                case .reject:
+                    return exChangeViewModel.loadRequestedByMe(state: .rejected)
+                        .map { Mutation.setInsights($0) }
+                }
+            case .receive:
+                switch selectedExchangeState {
+                case .waiting:
+                    return exChangeViewModel.loadRequestedByOthers(state: .pending)
+                        .map { Mutation.setInsights($0) }
+                case .done:
+                    return exChangeViewModel.loadRequestedByOthers(state: .accepted)
+                        .map { Mutation.setInsights($0) }
+                case .reject:
+                    return exChangeViewModel.loadRequestedByOthers(state: .rejected)
+                        .map { Mutation.setInsights($0) }
+                }
             }
-            return Observable.just(.setInsights(insights))
-        case .tapExchangeStateButton(let exchangeState):
-            return Observable.just(.changeSelectedExchangeState(exchangeState))
+            case .tapExchangeStateButton(let exchangeState):
+                return Observable.concat([
+                    Observable.just(Mutation.changeSelectedExchangeState(exchangeState)),
+                    Observable.just(Action.loadInsights).flatMap { action in
+                        return self.mutate(action: action)
+                    }
+                ])
+            
             case .selectedRequestSegmentControl(let requestState):
-                return Observable.just(.changeSelectedRequestState(requestState))
+                return Observable.concat([
+                    Observable.just(Mutation.changeSelectedRequestState(requestState)),
+                    Observable.just(Action.loadInsights).flatMap { action in
+                        return self.mutate(action: action)
+                    }
+                ])
             }
     }
     

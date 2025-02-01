@@ -134,7 +134,7 @@ class InsightAlertViewController: UIViewController {
             .disposed(by: disposeBag)
     }
     
-    func config(text: String, type: AlertType, imageType: AlertImageType, dimAction: Bool) {
+    func config(text: String, moveButtonTitle: String?, type: AlertType, imageType: AlertImageType, dimAction: Bool) {
         addSubviews()
         makeConstrints()
         descriptionLabel.setTextWithLineHeight(text: text, lineHeight: 25.2, textAlignment: .center)
@@ -171,8 +171,8 @@ class InsightAlertViewController: UIViewController {
             
         case .moveButton:
             confirmButton.setTitle("확인", for: .normal)
+            moveButton.setTitle(moveButtonTitle == nil ? "보관함 확인하기" : moveButtonTitle!, for: .normal)
             cancleButton.isHidden = true
-            
             
             moveButton.snp.makeConstraints {
                 $0.top.equalTo(descriptionLabel.snp.bottom).offset(16)

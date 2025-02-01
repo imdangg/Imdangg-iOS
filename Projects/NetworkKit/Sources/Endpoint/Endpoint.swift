@@ -10,11 +10,13 @@ import Foundation
 public import Alamofire
 
 public struct Endpoint<R>: Requestable where R: Decodable {
+    
     public typealias Response = R
     
     public let baseURL: String
     public let path: String
     public let method: HTTPMethod
+    public let encodingType: EncodingType?
     public let headers: HTTPHeaders
     public let parameters: HTTPRequestParameter?
     
@@ -23,6 +25,7 @@ public struct Endpoint<R>: Requestable where R: Decodable {
         baseURL: BaseURL,
         path: String,
         method: HTTPMethod,
+        encodingType: EncodingType? = nil,
         headers: HTTPHeaders = [HTTPHeader(name: "Content-Type", value: "application/json")],
         parameters: HTTPRequestParameter? = nil
     ) {
@@ -30,6 +33,7 @@ public struct Endpoint<R>: Requestable where R: Decodable {
         self.baseURL = baseURL.configValue
         self.path = path
         self.method = method
+        self.encodingType = encodingType
         self.parameters = parameters
     }
 }

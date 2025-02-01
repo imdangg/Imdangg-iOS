@@ -11,14 +11,14 @@ import RxSwift
 import Alamofire
 import CoreLocation
 
-struct InsightDetailResponse: Codable {
+struct ExchangeResponse: Codable {
     let exchangeRequestId: String
 }
 
 final class InsightDetailViewModel {
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager()
-
+    
     func createInsight(thisInsightId: String, myInsightId: String) -> Observable<Bool> {
         let parameters: [String: Any] = [
             "requestedInsightId": thisInsightId,
@@ -27,7 +27,7 @@ final class InsightDetailViewModel {
             "memberCouponId": 0
         ]
         
-        let endpoint = Endpoint<InsightDetailResponse>(
+        let endpoint = Endpoint<ExchangeResponse>(
             baseURL: .imdangAPI,
             path: "/exchanges/request",
             method: .post,

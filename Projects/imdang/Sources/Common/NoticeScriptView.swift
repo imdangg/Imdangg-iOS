@@ -45,13 +45,14 @@ final class NoticeScriptView: UIView {
         iconImageView.snp.makeConstraints {
             $0.size.equalTo(CGSize(width: 16, height: 18))
             $0.leading.equalToSuperview().inset(20)
-            $0.top.equalToSuperview().inset(16)
+            $0.centerY.equalToSuperview()
         }
         
         textLabel.snp.makeConstraints {
             $0.leading.equalTo(iconImageView.snp.trailing).offset(4)
-            $0.top.bottom.equalToSuperview().inset(16)
             $0.trailing.equalToSuperview().inset(20)
+            $0.top.equalToSuperview().inset(16)
+            $0.bottom.equalToSuperview().inset(16)
         }
     }
     

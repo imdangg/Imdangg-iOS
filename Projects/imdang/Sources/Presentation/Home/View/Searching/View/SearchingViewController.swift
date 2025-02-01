@@ -282,7 +282,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             case 2:
                 headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
                 headerView.buttonAction = {
-                    fullVC.config(title: "오늘 새롭게 올라온 인사이트", insights: self.todayInsights.value, chipViewHidden: true)
+                    fullVC.config(title: "오늘 새롭게 올라온 인사이트", insights: self.todayInsights.value, myInsights: self.myInsights.value, chipViewHidden: true)
                     self.navigationController?.pushViewController(fullVC, animated: true)
                 }
             case 3:

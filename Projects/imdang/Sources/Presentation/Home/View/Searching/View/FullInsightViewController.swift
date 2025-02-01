@@ -13,6 +13,7 @@ import RxRelay
 class FullInsightViewController: BaseViewController {
     private var tableView: UITableView!
     private var chipViewHidden: Bool = false
+    private var myInsights: [Insight]?
     private let searchingViewModel = SearchingViewModel()
     private let insights = BehaviorRelay<[Insight]>(value: [])
     private let disposeBag = DisposeBag()
@@ -90,10 +91,11 @@ class FullInsightViewController: BaseViewController {
         }
     }
     
-    func config(title: String, insights: [Insight], chipViewHidden: Bool = false) {
+    func config(title: String, insights: [Insight], myInsights: [Insight]? = nil, chipViewHidden: Bool = false) {
         titleLabel.text = title
         countLabel.text = "\(insights.count)개"
         self.insights.accept(insights)
+        self.myInsights = myInsights
         self.chipViewHidden = chipViewHidden
         self.chipView.isHidden = chipViewHidden
     }
@@ -116,7 +118,7 @@ extension FullInsightViewController: UITableViewDelegate, UITableViewDataSource 
         searchingViewModel.loadInsightDetail(id: insights.value[indexPath.row].insightId)
             .subscribe { [self] data in
                 if let data = data {
-                    let vc = InsightDetailViewController(url: "", insight: data, likeCount: insights.value[indexPath.row].likeCount, myInsights: chipViewHidden ? [] : nil)
+                    let vc = InsightDetailViewController(url: "", insight: data, likeCount: insights.value[indexPath.row].likeCount, myInsights: myInsights)
                     vc.hidesBottomBarWhenPushed = true
                     navigationController?.pushViewController(vc, animated: true)
                 }
