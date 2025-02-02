@@ -11,6 +11,7 @@ import RxSwift
 import RxRelay
 
 class FullInsightViewController: BaseViewController {
+    private var pageCount = 0
     private var tableView: UITableView!
     private var chipViewHidden: Bool = false
     private var myInsights: [Insight]?
@@ -123,6 +124,35 @@ extension FullInsightViewController: UITableViewDelegate, UITableViewDataSource 
                     navigationController?.pushViewController(vc, animated: true)
                 }
             }
+            .disposed(by: disposeBag)
+    }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.frame.size.height
+        
+        if offsetY > contentHeight - scrollViewHeight - 100 { // 100px 여유
+            loadMoreData()
+        }
+    }
+    
+    private func loadMoreData() {
+        guard !searchingViewModel.isLoading else { return } // 중복 요청 방지
+        
+        searchingViewModel.isLoading = true
+        pageCount += 1
+        
+        searchingViewModel.loadTodayInsights(page: pageCount)
+            .compactMap { $0 }
+            .subscribe(with: self, onNext: { owner, newData in
+                
+                var currentData = owner.insights.value
+                currentData.append(contentsOf: newData)
+                owner.insights.accept(currentData)
+                owner.countLabel.text = "\(owner.insights.value.count)개"
+                owner.tableView.reloadData()
+                owner.searchingViewModel.isLoading = false
+            })
             .disposed(by: disposeBag)
     }
 }

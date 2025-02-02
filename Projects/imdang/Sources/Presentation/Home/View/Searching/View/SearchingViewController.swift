@@ -14,8 +14,8 @@ import RxRelay
 
 
 class SearchingViewController: UIViewController {
-    let searchingViewModel = SearchingViewModel()
     private var disposeBag = DisposeBag()
+    private let searchingViewModel = SearchingViewModel()
     private let myInsights = BehaviorRelay<[Insight]>(value: [])
     private let todayInsights = BehaviorRelay<[Insight]>(value: [])
     private let topInsights = BehaviorRelay<[Insight]>(value: [])
@@ -56,17 +56,17 @@ class SearchingViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        searchingViewModel.loadTodayInsights()
+        searchingViewModel.loadTodayInsights(page: 0)
             .compactMap { $0 }
             .subscribe(with: self, onNext: { owner, data in
                 
                 owner.todayInsights.accept(data)
+                
                 owner.topInsights.accept(Array(data.sorted { $0.likeCount > $1.likeCount }.prefix(10)))
                 
                 owner.collectionView.reloadData()
             })
             .disposed(by: disposeBag)
-
     }
     
     private func setupCollectionView() {

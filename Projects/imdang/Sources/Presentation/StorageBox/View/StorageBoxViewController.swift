@@ -16,6 +16,7 @@ final class StorageBoxViewController: BaseViewController {
     private var collectionView: UICollectionView!
     private let disposeBag = DisposeBag()
     private let currentPage = PublishSubject<Int>()
+    private let insights = BehaviorRelay<[Insight]>(value: [])
     
     private let navigationTitleButton = ImageTextButton(type: .textFirst, horizonPadding: 0, spacing: 8).then {
         $0.customText.text = "보관함"
@@ -55,7 +56,7 @@ final class StorageBoxViewController: BaseViewController {
         
         navigationTitleButton.snp.makeConstraints {
             $0.height.equalTo(34)
-            $0.width.equalTo(63)
+            $0.width.equalTo(100)
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview()
         }
@@ -79,6 +80,7 @@ final class StorageBoxViewController: BaseViewController {
         
         collectionView.register(cell: LocationBoxCollectionCell.self)
         collectionView.register(cell: InsightCollectionCell.self)
+        collectionView.register(cell: EmptyMyInsightCollectionCell.self)
         
         collectionView.register(header: InsightHeaderView.self)
         collectionView.register(header: LocationBoxHeaderView.self)
@@ -154,7 +156,7 @@ final class StorageBoxViewController: BaseViewController {
         let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
         
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 0)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 20)
         
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                 heightDimension: .absolute(122))
@@ -183,7 +185,7 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return section == 0 ? 4 : 10
+        return section == 0 ? 4 : insights.value.isEmpty ? 1 : insights.value.count
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -226,11 +228,16 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             }
             return cell
         case 1:
-            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
-            let testImage = "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg"
-            let insight = Insight(insightId: "0", titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
-            cell.configure(insight: insight, layoutType: .horizontal)
-            return cell
+            if insights.value.isEmpty {
+                let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: EmptyMyInsightCollectionCell.self)
+                return cell
+            } else {
+                let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
+//                let testImage = "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg"
+//                let insight = Insight(insightId: "0", titleName: "초역세권 대단지 아파트 후기", titleImageUrl: testImage, userName: "홍길동", profileImageUrl: "", adress: "강남구 신논현동", likeCount: 20)
+                cell.configure(insight: insights.value[indexPath.row], layoutType: .horizontal)
+                return cell
+            }
         default:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
             

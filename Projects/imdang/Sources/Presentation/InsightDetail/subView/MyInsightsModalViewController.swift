@@ -110,7 +110,7 @@ class MyInsightsModalViewController: UIViewController {
                 
                 if let selectedInsightId = owner.selectedInsightId {
                     
-                    owner.insightDetailViewModel.createInsight(thisInsightId: owner.insightId, myInsightId: selectedInsightId)
+                    owner.insightDetailViewModel.requestInsight(thisInsightId: owner.insightId, myInsightId: selectedInsightId)
                         .subscribe(onNext: {
                             if $0 {
                                 owner.showAlert(text: "교환 요청을 완료했어요.\n교환 내역은 교환소에서 확인해보세요.", moveButtonTitle: "교환소 확인하기", type: .moveButton) {

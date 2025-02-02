@@ -178,6 +178,11 @@ class TicketModalViewController: UIViewController {
                         .subscribe { success in
                             if success {
                                 UserdefaultKey.ticketReceived = true
+                                if let _ = UserdefaultKey.couponCount {
+                                    UserdefaultKey.couponCount! += 1
+                                } else {
+                                    UserdefaultKey.couponCount = 1
+                                }
                             } else {
                                 print("쿠폰 발급 실패")
                             }

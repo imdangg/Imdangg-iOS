@@ -113,8 +113,8 @@ extension InsightDetail {
                 roadName: self.address.roadName ?? "",
                 buildingNumber: self.address.buildingNumber,
                 detail: self.address.detail ?? "",
-                latitude: 0.0,
-                longitude: 0.0
+                latitude: self.address.latitude ?? 0,
+                longitude: self.address.longitude ?? 0
             ),
             apartmentComplex: self.apartmentComplex,
             visitAt: self.visitAt.replacingOccurrences(of: ".", with: "-"),

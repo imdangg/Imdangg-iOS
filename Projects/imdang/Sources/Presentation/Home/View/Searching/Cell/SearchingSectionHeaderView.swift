@@ -100,7 +100,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             
             addSubview(collectionView)
             
-            titleLabel.snp.makeConstraints {
+            titleLabel.snp.remakeConstraints {
                 $0.top.equalToSuperview()
                 $0.leading.equalToSuperview()
                 $0.trailing.equalToSuperview()
@@ -113,7 +113,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
                 $0.height.equalTo(36)
             }
         } else {
-            titleLabel.snp.makeConstraints {
+            titleLabel.snp.remakeConstraints {
                 $0.edges.equalToSuperview()
             }
         }

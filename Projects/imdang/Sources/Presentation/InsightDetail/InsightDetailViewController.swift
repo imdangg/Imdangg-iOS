@@ -19,6 +19,7 @@ final class InsightDetailViewController: BaseViewController {
     private var exchangeState: DetailExchangeState
     private var disposeBag = DisposeBag()
     private let myInsights: [Insight]?
+    private let insightDetailViewModel = InsightDetailViewModel()
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
         $0.isHidden = true
@@ -245,24 +246,37 @@ final class InsightDetailViewController: BaseViewController {
         
         agreeButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
-                owner.showAlert(text: "교환을 수락했어요.\n교환한 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton, imageType: .circleCheck) {
-                    owner.exchangeState = .accepted
-                    owner.updateButton()
-                    owner.tableView.reloadData()
-                } etcAction: {
-                    self.dismiss(animated: true)
-                    self.navigationController?.popToRootViewController(animated: true)
-                    guard let tabBarController = self.tabBarController else { return }
-                    UIView.animate(withDuration: 5) {
-                        tabBarController.selectedIndex = 2
-                    }
-                }
+                owner.insightDetailViewModel.acceptInsight(exchangeRequestId: owner.insight.exchangeRequestId ?? "")
+                    .subscribe(onNext: {
+                        if $0 {
+                            owner.showAlert(text: "교환을 수락했어요.\n교환한 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton, imageType: .circleCheck) {
+                                owner.exchangeState = .accepted
+                                owner.updateButton()
+                                owner.tableView.reloadData()
+                            } etcAction: {
+                                self.dismiss(animated: true)
+                                self.navigationController?.popToRootViewController(animated: true)
+                                guard let tabBarController = self.tabBarController else { return }
+                                UIView.animate(withDuration: 5) {
+                                    tabBarController.selectedIndex = 2
+                                }
+                            }
+                        }
+                    })
+                    .disposed(by: owner.disposeBag)
             })
             .disposed(by: disposeBag)
         
         degreeButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
-                owner.showAlert(text: "교환을 거절했어요.", type: .confirmOnly, imageType: .circleCheck)
+                owner.insightDetailViewModel.rejecttInsight(exchangeRequestId: owner.insight.exchangeRequestId ?? "")
+                    .subscribe(onNext: {
+                        if $0 {
+                            owner.showAlert(text: "교환을 거절했어요.", type: .confirmOnly, imageType: .circleCheck)
+                            owner.navigationController?.popViewController(animated: true)
+                        }
+                    })
+                    .disposed(by: owner.disposeBag)
             })
             .disposed(by: disposeBag)
     }

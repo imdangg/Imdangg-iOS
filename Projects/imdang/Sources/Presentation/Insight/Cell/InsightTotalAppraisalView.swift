@@ -56,7 +56,6 @@ class InsightTotalAppraisalFooterView: UICollectionReusableView {
     func setPlaceHolder(text: String) {
         customTextView.placeholderLabel.text = text
     }
-    
 }
 
 

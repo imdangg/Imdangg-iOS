@@ -19,17 +19,68 @@ final class InsightDetailViewModel {
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager()
     
-    func createInsight(thisInsightId: String, myInsightId: String) -> Observable<Bool> {
+    func requestInsight(thisInsightId: String, myInsightId: String) -> Observable<Bool> {
         let parameters: [String: Any] = [
             "requestedInsightId": thisInsightId,
             "requestMemberId": UserdefaultKey.memberId,
             "requestMemberInsightId": myInsightId,
-            "memberCouponId": 0
+            "memberCouponId": UserdefaultKey.couponCount == nil ? "null" : UserdefaultKey.couponCount!
         ]
         
         let endpoint = Endpoint<ExchangeResponse>(
             baseURL: .imdangAPI,
             path: "/exchanges/request",
+            method: .post,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
+        )
+        
+        return networkManager.request(with: endpoint)
+            .map { _ in
+                return true
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(false)
+            }
+    }
+    
+    func acceptInsight(exchangeRequestId: String) -> Observable<Bool> {
+        let parameters: [String: Any] = [
+            "exchangeRequestId": exchangeRequestId,
+            "requestedMemberId": UserdefaultKey.memberId
+        ]
+        
+        print(parameters)
+        let endpoint = Endpoint<ExchangeResponse>(
+            baseURL: .imdangAPI,
+            path: "/exchanges/reject",
+            method: .post,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
+        )
+        
+        return networkManager.request(with: endpoint)
+            .map { _ in
+                return true
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(false)
+            }
+    }
+    
+    func rejecttInsight(exchangeRequestId: String) -> Observable<Bool> {
+        let parameters: [String: Any] = [
+            "exchangeRequestId": exchangeRequestId,
+            "requestedMemberId": UserdefaultKey.memberId
+        ]
+        
+        print(parameters)
+        
+        let endpoint = Endpoint<ExchangeResponse>(
+            baseURL: .imdangAPI,
+            path: "/exchanges/reject",
             method: .post,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
             parameters: parameters

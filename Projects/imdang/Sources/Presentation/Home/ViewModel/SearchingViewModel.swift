@@ -11,6 +11,7 @@ import Alamofire
 import RxSwift
 
 final class SearchingViewModel {
+    var isLoading: Bool = false
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager()
     
@@ -40,11 +41,12 @@ final class SearchingViewModel {
             }
     }
     
-    func loadTodayInsights() -> Observable<[Insight]?> {
+    func loadTodayInsights(page: Int) -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
-            "pageNumber": 0,
-            "pageSize": 100,
+            "pageNumber": page,
+            "pageSize": 10,
             "direction": "DESC",
+            "properties": [ "created_at" ]
         ]
         
         let endpoint = Endpoint<InsightResponse>(
@@ -70,7 +72,7 @@ final class SearchingViewModel {
             "insightId": id
         ]
         
-        let endpoint = Endpoint<InsightDetail>(
+        let endpoint = Endpoint<InsightDetailResponse>(
             baseURL: .imdangAPI,
             path: "/insights/detail",
             method: .get,
@@ -80,7 +82,7 @@ final class SearchingViewModel {
         
         return networkManager.request(with: endpoint)
             .map { data in
-                return data
+                return data.toDetail()
             }
             .catch { error in
                 print("Error: \(error.localizedDescription)")
