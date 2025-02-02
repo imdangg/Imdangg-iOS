@@ -12,13 +12,15 @@ import RxSwift
 
 final class SearchingViewModel {
     var isLoading: Bool = false
+    var myInsightTotalPage = 0
+    var todayInsightTotalPage = 0
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager()
     
-    func loadMyInsights() -> Observable<[Insight]?> {
+    func loadMyInsights(page: Int) -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
-            "pageNumber": 0,
-            "pageSize": 100,
+            "pageNumber": page,
+            "pageSize": 10,
             "direction": "DESC",
             "properties": [ "created_at" ]
         ]
@@ -33,6 +35,7 @@ final class SearchingViewModel {
         
         return networkManager.request(with: endpoint)
             .map { data in
+                self.myInsightTotalPage = data.totalPages
                 return data.toEntitiy()
             }
             .catch { error in
@@ -59,6 +62,7 @@ final class SearchingViewModel {
         
         return networkManager.request(with: endpoint)
             .map { data in
+                self.todayInsightTotalPage = data.totalPages
                 return data.toEntitiy()
             }
             .catch { error in

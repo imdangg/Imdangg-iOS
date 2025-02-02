@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             RxKakaoSDK.initSDK(appKey: APIKey)
         }
         
-        if let APIKey = Bundle.main.object(forInfoDictionaryKey: "NAVER_APP_KEY") as? String {
+        if let APIKey = Bundle.main.object(forInfoDictionaryKey: "NAVER_APP_KEY_ID") as? String {
             NMFAuthManager.shared().clientId = APIKey
         }
         

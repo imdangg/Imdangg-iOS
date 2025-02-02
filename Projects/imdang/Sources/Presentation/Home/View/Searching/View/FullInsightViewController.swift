@@ -10,11 +10,19 @@ import SnapKit
 import RxSwift
 import RxRelay
 
+enum FullInsightType: String {
+    case my = "내가 다녀온 단지의 다른 인사이트"
+    case today = "오늘 새롭게 올라온 인사이트"
+    case search
+}
+
 class FullInsightViewController: BaseViewController {
-    private var pageCount = 0
+    private var pageIndex = 0
+    private var totalPage = 1
     private var tableView: UITableView!
     private var chipViewHidden: Bool = false
     private var myInsights: [Insight]?
+    private var insightType: FullInsightType!
     private let searchingViewModel = SearchingViewModel()
     private let insights = BehaviorRelay<[Insight]>(value: [])
     private let disposeBag = DisposeBag()
@@ -92,9 +100,11 @@ class FullInsightViewController: BaseViewController {
         }
     }
     
-    func config(title: String, insights: [Insight], myInsights: [Insight]? = nil, chipViewHidden: Bool = false) {
+    func config(type: FullInsightType, totalPage: Int, title: String, insights: [Insight], myInsights: [Insight]? = nil, chipViewHidden: Bool = false) {
+        insightType = type
         titleLabel.text = title
         countLabel.text = "\(insights.count)개"
+        self.totalPage = totalPage
         self.insights.accept(insights)
         self.myInsights = myInsights
         self.chipViewHidden = chipViewHidden
@@ -132,27 +142,56 @@ extension FullInsightViewController: UITableViewDelegate, UITableViewDataSource 
         let scrollViewHeight = scrollView.frame.size.height
         
         if offsetY > contentHeight - scrollViewHeight - 100 { // 100px 여유
-            loadMoreData()
+            switch insightType {
+            case .my:
+                loadMoreMyData()
+            case .today:
+                loadMoreTodayData()
+            default:
+                break
+            }
         }
     }
     
-    private func loadMoreData() {
-        guard !searchingViewModel.isLoading else { return } // 중복 요청 방지
+    private func loadMoreTodayData() {
+        guard !searchingViewModel.isLoading else { return }
+        guard pageIndex < totalPage else { return }
         
         searchingViewModel.isLoading = true
-        pageCount += 1
+        pageIndex += 1
+            searchingViewModel.loadTodayInsights(page: pageIndex)
+                .compactMap { $0 }
+                .distinctUntilChanged()
+                .subscribe(with: self, onNext: { owner, newData in
+                    
+                    var currentData = owner.insights.value
+                    currentData.append(contentsOf: newData)
+                    owner.insights.accept(currentData)
+                    owner.countLabel.text = "\(owner.insights.value.count)개"
+                    owner.tableView.reloadData()
+                    owner.searchingViewModel.isLoading = false
+                })
+                .disposed(by: disposeBag)
+    }
+    
+    private func loadMoreMyData() {
+        guard !searchingViewModel.isLoading else { return }
+        guard pageIndex < totalPage else { return }
         
-        searchingViewModel.loadTodayInsights(page: pageCount)
-            .compactMap { $0 }
-            .subscribe(with: self, onNext: { owner, newData in
-                
-                var currentData = owner.insights.value
-                currentData.append(contentsOf: newData)
-                owner.insights.accept(currentData)
-                owner.countLabel.text = "\(owner.insights.value.count)개"
-                owner.tableView.reloadData()
-                owner.searchingViewModel.isLoading = false
-            })
-            .disposed(by: disposeBag)
+        searchingViewModel.isLoading = true
+        pageIndex += 1
+        searchingViewModel.loadMyInsights(page: pageIndex)
+                .compactMap { $0 }
+                .distinctUntilChanged()
+                .subscribe(with: self, onNext: { owner, newData in
+                    
+                    var currentData = owner.insights.value
+                    currentData.append(contentsOf: newData)
+                    owner.insights.accept(currentData)
+                    owner.countLabel.text = "\(owner.insights.value.count)개"
+                    owner.tableView.reloadData()
+                    owner.searchingViewModel.isLoading = false
+                })
+                .disposed(by: disposeBag)
     }
 }

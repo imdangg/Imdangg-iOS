@@ -57,80 +57,64 @@ final class InsightWriteService {
         }
     }
     
-    let dtoTest = InsightDTO(
-        memberId: UserdefaultKey.memberId,
-        score: 0,
-        title: "제목제목",
-        address: InsightDTO.Address(
-            siDo: "서울",
-            siGunGu: "강남구",
-            eupMyeonDong: "대치동",
-            roadName: "",
-            buildingNumber: "1025",
-            detail: "string",
-            latitude: 0,
-            longitude: 0
-        ),
-        apartmentComplex: InsightDTO.ApartmentComplex(name: "롯데캐슬리베아파트"),
-        visitAt: "2022-12-11",
-        visitTimes: ["아침"],
-        visitMethods: ["자차"],
-        summary: "stringstringstringstringstring",
-        access: "제한됨",
-        infra: InsightDTO.Infra(
-            transportations: ["해당_없음"],
-            schoolDistricts: ["해당_없음"],
-            amenities: ["해당_없음"],
-            facilities: ["해당_없음"],
-            surroundings: ["해당_없음"],
-            landmarks: ["해당_없음"],
-            unpleasantFacilities: ["해당_없음"],
-            text: "string"
-        ),
-        complexEnvironment: InsightDTO.ComplexEnvironment(
-            buildingCondition: "잘_모르겠어요",
-            security: "잘_모르겠어요",
-            childrenFacility: "잘_모르겠어요",
-            seniorFacility: "잘_모르겠어요",
-            text: "string"
-        ),
-        complexFacility: InsightDTO.ComplexFacility(
-            familyFacilities: ["해당_없음"],
-            multipurposeFacilities: ["해당_없음"],
-            leisureFacilities: ["해당_없음"],
-            surroundings: ["해당_없음"],
-            text: "string"
-        ),
-        favorableNews: InsightDTO.FavorableNews(
-            transportations: ["잘_모르겠어요"],
-            developments: ["잘_모르겠어요"],
-            educations: ["잘_모르겠어요"],
-            environments: ["잘_모르겠어요"],
-            cultures: ["잘_모르겠어요"],
-            industries: ["잘_모르겠어요"],
-            policies: ["잘_모르겠어요"],
-            text: "string"
-        )
-    )
-    
-    func getCoordinates(for address: String, completion: @escaping (CLLocationCoordinate2D?, Error?) -> Void) {
-        let geocoder = CLGeocoder()
-        geocoder.geocodeAddressString(address) { placemarks, error in
-            if let error = error {
-                print("Geocoding failed: \(error.localizedDescription)")
-                completion(nil, error)
-                return
-            }
+    func getCoordinates(address: String, completion: @escaping (Double?, Double?) -> Void) {
 
-            if let placemark = placemarks?.first, let location = placemark.location {
-                let coordinate = location.coordinate
-                completion(coordinate, nil)
-            } else {
-                print("No coordinates found for \(address)")
-                completion(nil, nil)
-            }
+        let url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=\(address)"
+        
+        if let APIID = Bundle.main.object(forInfoDictionaryKey: "NAVER_APP_KEY_ID") as? String, let APIKEY = Bundle.main.object(forInfoDictionaryKey: "NAVER_APP_KEY") as? String {
+            let headers: HTTPHeaders = [
+                "X-NCP-APIGW-API-KEY-ID": APIID,
+                "X-NCP-APIGW-API-KEY": APIKEY,
+                "Accept": "application/json"
+            ]
+
+            AF.request(url, method: .get, headers: headers)
+                .validate()
+                .responseDecodable(of: NaverGeocodeResponse.self) { response in
+                    switch response.result {
+                    case .success(let result):
+                        if let firstResult = result.addresses.first {
+                            let latitude = Double(firstResult.y)
+                            let longitude = Double(firstResult.x)
+                            completion(latitude, longitude)
+                        } else {
+                            completion(nil, nil)
+                        }
+                    case .failure(let error):
+                        print("네이버 Geocoding API 오류: \(error)")
+                        completion(nil, nil)
+                    }
+                }
         }
     }
 }
 
-
+struct NaverGeocodeResponse: Codable {
+    let status: String
+    let meta: Meta
+    let addresses: [Address]
+    let errorMessage: String?
+    
+    struct Meta: Codable {
+        let totalCount: Int
+        let page: Int
+        let count: Int
+    }
+    
+    struct Address: Codable {
+        let roadAddress: String
+        let jibunAddress: String
+        let englishAddress: String
+        let addressElements: [AddressElement]
+        let x: String  // 경도 (Longitude)
+        let y: String  // 위도 (Latitude)
+        let distance: Double
+    }
+    
+    struct AddressElement: Codable {
+        let types: [String]
+        let longName: String
+        let shortName: String
+        let code: String
+    }
+}

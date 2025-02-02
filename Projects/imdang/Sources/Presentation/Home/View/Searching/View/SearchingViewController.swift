@@ -46,7 +46,7 @@ class SearchingViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        searchingViewModel.loadMyInsights()
+        searchingViewModel.loadMyInsights(page: 0)
             .compactMap { $0 }
             .subscribe(with: self, onNext: { owner, data in
                 
@@ -274,15 +274,17 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             case 0:
                 return UICollectionReusableView()
             case 1:
-                headerView.configure(with: "내가 다녀온 단지의 다른 인사이트", type: .notTopten, showHorizontalCollection: myInsights.value.isEmpty ? false : true)
+                let title = "내가 다녀온 단지의 다른 인사이트"
+                headerView.configure(with: title, type: .notTopten, showHorizontalCollection: myInsights.value.isEmpty ? false : true)
                 headerView.buttonAction = {
-                    fullVC.config(title: "내가 다녀온 단지의 다른 인사이트", insights: self.myInsights.value)
+                    fullVC.config(type: .my, totalPage: self.searchingViewModel.myInsightTotalPage, title: title, insights: self.myInsights.value)
                     self.navigationController?.pushViewController(fullVC, animated: true)
                 }
             case 2:
-                headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
+                let title = "오늘 새롭게 올라온 인사이트"
+                headerView.configure(with: title, type: .notTopten, showHorizontalCollection: false)
                 headerView.buttonAction = {
-                    fullVC.config(title: "오늘 새롭게 올라온 인사이트", insights: self.todayInsights.value, myInsights: self.myInsights.value, chipViewHidden: true)
+                    fullVC.config(type: .today, totalPage: self.searchingViewModel.todayInsightTotalPage, title: title, insights: self.todayInsights.value, myInsights: self.myInsights.value, chipViewHidden: true)
                     self.navigationController?.pushViewController(fullVC, animated: true)
                 }
             case 3:
