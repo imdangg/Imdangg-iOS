@@ -22,12 +22,11 @@ class LocationBoxCollectionCell: UICollectionViewCell {
     }
     
     private let locationnLabel = UILabel().then {
-        $0.text = "서울시 강남구 신논현동"
         $0.font = .pretenSemiBold(18)
         $0.textColor = .white
     }
     
-    private let zoneStackView = UIStackView().then {
+    let zoneStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.distribution = .equalSpacing
         $0.alignment = .center
@@ -36,7 +35,7 @@ class LocationBoxCollectionCell: UICollectionViewCell {
         $0.layer.cornerRadius = 8
     }
     
-    private let insightStackView = UIStackView().then {
+    let insightStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.distribution = .equalSpacing
         $0.alignment = .center
@@ -58,13 +57,11 @@ class LocationBoxCollectionCell: UICollectionViewCell {
     }
     
     private let zoneCountLabel = UILabel().then {
-        $0.text = "3개"
         $0.font = .pretenMedium(14)
         $0.textColor = .white
     }
     
     private let insightCountLabel = UILabel().then {
-        $0.text = "3개"
         $0.font = .pretenMedium(14)
         $0.textColor = .white
     }
@@ -149,8 +146,10 @@ class LocationBoxCollectionCell: UICollectionViewCell {
         }
     }
 
-    func configure() {
-        
+    func configure(address: AddressResponse) {
+        locationnLabel.text = address.toAddress()
+        zoneCountLabel.text = "\(address.apartmentComplexCount)개"
+        insightCountLabel.text = "\(address.insightCount)개"
     }
     
     func bind(input: Observable<Int>, pageIndex: Int) {
@@ -158,16 +157,20 @@ class LocationBoxCollectionCell: UICollectionViewCell {
         
         input
             .subscribe(onNext: { [weak self] currentPage in
-                if pageIndex == currentPage {
-                    self?.backgroundColor = .mainOrange500
-                    self?.zoneStackView.backgroundColor = .mainOrange400
-                    self?.insightStackView.backgroundColor = .mainOrange400
-                } else {
-                    self?.backgroundColor = .grayScale100
-                    self?.zoneStackView.backgroundColor = .grayScale50
-                    self?.insightStackView.backgroundColor = .grayScale50
-                }
+                self?.setTintColor(visiable: pageIndex == currentPage)
             })
             .disposed(by: disposeBag)
+    }
+    
+    func setTintColor(visiable: Bool) {
+        if visiable {
+            backgroundColor = .mainOrange500
+            zoneStackView.backgroundColor = .mainOrange400
+            insightStackView.backgroundColor = .mainOrange400
+        } else {
+            backgroundColor = .grayScale100
+            zoneStackView.backgroundColor = .grayScale50
+            insightStackView.backgroundColor = .grayScale50
+        }
     }
 }

@@ -8,11 +8,13 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
 
 class StorageBoxContainerViewController: UIViewController {
-    private let insight = [Insight]()
+    private var disposeBag = DisposeBag()
     private let emptyView = StorageBoxEmptyViewController()
     private let storageBoxViewController = StorageBoxViewController()
+    private let storageBoxViewModel = StorageBoxViewModel()
     
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -25,10 +27,13 @@ class StorageBoxContainerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
-        
         addSubviews()
-        makeConstraints()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        setView()
     }
     
     private func addSubviews() {
@@ -41,11 +46,17 @@ class StorageBoxContainerViewController: UIViewController {
         storageBoxViewController.didMove(toParent: self)
     }
     
-    private func makeConstraints() {
-        if !insight.isEmpty {
-            storageBoxViewController.view.isHidden = true
-        } else {
-            emptyView.view.isHidden = true
-        }
+    private func setView() {
+        storageBoxViewModel.loadMyDistricts()
+            .subscribe(with: self) { owner, data in
+                
+                if let data = data {
+                    owner.emptyView.view.isHidden = true
+                    owner.storageBoxViewController.config(addresses: data)
+                } else {
+                    owner.storageBoxViewController.view.isHidden = true
+                }
+            }
+            .disposed(by: disposeBag)
     }
 }

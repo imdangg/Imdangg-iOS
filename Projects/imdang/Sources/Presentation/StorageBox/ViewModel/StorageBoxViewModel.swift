@@ -1,8 +1,8 @@
 //
-//  SearchingViewModel.swift
+//  StoregeBoxViewModel.swift
 //  imdang
 //
-//  Created by 임대진 on 1/24/25.
+//  Created by 임대진 on 2/2/25.
 //
 
 import Foundation
@@ -10,33 +10,24 @@ import NetworkKit
 import Alamofire
 import RxSwift
 
-final class SearchingViewModel {
+final class StorageBoxViewModel {
+    var totalCount = 0
+    var totalPage = 0
     var isLoading: Bool = false
-    var myInsightTotalPage = 0
-    var todayInsightTotalPage = 0
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager(session: .default)
     
-    func loadMyInsights(page: Int) -> Observable<[Insight]?> {
-        let parameters: [String: Any] = [
-            "pageNumber": page,
-            "pageSize": 10,
-            "direction": "DESC",
-            "properties": [ "created_at" ]
-        ]
-        
-        let endpoint = Endpoint<MyInsightResponse>(
+    func loadMyDistricts() -> Observable<[AddressResponse]?> {
+        let endpoint = Endpoint<[AddressResponse]>(
             baseURL: .imdangAPI,
-            path: "/my-insights/created-by-me",
+            path: "/my-insights/districts",
             method: .get,
-            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
-            parameters: parameters
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
         )
         
         return networkManager.request(with: endpoint)
             .map { data in
-                self.myInsightTotalPage = data.totalPages
-                return data.toEntitiy()
+                return data.filter { $0.eupMyeonDong != ""}
             }
             .catch { error in
                 print("Error: \(error.localizedDescription)")
@@ -44,25 +35,35 @@ final class SearchingViewModel {
             }
     }
     
-    func loadTodayInsights(page: Int) -> Observable<[Insight]?> {
-        let parameters: [String: Any] = [
-            "pageNumber": page,
-            "pageSize": 10,
-            "direction": "DESC",
-            "properties": [ "created_at" ]
+    
+    func loadStoregeInsights(address: AddressResponse, pageIndex: Int, apartmentComplexName: String? = nil, onlyMine: Bool = false) -> Observable<[Insight]?> {
+        var parameters: [String: Any] = [
+            "siDo": address.siDo,
+            "siGunGu": address.siGunGu,
+            "eupMyeonDong": address.eupMyeonDong,
+            "onlyMine" : onlyMine,
+            "pageNumber" : pageIndex,
+            "pageSize" : 100,
+            "direction" : "DESC",
+            "properties" : [],
         ]
+        if let aptName = apartmentComplexName {
+            parameters["apartmentComplexName"] = aptName
+        }
         
-        let endpoint = Endpoint<InsightResponse>(
+        let endpoint = Endpoint<MyInsightResponse>(
             baseURL: .imdangAPI,
-            path: "/insights",
+            path: "/my-insights",
             method: .get,
+            encodingType: .query,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
             parameters: parameters
         )
         
         return networkManager.request(with: endpoint)
             .map { data in
-                self.todayInsightTotalPage = data.totalPages
+                self.totalCount = data.totalElements
+                self.totalPage = data.totalPages
                 return data.toEntitiy()
             }
             .catch { error in
