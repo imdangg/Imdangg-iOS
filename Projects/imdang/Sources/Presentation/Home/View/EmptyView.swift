@@ -11,14 +11,7 @@ import Then
 
 class EmptyViewController: UIViewController {
     
-    private let centerLabel = UILabel().then {
-        $0.font = UIFont.systemFont(ofSize: 18)
-    }
-    
-    private let labelText: String
-    
-    init(labelText: String) {
-        self.labelText = labelText
+    init() {
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -31,16 +24,13 @@ class EmptyViewController: UIViewController {
         
         view.backgroundColor = .white
         
-        centerLabel.text = labelText
-        
         makeConstraints()
     }
     
-    private func makeConstraints() {
-        view.addSubview(centerLabel)
+    private func addSubviews() {
         
-        centerLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
+    }
+    
+    private func makeConstraints() {
     }
 }

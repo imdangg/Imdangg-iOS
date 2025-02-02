@@ -14,9 +14,18 @@ class WebViewController: UIViewController {
     // MARK: - Properties
     var webView: WKWebView?
     let indicator = UIActivityIndicatorView(style: .medium)
-    var address = ""
+    var adress = ""
     var onAddressSelected: (([String: Any]) -> Void)?
-
+    
+    init(url: String = "https://imdangg.github.io/Kakao-Postcode/") {
+        super.init(nibName: nil, bundle: nil)
+        adress = url
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,7 +49,7 @@ class WebViewController: UIViewController {
         webView = WKWebView(frame: .zero, configuration: configuration)
         self.webView?.navigationDelegate = self
 
-        guard let url = URL(string: "https://da-hye0.github.io/Kakao-Postcode/"),
+        guard let url = URL(string: adress),
             let webView = webView
             else { return }
         let request = URLRequest(url: url)

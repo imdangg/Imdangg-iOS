@@ -39,13 +39,13 @@ final class ExchangeReactor: Reactor {
         case .loadInsights:
             let insights = (1...20).map { index in
                 Insight(
-                    id: index,
+                    id: "index",
                     titleName: "Insight \(index)",
                     titleImageUrl: "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg",
                     userName: "User \(index)",
                     profileImageUrl: "",
                     adress: "Seoul",
-                    likeCount: index * 5
+                    likeCount: index * 5, state: .beforeRequest
                 )
             }
             return Observable.just(.setInsights(insights))
