@@ -50,7 +50,7 @@ class StorageBoxContainerViewController: UIViewController {
         storageBoxViewModel.loadMyDistricts()
             .subscribe(with: self) { owner, data in
                 
-                if let data = data {
+                if let data = data, !data.isEmpty {
                     owner.emptyView.view.isHidden = true
                     owner.storageBoxViewController.config(addresses: data)
                 } else {
