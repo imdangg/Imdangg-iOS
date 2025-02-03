@@ -13,6 +13,7 @@ import RxCocoa
 protocol ReusableViewDelegate: AnyObject {
     func didTapFullViewButton()
     func didTapAreaSeletButton()
+    func disTapSortButton(isOn: Bool)
 }
 
 class InsightHeaderView: UICollectionReusableView {
@@ -52,12 +53,11 @@ class InsightHeaderView: UICollectionReusableView {
     }
     
     private let insightCount = UILabel().then {
-        $0.text = "33개"
         $0.textColor = .grayScale900
         $0.font = .pretenSemiBold(16)
     }
     
-    private let toggleSwitch = CustomSwitch()
+    private var toggleSwitch = CustomSwitch()
     
     private let secondLineView = UIView().then {
         $0.backgroundColor = .white
@@ -169,6 +169,15 @@ class InsightHeaderView: UICollectionReusableView {
                 delegate?.didTapAreaSeletButton()
             })
             .disposed(by: disposeBag)
+        
+        toggleSwitch.valueChanged = { [self] in
+            delegate?.disTapSortButton(isOn: $0)
+        }
+    }
+    
+    func config(insightCount: Int, toggleState: Bool) {
+        self.insightCount.text = "\(insightCount)개"
+        self.toggleSwitch.setOn(toggleState)
     }
 
 }

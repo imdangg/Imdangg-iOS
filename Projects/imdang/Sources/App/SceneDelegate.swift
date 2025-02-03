@@ -16,9 +16,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
+//        let tab = TabBarController()
         let viewController = SigninViewController()
-        let reactor = SigninReactor()
-        viewController.reactor = reactor
         viewController.view.backgroundColor = .white
 
         let navigationController = UINavigationController(rootViewController: viewController)
@@ -61,6 +60,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window.layer.add(transition, forKey: kCATransition)
         }
         window.rootViewController = viewController
+        window.makeKeyAndVisible()
+    }
+    
+    /// 네비게이션 루트뷰 변경
+    func changeNavigationRootView(_ viewController: UIViewController, animated: Bool) {
+        guard let window = self.window else { return }
+        
+        if animated {
+            let transition = CATransition()
+            transition.duration = 0.3
+            transition.type = CATransitionType.push
+            transition.subtype = CATransitionSubtype.fromRight
+            window.layer.add(transition, forKey: kCATransition)
+        }
+        let navigationController = UINavigationController(rootViewController: viewController)
+        window.rootViewController = navigationController
         window.makeKeyAndVisible()
     }
 }

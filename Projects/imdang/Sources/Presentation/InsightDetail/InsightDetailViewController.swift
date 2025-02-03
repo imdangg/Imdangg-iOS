@@ -8,21 +8,18 @@
 import UIKit
 import SnapKit
 import Then
-
-enum DetailExchangeState {
-    case beforeRequest
-    case afterRequest
-    case waiting
-    case done
-}
-
+import RxSwift
 final class InsightDetailViewController: BaseViewController {
 
     private var insight: InsightDetail!
     private var mainImage: UIImage?
     private var tableView: UITableView!
     private var insightImageUrl = ""
+    private var likeCount: Int
     private var exchangeState: DetailExchangeState
+    private var disposeBag = DisposeBag()
+    private let myInsights: [Insight]?
+    private let insightDetailViewModel = InsightDetailViewModel()
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
         $0.isHidden = true
@@ -40,15 +37,23 @@ final class InsightDetailViewController: BaseViewController {
     private let degreeButton = CommonButton(title: "거절", initialButtonType: .whiteBackBorderStyle)
     private let agreeButton = CommonButton(title: "수락", initialButtonType: .enabled)
     private let waitButton = CommonButton(title: "대기중", initialButtonType: .disabled)
-    private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled).then { $0.applyTopBlur() }
-    private let buttonBackView = UIView().then { $0.backgroundColor = .white }
+    private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
+    private let buttonBackView = UIView().then { $0.backgroundColor = .white }.then { $0.applyTopBlur() }
     
-    init(url: String, image: UIImage? = nil,state: DetailExchangeState, insight: InsightDetail) {
-        exchangeState = state
+    init(url: String, image: UIImage? = nil, insight: InsightDetail, likeCount: Int, myInsights: [Insight]? = nil) {
+        exchangeState = insight.exchangeRequestStatus
         insightImageUrl = url
         mainImage = image
+        self.likeCount = likeCount
+        self.myInsights = myInsights
         self.insight = insight
+        
         super.init(nibName: nil, bundle: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleModalDismiss), name: .detailModalDidDismiss, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .detailModalDidDismiss, object: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -64,6 +69,7 @@ final class InsightDetailViewController: BaseViewController {
         configureTableView()
         addSubviews()
         makeConstraints()
+        bindActions()
         
         view.addSubview(categoryTapView)
         categoryTapView.snp.makeConstraints {
@@ -73,6 +79,15 @@ final class InsightDetailViewController: BaseViewController {
         }
     }
     
+    
+    @objc private func handleModalDismiss() {
+        self.navigationController?.popToRootViewController(animated: true)
+        self.navigationController?.viewControllers.forEach {
+            if let homeVC = $0 as? HomeContainerViewController {
+                homeVC.changeView(showView: .exchange)
+            }
+        }
+    }
     private func setNavigationItem() {
         [reportIcon, shareIcon].forEach { rightNaviItemView.addSubview($0) }
         
@@ -108,71 +123,168 @@ final class InsightDetailViewController: BaseViewController {
         self.view.addSubview(tableView)
         tableView.snp.makeConstraints {
             $0.topEqualToNavigationBottom(vc: self)
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview().offset(-96)
         }
     }
     
     private func addSubviews() {
-        view.addSubview(buttonBackView)
-        switch exchangeState {
-        case .beforeRequest:
-            view.addSubview(requestButton)
-        case .afterRequest:
-            view.addSubview(degreeButton)
-            view.addSubview(agreeButton)
-        case .waiting:
-            view.addSubview(waitButton)
-        case .done:
-            view.addSubview(doneButton)
+        [buttonBackView, requestButton, waitButton, doneButton, degreeButton, agreeButton].forEach {
+            view.addSubview($0)
         }
     }
     
     private func makeConstraints() {
-        buttonBackView.snp.makeConstraints {
+        buttonBackView.snp.makeConstraints() {
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(96)
             $0.bottom.equalToSuperview()
         }
-        switch exchangeState {
-        case .beforeRequest:
-            requestButton.snp.makeConstraints {
-                $0.horizontalEdges.equalToSuperview().inset(20)
-                $0.height.equalTo(56)
-                $0.bottom.equalToSuperview().offset(-40)
-            }
-        case .afterRequest:
-            degreeButton.snp.makeConstraints {
-                $0.leading.equalToSuperview().offset(20)
-                $0.trailing.equalTo(buttonBackView.snp.centerX).offset(-5)
-                $0.height.equalTo(56)
-                $0.bottom.equalToSuperview().offset(-40)
-            }
-            agreeButton.snp.makeConstraints {
-                $0.leading.equalTo(buttonBackView.snp.centerX).offset(5)
-                $0.trailing.equalToSuperview().offset(-20)
-                $0.height.equalTo(56)
-                $0.bottom.equalToSuperview().offset(-40)
-            }
-        case .waiting:
-            waitButton.snp.makeConstraints {
-                $0.horizontalEdges.equalToSuperview().inset(20)
-                $0.height.equalTo(56)
-                $0.bottom.equalToSuperview().offset(-40)
-            }
-        case .done:
-            doneButton.snp.makeConstraints {
+        
+        [requestButton, waitButton, doneButton].forEach {
+            $0.snp.makeConstraints {
                 $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.height.equalTo(56)
                 $0.bottom.equalToSuperview().offset(-40)
             }
         }
+        
+        degreeButton.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(20)
+            $0.trailing.equalTo(buttonBackView.snp.centerX).offset(-5)
+            $0.height.equalTo(56)
+            $0.bottom.equalToSuperview().offset(-40)
+        }
+        
+        agreeButton.snp.makeConstraints {
+            $0.leading.equalTo(buttonBackView.snp.centerX).offset(5)
+            $0.trailing.equalToSuperview().offset(-20)
+            $0.height.equalTo(56)
+            $0.bottom.equalToSuperview().offset(-40)
+        }
+        
+        updateButton()
+    }
+    
+    private func updateButton() {
+        [requestButton, waitButton, doneButton, degreeButton, agreeButton].forEach {
+            $0.isHidden = true
+        }
+        
+        switch exchangeState {
+        case .null:
+            if myInsights != nil  {
+                requestButton.isHidden = false
+            } else {
+                buttonBackView.isHidden = true
+                tableView.snp.updateConstraints {
+                    $0.bottom.equalToSuperview()
+                }
+            }
+        case .pending:
+            if let state = insight.exchangeRequestCreatedByMe {
+                if state {
+                    waitButton.isHidden = false
+                } else {
+                    degreeButton.isHidden = false
+                    agreeButton.isHidden = false
+                }
+            } else {
+                waitButton.isHidden = false
+            }
+        case .rejected:
+            if let state = insight.exchangeRequestCreatedByMe {
+                if state {
+                    buttonBackView.isHidden = true
+                    tableView.snp.updateConstraints {
+                        $0.bottom.equalToSuperview()
+                    }
+                } else {
+                    degreeButton.isHidden = false
+                    agreeButton.isHidden = false
+                }
+            }
+        case .accepted:
+            if let state = insight.exchangeRequestCreatedByMe {
+                if state {
+                    buttonBackView.isHidden = true
+                    tableView.snp.updateConstraints {
+                        $0.bottom.equalToSuperview()
+                    }
+                } else {
+                    doneButton.isHidden = false
+                }
+            } else {
+                doneButton.isHidden = false
+            }
+        }
+    }
+    
+    private func bindActions() {
+        requestButton.rx.tap
+            .subscribe(with: self, onNext: { owner, _ in
+                
+                if let insights = owner.myInsights {
+                    let vc = MyInsightsModalViewController(insightId: owner.insight.insightId, myInsights: insights)
+                    
+                    vc.resultSend = {
+                        if $0 {
+                            owner.exchangeState = .pending
+                            owner.updateButton()
+                            owner.tableView.reloadData()
+                        }
+                    }
+                    
+                    vc.modalPresentationStyle = .pageSheet
+                    vc.modalTransitionStyle = .coverVertical
+                    self.present(vc, animated: true, completion: nil)
+                } else {
+                    owner.showAlert(text: "교환할 인사이트가 없어요.\n임장을 다녀온 후 인사이트를\n작성해주세요.", type: .confirmOnly, imageType: .circleCheck)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        agreeButton.rx.tap
+            .subscribe(with: self, onNext: { owner, _ in
+                owner.insightDetailViewModel.acceptInsight(exchangeRequestId: owner.insight.exchangeRequestId ?? "")
+                    .subscribe(onNext: {
+                        if $0 {
+                            owner.showAlert(text: "교환을 수락했어요.\n교환한 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton, imageType: .circleCheck) {
+                                owner.exchangeState = .accepted
+                                owner.updateButton()
+                                owner.tableView.reloadData()
+                            } etcAction: {
+                                self.dismiss(animated: true)
+                                self.navigationController?.popToRootViewController(animated: true)
+                                guard let tabBarController = self.tabBarController else { return }
+                                UIView.animate(withDuration: 5) {
+                                    tabBarController.selectedIndex = 2
+                                }
+                            }
+                        }
+                    })
+                    .disposed(by: owner.disposeBag)
+            })
+            .disposed(by: disposeBag)
+        
+        degreeButton.rx.tap
+            .subscribe(with: self, onNext: { owner, _ in
+                owner.insightDetailViewModel.rejecttInsight(exchangeRequestId: owner.insight.exchangeRequestId ?? "")
+                    .subscribe(onNext: {
+                        if $0 {
+                            owner.showAlert(text: "교환을 거절했어요.", type: .confirmOnly, imageType: .circleCheck)
+                            owner.navigationController?.popViewController(animated: true)
+                        }
+                    })
+                    .disposed(by: owner.disposeBag)
+            })
+            .disposed(by: disposeBag)
     }
 }
 
 extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return exchangeState == .done ? 7 : 3
+        return exchangeState == .null ? myInsights == nil ? 7 : 3 : exchangeState == .accepted ? 7 : 3
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -190,12 +302,12 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
-            cell.config(info: insight)
+            cell.config(info: insight, likeCount: likeCount)
             cell.selectionStyle = .none
             return cell
         case 2:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailDefaultInfoTableCell.self)
-            cell.config(info: insight, state: exchangeState)
+            cell.config(info: insight, state: exchangeState, isMyInsight: myInsights == nil)
             cell.selectionStyle = .none
             return cell
         case 3:

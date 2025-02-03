@@ -32,10 +32,11 @@ final class NextAndBackButton: UIView {
         $0.backgroundColor = .grayScale100
         $0.titleLabel?.font = .pretenSemiBold(16)
         $0.setTitleColor(.grayScale500, for: .normal)
-        $0.isEnabled = false
         
         $0.layer.cornerRadius = 8
     }
+    
+    var isEnable = false
     
     override init(frame: CGRect = .zero) {
         super.init(frame: frame)
@@ -51,7 +52,12 @@ final class NextAndBackButton: UIView {
         [backgroundView, backButton, nextButton].forEach { addSubview($0) }
     }
     
-    func config(needBack: Bool) {
+    func config(needBack: Bool, title: String? = nil) {
+        
+        if let title = title {
+            nextButton.setTitle(title, for: .normal)
+        }
+        
         backgroundView.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.verticalEdges.equalToSuperview()
@@ -81,13 +87,13 @@ final class NextAndBackButton: UIView {
     }
     
     func nextButtonEnable(value: Bool) {
-        if value {
-            nextButton.isEnabled = true
+        isEnable = value
+        
+        if isEnable {
             nextButton.backgroundColor = .mainOrange500
             nextButton.layer.borderWidth = 0
             nextButton.setTitleColor(.white, for: .normal)
         } else {
-            nextButton.isEnabled = false
             nextButton.backgroundColor = .grayScale100
             nextButton.layer.borderWidth = 0
             nextButton.setTitleColor(.grayScale500, for: .normal)

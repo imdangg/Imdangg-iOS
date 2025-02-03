@@ -47,6 +47,7 @@ class GoogleLoginService {
                         networkManager.request(with: endpoint)
                             .subscribe(
                                 onNext: { entity in
+                                    UserdefaultKey.isJoined = entity.joined
                                     UserdefaultKey.accessToken = entity.accessToken
                                     UserdefaultKey.memberId = entity.memberId
                                     observer.onNext(true)

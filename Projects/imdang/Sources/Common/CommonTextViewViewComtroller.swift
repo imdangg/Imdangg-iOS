@@ -100,8 +100,13 @@ class CommonTextViewViewComtroller: BaseViewController {
         super.init(nibName: nil, bundle: nil)
         
         titleLabel.text = title
+        let attributedString = NSMutableAttributedString(string: title)
+        let range = (title as NSString).range(of: "*")
+        attributedString.addAttribute(.foregroundColor, value: UIColor.red, range: range)
+        
+        titleLabel.attributedText = attributedString
         textView.text = text
-        NavigationTitleLabel.text = title
+        NavigationTitleLabel.text = title.replacingOccurrences(of: "*", with: "")
         self.descriptionText = description ?? ""
         
         if text.isEmpty {

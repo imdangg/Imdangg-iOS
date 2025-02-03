@@ -15,6 +15,11 @@ class LocationBoxHeaderView: UICollectionReusableView {
     weak var delegate: ReusableViewDelegate?
     private var disposeBag = DisposeBag()
     private var collectionView: UICollectionView?
+    private var totalPage = 1 {
+        didSet {
+            updatePageLabel()
+        }
+    }
     private var currentPage = 1 {
         didSet {
             updatePageLabel()
@@ -53,10 +58,8 @@ class LocationBoxHeaderView: UICollectionReusableView {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        disposeBag = DisposeBag()
         
         currentPage = 1
-        pageLabel.text = "1 / 4"
         
         delegate = nil
         collectionView = nil
@@ -87,7 +90,7 @@ class LocationBoxHeaderView: UICollectionReusableView {
     }
     
     private func updatePageLabel() {
-        pageLabel.text = "\(currentPage) / 4"
+        pageLabel.text = "\(currentPage) / \(totalPage)"
     }
     
     func bindActions() {
@@ -98,8 +101,9 @@ class LocationBoxHeaderView: UICollectionReusableView {
             .disposed(by: disposeBag)
     }
     
-    func bind(input: Observable<Int>, indexPath: IndexPath, collectionView: UICollectionView) {
+    func bind(input: Observable<Int>, totalPage: Int, indexPath: IndexPath, collectionView: UICollectionView) {
         self.collectionView = collectionView
+        self.totalPage = totalPage
         
         input
             .subscribe(onNext: { [weak self] currentPage in

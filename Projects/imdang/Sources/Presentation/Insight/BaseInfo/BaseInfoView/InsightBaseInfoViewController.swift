@@ -24,6 +24,7 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     
     var disposeBag = DisposeBag()
     
+    private let insightService = InsightWriteService()
     private var baseInfo = InsightDetail.emptyInsight
     private var imageData: UIImage?
     private var buildingName = ""
@@ -85,15 +86,22 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     func bind(reactor: InsightReactor) {
         
         nextButtonView.nextButton.rx.tap
-            .map { InsightReactor.Action.tapBaseInfoConfirm(self.baseInfo, self.imageData) }
-            .bind(to: reactor.action)
+            .subscribe(with: self, onNext: { owner, _ in
+                if owner.nextButtonView.isEnable {
+                    owner.reactor?.action.onNext(
+                        .tapBaseInfoConfirm(owner.baseInfo, owner.imageData)
+                    )
+                } else {
+                    owner.showToast(message: "필수 항목을 모두 작성해주세요")
+                }
+            })
             .disposed(by: disposeBag)
-        
+
+
         checkSectionState
-            .subscribe(onNext: { [weak self] arr in
-                guard let self = self else { return }
-                self.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 8 ? true : false)
-//                self.nextButtonView.nextButtonEnable(value: true)
+            .subscribe(with: self, onNext: { owner, arr in
+                owner.nextButtonView.nextButtonEnable(value: arr.filter { $0 == .done }.count == 8 ? true : false)
+//                owner.nextButtonView.nextButtonEnable(value: true)
             })
             .disposed(by: disposeBag)
     }
@@ -241,7 +249,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             if indexPath.row == 0 {
                 baseInfo.address.siDo == ""
                 ? cell.configure(title: "지번 주소")
-                : cell.setData(title: "\(baseInfo.address.siDo) \(baseInfo.address.siGunGu) \(baseInfo.address.eupMyeonDong) \(baseInfo.address.buildingNumber)")
+                : cell.setData(title: baseInfo.address.toString())
             } else {
                 buildingName == ""
                 ? cell.configure(title: "아파트 단지 명")
@@ -249,22 +257,34 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             }
             
             cell.buttonAction = { result in
-                let webViewController = WebViewController()
+                let webViewController = WebViewController(url: "https://daejinlim.github.io/kakaoAddress/")
                 self.present(webViewController, animated: true, completion: nil)
                 
                 webViewController.onAddressSelected = { [self] data in
-                    if let sido = (data["sido"]) as? String {
-                        baseInfo.address.siDo = sido
+                    
+                    if let jibunAddress = (data["jibunAddress"]) as? String {
+                        print("jibunAddress: \(jibunAddress)")
+                        let splited = jibunAddress.split(separator: " ")
+                        baseInfo.address.siDo = String(splited[safe: 0] ?? "")
+                        baseInfo.address.siGunGu = String(splited[safe: 1] ?? "")
+                        baseInfo.address.eupMyeonDong = String(splited[safe: 2] ?? "")
+                        baseInfo.address.buildingNumber = String(splited[safe: 3] ?? "")
+                        
+                        insightService.getCoordinates(address: jibunAddress) { [self] latitude, longitude in
+                            baseInfo.address.latitude = latitude
+                            baseInfo.address.longitude = longitude
+                            print("Latitude: \(latitude ?? 0), Longitude: \(longitude ?? 0)")
+                        }
                     }
                     
-                    if let sigungu = (data["sigungu"]) as? String {
-                        baseInfo.address.siGunGu = sigungu
-                    }
-                    
-                    if let query = (data["query"]) as? String {
-                        let splited = query.split(separator: " ")
-                        baseInfo.address.eupMyeonDong = String(splited[safe: 0] ?? "")
-                        baseInfo.address.buildingNumber = String(splited[safe: 1] ?? "")
+                    DispatchQueue.main.async {
+                        if self.baseInfo.address.siDo != "서울" {
+                            self.showAlert(text: "지금은 서울 지역만 서비스가 가능합니다.", type: .confirmOnly, dimAction: false , comfrimAction: {
+                                self.baseInfo.address = Address(siDo: "", siGunGu: "", eupMyeonDong: "", buildingNumber: "")
+                                self.buildingName = ""
+                                collectionView.reloadSections(IndexSet([2]))
+                            })
+                        }
                     }
                     
                     if let buildingName = (data["buildingName"]) as? String {

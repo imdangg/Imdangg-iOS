@@ -11,7 +11,8 @@ import SnapKit
 import RxSwift
 import RxRelay
 
-class TermsModelViewController: UIViewController {
+class TermsModalViewController: UIViewController {
+    private let joinService = ServerJoinService()
     private var disposeBag = DisposeBag()
     private var countRelay = PublishRelay<Set<Int>>()
     private var currentSelected = Set<Int>()
@@ -53,7 +54,7 @@ class TermsModelViewController: UIViewController {
     }
     
     private let marketingButton = CheckButton().then {
-        $0.configure(isBackground: false, title: "[필수] 마케팅 수신 및 앱 알림 동의")
+        $0.configure(isBackground: false, title: "[선택] 마케팅 수신 및 앱 알림 동의")
         $0.setState(isSelected: false)
     }
     
@@ -121,20 +122,21 @@ class TermsModelViewController: UIViewController {
         }
         
         termsButton.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+            $0.height.equalTo(24)
             $0.top.equalTo(allCheckButton.snp.bottom).offset(16)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalTo(termsPageButton.snp.leading).offset(-4)
         }
         
         personalInfoButton.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+            $0.height.equalTo(24)
             $0.top.equalTo(termsButton.snp.bottom).offset(16)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalTo(personalInfoPageButton.snp.leading).offset(-4)
         }
+        
         marketingButton.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+            $0.height.equalTo(24)
             $0.top.equalTo(personalInfoButton.snp.bottom).offset(16)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalTo(marketingPageButton.snp.leading).offset(-4)
@@ -172,9 +174,8 @@ class TermsModelViewController: UIViewController {
         xButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
                 self?.dismiss(animated: true, completion: nil)
-                if let rootNavController = self?.presentingViewController as? UINavigationController {
-                    rootNavController.popToRootViewController(animated: true)
-                }
+                
+                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(), animated: true)
             })
             .disposed(by: disposeBag)
         
@@ -270,16 +271,29 @@ class TermsModelViewController: UIViewController {
             .disposed(by: disposeBag)
         
         acceptButton.rx.tap
-            .subscribe(onNext: { [weak self] _ in
-                self?.dismiss(animated: true, completion: nil)
+            .subscribe(with: self, onNext: { owner, _ in
+                
+                owner.joinService.termsAgree(agreeIndex: Array(owner.currentSelected))
+                        .subscribe { success in
+                            if success {
+                                owner.dismiss(animated: true, completion: nil)
+                            } else {
+                                print("약관 동의 실패")
+                            }
+                        }
+                        .disposed(by: owner.disposeBag)
             })
             .disposed(by: disposeBag)
         
         countRelay
             .subscribe(onNext: { [weak self] arr in
                 guard let self else { return }
-                if arr.count == 3 {
+                if  arr == [0, 1] {
                     acceptButton.setState(.enabled)
+                    allCheckButton.setState(isSelected: false)
+                } else if arr.count == 3 {
+                    acceptButton.setState(.enabled)
+                    allCheckButton.setState(isSelected: true)
                 } else {
                     acceptButton.setState(.disabled)
                     allCheckButton.setState(isSelected: false)

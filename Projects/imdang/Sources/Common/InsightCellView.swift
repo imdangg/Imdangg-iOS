@@ -175,9 +175,11 @@ final class InsightCellView: UIView {
     
     func configure(insight: Insight, layoutType: DirectionType) {
         self.directionType = layoutType
-        guard let url = URL(string: insight.titleImageUrl) else { return }
-        titleImageView.kf.setImage(with: url)
-        titleImageView.contentMode = .scaleAspectFill
+        if let url = URL(string: insight.titleImageUrl) {
+            titleImageView.kf.setImage(with: url)
+        } else {
+            titleImageView.image = UIImage()
+        }
         profileImageView.image = ImdangImages.Image(resource: .person)
         
         adressLabel.attributedText = createAttributedString(image: ImdangImages.Image(resource: .location), text: insight.adress)

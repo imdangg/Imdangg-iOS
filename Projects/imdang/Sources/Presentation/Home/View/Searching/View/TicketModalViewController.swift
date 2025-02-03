@@ -12,6 +12,7 @@ import RxSwift
 import RxCocoa
 
 class TicketModalViewController: UIViewController {
+    private let homeViewModel = HomeViewModel()
     private let disposeBag = DisposeBag()
     
     private let dimView = UIView().then {
@@ -152,22 +153,43 @@ class TicketModalViewController: UIViewController {
     private func bindActions() {
         xButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                UserdefaultKey.dontSeeToday = true
                 self?.dismiss(animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
         
         closeButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                UserdefaultKey.dontSeeToday = true
+                let today = Date()
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                let todayString = formatter.string(from: today)
+                
+                UserdefaultKey.dontSeeToday = todayString
                 self?.dismiss(animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
         
         acceptButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                UserdefaultKey.dontSeeToday = true
-                self?.dismiss(animated: true, completion: nil)
+                guard let self = self else { return }
+                
+                if let id = Bundle.main.object(forInfoDictionaryKey: "WELCOME_COUPON") as? String {
+                    homeViewModel.issueCoupons(id: id)
+                        .subscribe { success in
+                            if success {
+                                UserdefaultKey.ticketReceived = true
+                                if let _ = UserdefaultKey.couponCount {
+                                    UserdefaultKey.couponCount! += 1
+                                } else {
+                                    UserdefaultKey.couponCount = 1
+                                }
+                            } else {
+                                print("쿠폰 발급 실패")
+                            }
+                        }
+                        .disposed(by: disposeBag)
+                }
+                dismiss(animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
     }

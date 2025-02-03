@@ -16,6 +16,8 @@ enum HeaderType {
 
 class SearchingSectionHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "SearchingSectionHeaderView"
+    
+    var buttonAction: (() -> Void)?
     private let disposeBag = DisposeBag()
     private var collectionView: UICollectionView?
     private var currentPage = 1 {
@@ -72,6 +74,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        bindAction()
     }
     
     required init?(coder: NSCoder) {
@@ -97,7 +100,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             
             addSubview(collectionView)
             
-            titleLabel.snp.makeConstraints {
+            titleLabel.snp.remakeConstraints {
                 $0.top.equalToSuperview()
                 $0.leading.equalToSuperview()
                 $0.trailing.equalToSuperview()
@@ -110,7 +113,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
                 $0.height.equalTo(36)
             }
         } else {
-            titleLabel.snp.makeConstraints {
+            titleLabel.snp.remakeConstraints {
                 $0.edges.equalToSuperview()
             }
         }
@@ -134,6 +137,14 @@ class SearchingSectionHeaderView: UICollectionReusableView {
                 $0.trailing.equalToSuperview()
             }
         }
+    }
+    
+    private func bindAction() {
+        fullViewBotton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                owner.buttonAction?()
+            }
+            .disposed(by: disposeBag)
     }
     
     func configure(with title: String, type: HeaderType, showHorizontalCollection: Bool) {
@@ -160,5 +171,4 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             .disposed(by: disposeBag)
 
     }
-
 }

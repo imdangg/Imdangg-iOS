@@ -48,6 +48,7 @@ class AreaListViewController: BaseViewController {
         tableView.separatorColor = .grayScale100
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         tableView.showsVerticalScrollIndicator = false
+        tableView(tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
         
         tableView.register(cell: AreaListTableCell.self)
     }

@@ -42,6 +42,8 @@ import RxCocoa
  */
 
 class BaseViewController: UIViewController {
+    var backButtonActionEnable: Bool = true
+    
     private let disposeBag = DisposeBag()
     
     private let leftNavigtaionView = UIStackView().then {
@@ -130,8 +132,10 @@ class BaseViewController: UIViewController {
     
     private func bindAction() {
         customBackButton.rx.tap
-            .subscribe(onNext: { [weak self] _ in
-                self?.navigationController?.popViewController(animated: true)
+            .subscribe(onNext: { [weak self] in
+                if self?.backButtonActionEnable == true {
+                    self?.navigationController?.popViewController(animated: true)
+                }
             })
             .disposed(by: disposeBag)
     }

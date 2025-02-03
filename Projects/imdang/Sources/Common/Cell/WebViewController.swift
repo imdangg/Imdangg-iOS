@@ -18,8 +18,8 @@ class WebViewController: UIViewController {
     var onAddressSelected: (([String: Any]) -> Void)?
     
     init(url: String = "https://imdangg.github.io/Kakao-Postcode/") {
-        super.init(nibName: nil, bundle: nil)
         adress = url
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {

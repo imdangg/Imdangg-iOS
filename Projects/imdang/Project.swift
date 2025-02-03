@@ -28,7 +28,8 @@ let project = Project(
                         "kakaokompassauth",
                         "kakaolink",
                         "kakaoplus",
-                        "kakaotalk"
+                        "kakaotalk",
+                        "nmap"
                     ],
                     "CFBundleURLTypes" : [
                         [
@@ -42,6 +43,10 @@ let project = Project(
                     ],
                     "KAKAO_URL_KEY": "$(KAKAO_URL_KEY)",
                     "KAKAO_APP_KEY": "$(KAKAO_APP_KEY)",
+                    "NAVER_APP_KEY_ID": "$(NAVER_APP_KEY_ID)",
+                    "NAVER_APP_KEY": "$(NAVER_APP_KEY)",
+                    "WELCOME_COUPON": "$(WELCOME_COUPON)",
+                    "NSCameraUsageDescription": "카메라를 사용하여 인사이트 사진을 업로드합니다.",
                     "NSAppTransportSecurity": [
                         "NSExceptionDomains": [
                             "imdang.info": [
@@ -76,6 +81,7 @@ let project = Project(
                 .external(name: "FirebasePerformance"),
                 .external(name: "FirebaseRemoteConfig"),
                 .external(name: "FirebaseAnalytics"),
+                .external(name: "NMapsMap"),
                 .project(target: "NetworkKit", path: "../NetworkKit"),
                 .target(name: "SharedLibraries")
             ],

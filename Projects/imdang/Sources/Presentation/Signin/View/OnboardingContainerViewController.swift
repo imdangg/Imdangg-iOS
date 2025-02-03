@@ -20,6 +20,10 @@ class OnboardingContainerViewController: UIViewController {
         $0.layer.cornerRadius = 8
     }
     
+    private let backbutton = UIButton().then {
+        $0.setImage(ImdangImages.Image(resource: .backButton), for: .normal)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
@@ -27,6 +31,7 @@ class OnboardingContainerViewController: UIViewController {
         addSubView()
         makeConstraints()
         configButton()
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backbutton)
     }
     
     private func addSubView() {
@@ -51,6 +56,10 @@ class OnboardingContainerViewController: UIViewController {
     private func configButton() {
         nextButton.rx.tap.subscribe(onNext: {
             self.onboardingPageVC.goToNextPage()
+        }).disposed(by: disposeBag)
+        
+        backbutton.rx.tap.subscribe(onNext: {
+            self.navigationController?.popViewController(animated: true)
         }).disposed(by: disposeBag)
     }
 }

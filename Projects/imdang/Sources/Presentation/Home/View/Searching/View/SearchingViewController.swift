@@ -14,11 +14,11 @@ import RxRelay
 
 
 class SearchingViewController: UIViewController {
-    let searchingViewModel = SearchingViewModel()
     private var disposeBag = DisposeBag()
-    private let myInsight = BehaviorRelay<[Insight]>(value: [])
-    private let todayInsight = BehaviorRelay<[Insight]>(value: Insight.todayInsight)
-    private let topInsight = BehaviorRelay<[Insight]>(value: Insight.topInsight)
+    private let searchingViewModel = SearchingViewModel()
+    private let myInsights = BehaviorRelay<[Insight]>(value: [])
+    private let todayInsights = BehaviorRelay<[Insight]>(value: [])
+    private let topInsights = BehaviorRelay<[Insight]>(value: [])
     private let currentPage = PublishSubject<Int>()
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout()).then {
         $0.backgroundColor = .white
@@ -46,13 +46,26 @@ class SearchingViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        searchingViewModel.loadMyInsight()
-            .subscribe { [self] data in
-                if let data = data {
-                    myInsight.accept(data)
-                    collectionView.reloadData()
-                }
-            }
+        searchingViewModel.loadMyInsights(page: 0)
+            .compactMap { $0 }
+            .subscribe(with: self, onNext: { owner, data in
+                
+                owner.myInsights.accept(data)
+    
+                owner.collectionView.reloadData()
+            })
+            .disposed(by: disposeBag)
+        
+        searchingViewModel.loadTodayInsights(page: 0)
+            .compactMap { $0 }
+            .subscribe(with: self, onNext: { owner, data in
+                
+                owner.todayInsights.accept(data)
+                
+                owner.topInsights.accept(Array(data.sorted { $0.likeCount > $1.likeCount }.prefix(10)))
+                
+                owner.collectionView.reloadData()
+            })
             .disposed(by: disposeBag)
     }
     
@@ -74,7 +87,7 @@ class SearchingViewController: UIViewController {
         collectionView.snp.makeConstraints {
             $0.top.equalTo(searchBoxView.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.bottom.equalToSuperview().offset(-20)
         }
     }
     
@@ -95,15 +108,15 @@ class SearchingViewController: UIViewController {
         let item = NSCollectionLayoutItem(layoutSize: size)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: size, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: myInsight.value.isEmpty ? 0 : 32, trailing: 0)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: myInsights.value.isEmpty ? 0 : 32, trailing: 0)
         return section
     }
-
+    
     private func createFirstSectionLayout() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(myInsight.value.isEmpty ? 72 : 100))
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(myInsights.value.isEmpty ? 72 : 100))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(myInsight.value.isEmpty ? 72 : 336))
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(myInsights.value.isEmpty ? 72 : 336))
         
         
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(77))
@@ -111,7 +124,7 @@ class SearchingViewController: UIViewController {
         
         let separatorSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(8))
         let separator = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: separatorSize, elementKind: UICollectionView.elementKindSectionFooter, alignment: .bottom)
-        if myInsight.value.isEmpty {
+        if myInsights.value.isEmpty {
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
             let section = NSCollectionLayoutSection(group: group)
             
@@ -136,14 +149,14 @@ class SearchingViewController: UIViewController {
     private func createSecondSectionLayout() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(271))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-
+        
         let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(200), heightDimension: .absolute(271))
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-
+        
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .continuous
         section.interGroupSpacing = 12
-
+        
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(40))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         
@@ -153,9 +166,9 @@ class SearchingViewController: UIViewController {
         section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 32, trailing: 0)
         header.contentInsets = NSDirectionalEdgeInsets(top: -32, leading: 0, bottom: 0, trailing: 20)
         separator.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -20, bottom: 0, trailing: 0)
-
+        
         section.boundarySupplementaryItems = [header, separator]
-
+        
         return section
     }
     
@@ -174,12 +187,12 @@ class SearchingViewController: UIViewController {
             let containerWidth = environment.container.contentSize.width
             let itemWidth = environment.container.contentSize.width
             let pageIndex = Int(max(0, round(contentOffset.x / itemWidth)))
-
+            
             if containerWidth > 0 {
                 self?.currentPage.onNext(pageIndex)
             }
         }
-
+        
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(40))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         
@@ -194,7 +207,7 @@ class SearchingViewController: UIViewController {
         
         return section
     }
-
+    
 }
 
 extension SearchingViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -205,35 +218,47 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch section {
         case 0: return 1
-        case 1: return myInsight.value.isEmpty ? 1 : myInsight.value.count > 3 ? 3 : myInsight.value.count
-        case 2: return todayInsight.value.count
-        case 3: return topInsight.value.count
+        case 1: return myInsights.value.isEmpty ? 1 : myInsights.value.count > 3 ? 3 : myInsights.value.count
+        case 2: return todayInsights.value.count > 5 ? 5 : todayInsights.value.count
+        case 3: return topInsights.value.count
         default: return 0
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let insightId = myInsight.value[indexPath.row].id
         switch indexPath.section {
         case 1:
-            
-            searchingViewModel.loadInsightDetail(id: insightId)
+            if !myInsights.value.isEmpty {
+                searchingViewModel.loadInsightDetail(id: myInsights.value[indexPath.row].insightId)
+                    .subscribe { [self] data in
+                        if let data = data {
+                            let vc = InsightDetailViewController(url: "", insight: data, likeCount: myInsights.value[indexPath.row].likeCount)
+                            vc.hidesBottomBarWhenPushed = true
+                            navigationController?.pushViewController(vc, animated: true)
+                        }
+                    }
+                    .disposed(by: disposeBag)
+            }
+        case 2:
+            searchingViewModel.loadInsightDetail(id: todayInsights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", state: .done, insight: data)
+                        let vc = InsightDetailViewController(url: "", insight: data, likeCount: todayInsights.value[indexPath.row].likeCount, myInsights: myInsights.value)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }
                 }
                 .disposed(by: disposeBag)
-        case 2:
-            let vc = InsightDetailViewController(url: todayInsight.value[indexPath.row].titleImageUrl, state: todayInsight.value[indexPath.row].state, insight: InsightDetail.testData)
-            vc.hidesBottomBarWhenPushed = true
-            navigationController?.pushViewController(vc, animated: true)
         case 3:
-            let vc = InsightDetailViewController(url: topInsight.value[indexPath.row].titleImageUrl, state: topInsight.value[indexPath.row].state, insight: InsightDetail.testData)
-            vc.hidesBottomBarWhenPushed = true
-            navigationController?.pushViewController(vc, animated: true)
+            searchingViewModel.loadInsightDetail(id: topInsights.value[indexPath.row].insightId)
+                .subscribe { [self] data in
+                    if let data = data {
+                        let vc = InsightDetailViewController(url: "", insight: data, likeCount: topInsights.value[indexPath.row].likeCount, myInsights: myInsights.value)
+                        vc.hidesBottomBarWhenPushed = true
+                        navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+                .disposed(by: disposeBag)
         default:
             break
         }
@@ -242,14 +267,26 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: SearchingSectionHeaderView.reuseIdentifier, for: indexPath) as! SearchingSectionHeaderView
+            let fullVC = FullInsightViewController()
+            fullVC.hidesBottomBarWhenPushed = true
             
             switch indexPath.section {
             case 0:
                 return UICollectionReusableView()
             case 1:
-                headerView.configure(with: "내가 다녀온 단지의 다른 인사이트", type: .notTopten, showHorizontalCollection: myInsight.value.isEmpty ? false : true)
+                let title = "내가 다녀온 단지의 다른 인사이트"
+                headerView.configure(with: title, type: .notTopten, showHorizontalCollection: myInsights.value.isEmpty ? false : true)
+                headerView.buttonAction = {
+                    fullVC.config(type: .my, totalPage: self.searchingViewModel.myInsightTotalPage, title: title, insights: self.myInsights.value)
+                    self.navigationController?.pushViewController(fullVC, animated: true)
+                }
             case 2:
-                headerView.configure(with: "오늘 새롭게 올라온 인사이트", type: .notTopten, showHorizontalCollection: false)
+                let title = "오늘 새롭게 올라온 인사이트"
+                headerView.configure(with: title, type: .notTopten, showHorizontalCollection: false)
+                headerView.buttonAction = {
+                    fullVC.config(type: .today, totalPage: self.searchingViewModel.todayInsightTotalPage, title: title, insights: self.todayInsights.value, myInsights: self.myInsights.value, chipViewHidden: true)
+                    self.navigationController?.pushViewController(fullVC, animated: true)
+                }
             case 3:
                 headerView.configure(with: "추천수 TOP 10 인사이트", type: .topten, showHorizontalCollection: false)
                 headerView.bind(input: currentPage.asObservable(), indexPath: indexPath, collectionView: collectionView)
@@ -288,21 +325,21 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             bannerImageView.snp.makeConstraints { $0.edges.equalToSuperview() }
             return cell
         case 1:
-            if myInsight.value.isEmpty {
+            if myInsights.value.isEmpty {
                 let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: EmptyMyInsightCollectionCell.self)
                 return cell
             } else {
                 let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
-                cell.configure(insight: myInsight.value[indexPath.row], layoutType: .horizontal)
+                cell.configure(insight: myInsights.value[indexPath.row], layoutType: .horizontal)
                 return cell
             }
         case 2:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
-            cell.configure(insight: todayInsight.value[indexPath.row], layoutType: .vertical)
+            cell.configure(insight: todayInsights.value[indexPath.row], layoutType: .vertical)
             return cell
         case 3:
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
-            cell.configure(insight: topInsight.value[indexPath.row], layoutType: .horizontal)
+            cell.configure(insight: topInsights.value[indexPath.row], layoutType: .horizontal)
             return cell
         default:
             return UICollectionViewCell()

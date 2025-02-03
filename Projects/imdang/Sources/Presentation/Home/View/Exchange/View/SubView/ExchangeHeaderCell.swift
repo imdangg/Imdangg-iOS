@@ -92,7 +92,6 @@ final class ExchangeHeaderCell: UITableViewCell {
         noticeScriptView.snp.makeConstraints {
             $0.top.equalTo(exchangeStateButtonView.snp.bottom).offset(24)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.bottom.equalToSuperview().inset(20)
         }
     }
     
@@ -122,17 +121,19 @@ final class ExchangeHeaderCell: UITableViewCell {
             .disposed(by: disposeBag)
         
         reactor.state
-            .map { $0.selectedExchangeState }
-            .distinctUntilChanged()
-            .subscribe(onNext: { [weak self] state in
+            .map { ($0.selectedExchangeState, $0.insights) }
+            .distinctUntilChanged( {
+                return $0 == $1
+            })
+            .subscribe(onNext: { [weak self] exchangeState, insights in
                 guard let self = self else { return }
                 
-                self.exchangeStateButtonView.waitingButton.rx.commonButtonState.onNext(state == .waiting ? .enabled : .unselectedBorderStyle)
-                self.exchangeStateButtonView.rejectButton.rx.commonButtonState.onNext(state == .reject ? .enabled : .unselectedBorderStyle)
-                self.exchangeStateButtonView.doneButton.rx.commonButtonState.onNext(state == .done ? .enabled : .unselectedBorderStyle)
+                self.exchangeStateButtonView.waitingButton.rx.commonButtonState.onNext(exchangeState == .waiting ? .enabled : .unselectedBorderStyle)
+                self.exchangeStateButtonView.rejectButton.rx.commonButtonState.onNext(exchangeState == .reject ? .enabled : .unselectedBorderStyle)
+                self.exchangeStateButtonView.doneButton.rx.commonButtonState.onNext(exchangeState == .done ? .enabled : .unselectedBorderStyle)
                 
-                self.updateScript(state: state, num: 3)
-                self.updateButtonTitle(state: state, num: 3)
+                self.updateScript(state: exchangeState, num: insights?.count ?? 0)
+                self.updateButtonTitle(state: exchangeState, num: insights?.count ?? 0)
             })
             .disposed(by: disposeBag)
     }

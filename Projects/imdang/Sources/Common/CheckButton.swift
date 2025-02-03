@@ -47,13 +47,13 @@ class CheckButton: UIButton {
         
         icon.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.leading.equalToSuperview().inset(16)
+            $0.leading.equalToSuperview().offset(16)
             $0.width.height.equalTo(20)
         }
+        
         title.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalTo(icon.snp.trailing).offset(8)
-            $0.trailing.equalToSuperview().inset(16)
         }
     }
     

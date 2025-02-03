@@ -35,7 +35,7 @@ class TabBarController: UITabBarController {
     private func configureTabBar() {
         let firstViewController = HomeContainerViewController()
         let secondViewController = InsightViewController()
-        let thirdViewController = StorageBoxViewController()
+        let thirdViewController = StorageBoxContainerViewController()
         
         let firstNav = UINavigationController(rootViewController: firstViewController)
         let secondNav = UINavigationController(rootViewController: secondViewController)

@@ -16,6 +16,7 @@ enum ExchangeRequestState {
 
 final class ExchangeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, View {
     
+    let searchingViewModel = SearchingViewModel()
     var disposeBag = DisposeBag()
     private let tableView = UITableView(frame: .zero, style: .plain)
     private var insights: [Insight] = []
@@ -33,8 +34,13 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
         super.viewDidLoad()
         view.backgroundColor = .white
 
-        reactor?.action.onNext(.loadInsights)
         setupTableView()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        reactor?.action.onNext(.loadInsights)
     }
 
 
@@ -56,11 +62,10 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
 
     func bind(reactor: ExchangeReactor) {
         reactor.state
-            .map { $0.insights }
+            .compactMap { $0.insights }
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] insights in
                 self?.insights = insights
-//                print("loadData - \(insights)")
                 self?.tableView.reloadData()
             })
             .disposed(by: disposeBag)
@@ -123,5 +128,14 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 { return }
         print("\(indexPath.row)")
+        searchingViewModel.loadInsightDetail(id: insights[indexPath.row].insightId)
+            .subscribe { [self] data in
+                if let data = data {
+                    let vc = InsightDetailViewController(url: "", insight: data, likeCount: insights[indexPath.row].likeCount)
+                    vc.hidesBottomBarWhenPushed = true
+                    navigationController?.pushViewController(vc, animated: true)
+                }
+            }
+            .disposed(by: disposeBag)
     }
 }
