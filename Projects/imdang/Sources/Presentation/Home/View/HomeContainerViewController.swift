@@ -177,7 +177,7 @@ class HomeContainerViewController: BaseViewController {
         
         myPageButton.rx.tap
             .subscribe(onNext: { [weak self] state in
-                let vc = MyPageViewController()
+                let vc = MyPageViewController(reactor: MyPageReactor())
                 vc.hidesBottomBarWhenPushed = true
                 self?.navigationController?.pushViewController(vc, animated: true)
         })

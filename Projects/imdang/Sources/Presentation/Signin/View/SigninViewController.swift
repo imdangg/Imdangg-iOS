@@ -185,6 +185,5 @@ final class SigninViewController: UIViewController, View {
             })
             .disposed(by: disposeBag)
     }
-    
 }
 
