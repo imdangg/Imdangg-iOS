@@ -110,6 +110,18 @@ final class MyPageViewController: BaseViewController, View {
                 self.navigationController?.pushViewController(vc, animated: true)
             })
             .disposed(by: disposeBag)
+        
+        reactor.state
+                  .map { $0.isLogout }
+                  .distinctUntilChanged()
+                  .subscribe(onNext: { success in
+                      if success {
+                          (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(), animated: true)
+                      } else {
+                          print("Logout failed")
+                      }
+                  })
+                  .disposed(by: disposeBag)
     }
 }
 
@@ -147,8 +159,8 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
                 self.present(vc, animated: false)
                 
                 vc.confirmAction = {
+                    self.reactor?.action.onNext(.logout)
                     vc.dismiss(animated: true)
-                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(), animated: true)
                 }
                 vc.cancelAction = {
                     print("취소핑")

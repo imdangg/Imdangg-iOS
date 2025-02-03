@@ -31,4 +31,21 @@ class MyPageService {
                 return Observable.empty()
             }
     }
+    
+    func logout() -> Observable<Bool> {
+        
+        let endpoint = Endpoint<EmptyResponse>(
+            baseURL: .imdangAPI,
+            path: "/members/logout",
+            method: .post,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
+        )
+
+        return networkManager.request(with: endpoint)
+            .map { response in true }
+            .catch { error in
+                print("Logout request failed with error: \(error)")
+                return Observable.just(false)
+            }
+    }
 }
