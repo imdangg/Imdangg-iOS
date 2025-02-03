@@ -19,20 +19,22 @@ enum TextFieldState {
     case error
 }
 
+enum InputType {
+    case stringInput
+    case dateInput
+}
+
 class CommomTextField: UITextField {
     var isClearButtonTapped = BehaviorSubject<Bool>(value: false)
     let placeholderText: String
-    let textfieldType: UIKeyboardType
+    var textfieldType: InputType
     let disposeBag = DisposeBag()
     
-    init(frame: CGRect = .zero, placeholderText: String, textfieldType: UIKeyboardType) {
+    init(frame: CGRect = .zero, placeholderText: String, textfieldType: InputType) {
         self.placeholderText = placeholderText
         self.textfieldType = textfieldType
         super.init(frame: frame)
         setAttribute()
-        if textfieldType == .numberPad || textfieldType == .decimalPad {
-            numberPadTypeBind()
-        }
     }
     
     required init?(coder: NSCoder) {
@@ -49,8 +51,7 @@ class CommomTextField: UITextField {
         autocapitalizationType = .none
         
         self.placeholder = placeholderText
-        self.keyboardType = textfieldType
-        
+        setKeyboardType(textfieldType)
         let clearButton = UIButton(type: .custom)
         clearButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
         clearButton.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
@@ -96,11 +97,18 @@ class CommomTextField: UITextField {
         isClearButtonTapped.onNext(true)
     }
     
-    func setConfigure(placeholderText: String, textfieldType: UIKeyboardType) {
+    func setConfigure(placeholderText: String, textfieldType: InputType) {
         self.placeholder = placeholderText
-        self.keyboardType = textfieldType
-        
-        if textfieldType == .numberPad || textfieldType == .decimalPad {
+        setKeyboardType(textfieldType)
+    }
+    
+    private func setKeyboardType(_ type: InputType) {
+        switch type {
+        case .stringInput:
+            self.keyboardType = .default
+            nickNameTypeBind()
+        case .dateInput:
+            self.keyboardType = .numberPad
             numberPadTypeBind()
         }
     }
@@ -116,6 +124,19 @@ extension Reactive where Base: CommomTextField {
 
 // NumberPad Type
 extension CommomTextField {
+    
+    func nickNameTypeBind() {
+        self.rx.text
+            .orEmpty
+            .map { text in
+                let limitedText = String(text.prefix(10))
+                return limitedText
+            }
+            .bind(to: self.rx.text)
+            .disposed(by: disposeBag)
+    }
+    
+    
     func numberPadTypeBind() {
         self.rx.text
             .orEmpty

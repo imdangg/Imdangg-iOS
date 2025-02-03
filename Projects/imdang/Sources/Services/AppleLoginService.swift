@@ -93,9 +93,9 @@ extension AppleLoginService {
             networkManager.request(with: endpoint)
                 .subscribe(
                     onNext: { response in
+                        UserdefaultKey.isJoined = response.joined
                         UserdefaultKey.accessToken = response.accessToken
                         UserdefaultKey.memberId = response.memberId
-
                         observer.onNext(true)
                         observer.onCompleted()
                     },

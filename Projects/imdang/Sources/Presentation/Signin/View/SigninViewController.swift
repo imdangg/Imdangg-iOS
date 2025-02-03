@@ -128,7 +128,8 @@ final class SigninViewController: UIViewController, View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        reactor.state.map { $0.appleLoginResult }
+        reactor.state
+            .map { $0.appleLoginResult }
             .compactMap { $0 }
             .subscribe(onNext: { result in
                 switch result {
