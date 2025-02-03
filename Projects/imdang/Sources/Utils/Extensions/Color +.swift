@@ -35,7 +35,8 @@ extension UIColor {
     
     // MARK: - Other
     static let error = UIColor(hexCode: "#E93528")
-    
+    static let darkBlue = UIColor(hexCode: "#11388B")
+    static let lightBlue = UIColor(hexCode: "#EDF3FF")
 }
 
 // rgb to hex
