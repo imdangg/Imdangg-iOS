@@ -58,15 +58,13 @@ class LocationBoxHeaderView: UICollectionReusableView {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        
+        disposeBag = DisposeBag()
         currentPage = 1
         
         delegate = nil
         collectionView = nil
         bindActions()
     }
-
-    
     
     func addSubViews() {
         [pageLabel, fullViewBotton].forEach {

@@ -20,7 +20,7 @@ final class HomeViewModel {
             "couponId": id,
         ]
         
-        let endpoint = Endpoint<MyInsightResponse>(
+        let endpoint = Endpoint<BasicResponse>(
             baseURL: .imdangAPI,
             path: "/coupons/issue",
             method: .post,
