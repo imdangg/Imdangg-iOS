@@ -40,7 +40,17 @@ class SearchingViewController: UIViewController {
         super.viewDidLoad()
         
         setupCollectionView()
-        
+        bindActions()
+    }
+    
+    func bindActions() {
+        searchBoxView.searchButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = AddressListViewController()
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
     
     override func viewWillAppear(_ animated: Bool) {

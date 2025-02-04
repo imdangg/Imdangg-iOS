@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 class SearchBoxView: UIView {
-    private let searchButton = ImageTextButton(type: .imageFirst, horizonPadding: 12, spacing: 8).then {
+    let searchButton = ImageTextButton(type: .imageFirst, horizonPadding: 12, spacing: 8).then {
         $0.customImage.image = ImdangImages.Image(resource: .magnifier)
         $0.imageSize = 16
         $0.customText.text = "어떤 지역의 인사이트를 찾으시나요?"
@@ -21,7 +21,7 @@ class SearchBoxView: UIView {
         $0.layer.borderColor = UIColor.grayScale100.cgColor
     }
     
-    private let mapButton = UIButton().then {
+    let mapButton = UIButton().then {
         $0.setImage(ImdangImages.Image(resource: .mapButton), for: .normal)
     }
     

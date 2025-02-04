@@ -89,4 +89,27 @@ final class SearchingViewModel {
                 return Observable.just(nil)
             }
     }
+    
+    func loadMyDistricts() -> Observable<[String: [String]]?> {
+        let endpoint = Endpoint<[AddressResponse]>(
+            baseURL: .imdangAPI,
+            path: "/my-insights/districts",
+            method: .get,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
+        )
+        
+        return networkManager.request(with: endpoint)
+            .map { data in
+                var result: [String: [String]] = [:]
+                data.filter { $0.eupMyeonDong != ""}.forEach {
+                    result[$0.siGunGu, default: [String]()].append($0.eupMyeonDong)
+                }
+                return result
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(nil)
+            }
+    }
+    
 }
