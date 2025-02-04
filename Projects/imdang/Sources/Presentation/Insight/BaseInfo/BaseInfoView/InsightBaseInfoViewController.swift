@@ -146,7 +146,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                 .disposed(by: disposeBag)
             
             if indexPath.section == 3 {
-                cell.titleTextField.setConfigure(placeholderText: "예시) 2024.01.01", textfieldType: .decimalPad)
+                cell.titleTextField.setConfigure(placeholderText: "예시) 2024.01.01", textfieldType: .dateInput)
             }
             
             return cell

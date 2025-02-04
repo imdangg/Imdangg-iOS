@@ -12,7 +12,7 @@ import Then
 class BaseInfoTextFieldCell: UICollectionViewCell {
     static let identifier = "TitleCell"
     
-    let titleTextField = CommomTextField(placeholderText: "", textfieldType: .default ).then {
+    let titleTextField = CommomTextField(placeholderText: "", textfieldType: .stringInput ).then {
         $0.font = .systemFont(ofSize: 16, weight: .semibold)
         $0.textColor = .grayScale900
     }
