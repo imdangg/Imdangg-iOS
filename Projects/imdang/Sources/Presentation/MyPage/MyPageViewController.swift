@@ -234,7 +234,7 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 2 {
             if indexPath.row == 0 {
-                let vc =  IntroServiceViewController()
+                let vc =  IntroViewController(type: .intro)
                 vc.hidesBottomBarWhenPushed = false
                 self.navigationController?.pushViewController(vc, animated: true)
             }
