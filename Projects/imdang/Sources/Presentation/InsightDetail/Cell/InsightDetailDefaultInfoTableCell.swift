@@ -222,7 +222,11 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
         
         switch state {
         case .null:
-            descriptionImageView.image = ImdangImages.Image(resource: .detailExchangeRequest)
+            if isMyInsight {
+                descriptionImageView.isHidden = true
+            } else {
+                descriptionImageView.image = ImdangImages.Image(resource: .detailExchangeRequest)
+            }
         case .pending:
             if isMyInsight {
                 descriptionImageView.image = ImdangImages.Image(resource: .detailRequestReply)

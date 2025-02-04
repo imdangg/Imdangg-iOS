@@ -17,7 +17,7 @@ class SearchBoxView: UIView {
         $0.customText.textColor = .grayScale500
         
         $0.layer.cornerRadius = 8
-        $0.layer.borderWidth = 2
+        $0.layer.borderWidth = 1
         $0.layer.borderColor = UIColor.grayScale100.cgColor
     }
     

@@ -133,10 +133,10 @@ extension NotificationViewController:  UICollectionViewDataSource, UICollectionV
                         self.navigationController?.popViewController(animated: true)
                     }
                 case .request_reject:
-                    let view2 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight, likeCount: 0)
+                    let view2 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight)
                     self.navigationController?.pushViewController(view2, animated: true)
                 case .response:
-                    let view3 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight, likeCount: 0)
+                    let view3 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight)
                     self.navigationController?.pushViewController(view3, animated: true)
                 }
             }

@@ -298,7 +298,7 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             storageBoxViewModel.loadInsightDetail(id: insights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", insight: data, likeCount: insights.value[indexPath.row].likeCount)
+                        let vc = InsightDetailViewController(url: "", insight: data)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }
