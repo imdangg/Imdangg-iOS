@@ -38,7 +38,7 @@ final class MyPageReactor: Reactor {
         switch action {
         case .loadInfo:
             return myPageService.fetchMyPageInfo()
-                .map { Mutation.setInfo($0) }
+                .map { Mutation.setInfo($0)}
             
         case .logout:
             return myPageService.logout()
@@ -48,20 +48,20 @@ final class MyPageReactor: Reactor {
                     return Observable.just(Mutation.setLogoutSuccess(false))
                 }
         }
+    }
+    
+    func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
         
-        func reduce(state: State, mutation: Mutation) -> State {
-            var newState = state
+        switch mutation {
+        case .setInfo(let info):
+            newState.myPageInfo = info
             
-            switch mutation {
-            case .setInfo(let info):
-                newState.myPageInfo = info
-                
-            case .setLogoutSuccess(let success):
-                newState.isLogout = success
-            }
-            
-            return newState
+        case .setLogoutSuccess(let success):
+            newState.isLogout = success
         }
+        
+        return newState
     }
 }
 

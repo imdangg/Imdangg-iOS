@@ -40,8 +40,7 @@ class MyPageService {
             method: .post,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
         )
-
-        return networkManager.request(with: endpoint)
+        return networkManager.requestOptional(with: endpoint)
             .map { response in true }
             .catch { error in
                 print("Logout request failed with error: \(error)")

@@ -150,8 +150,7 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
             cell.selectionStyle = .none
             cell.configure(name: info?.nickname ?? "임당님")
             cell.onLogoutButtonTapped = {
-                
-                print("Logout!")
+
                 let vc = CommonAlertViewController()
                 vc.configure(script: "로그아웃 시 서비스 사용이 제한돼요. 그래도 로그아웃 할까요?", confirmString: "로그아웃")
                 vc.hidesBottomBarWhenPushed = false
@@ -163,7 +162,7 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
                     vc.dismiss(animated: true)
                 }
                 vc.cancelAction = {
-                    print("취소핑")
+                    print("ㅊㅅ")
                 }
             }
             
