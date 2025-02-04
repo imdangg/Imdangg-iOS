@@ -11,7 +11,10 @@ import RxSwift
 import RxCocoa
 
 class AreaListViewController: BaseViewController {
+    var setIndex : ((Int?) -> Void)?
     private var tableView: UITableView!
+    private var addresses: [AddressResponse]!
+    private var selectedIndex: Int?
     private let disposeBag = DisposeBag()
     
     private let confirmButton = UIButton().then {
@@ -51,6 +54,8 @@ class AreaListViewController: BaseViewController {
         tableView(tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
         
         tableView.register(cell: AreaListTableCell.self)
+        
+        tableView.selectRow(at: IndexPath(row: 0, section: 0), animated: true, scrollPosition: .none)
     }
     
     private func configNavigationBarItem() {
@@ -84,24 +89,31 @@ class AreaListViewController: BaseViewController {
     
     private func bindAction() {
         confirmButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.navigationController?.popViewController(animated: true)
-            })
+            .subscribe(with: self) { owner, _ in
+                owner.setIndex?(owner.selectedIndex)
+                owner.navigationController?.popViewController(animated: true)
+            }
             .disposed(by: disposeBag)
+    }
+    
+    func config(addresses: [AddressResponse]) {
+        self.addresses = addresses
     }
 }
 
 extension AreaListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return addresses.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: AreaListTableCell.identifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: AreaListTableCell.self)
         cell.selectionStyle = .none
+        cell.config(address: addresses[indexPath.row])
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedIndex = indexPath.row
     }
 }

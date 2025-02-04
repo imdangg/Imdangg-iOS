@@ -13,6 +13,7 @@ import RxCocoa
 
 class AreaModalViewController: UIViewController {
     private var tableView: UITableView!
+    private var Insight: Insight!
     private let disposeBag = DisposeBag()
     private let grabber = UIButton().then {
         $0.backgroundColor = .grayScale200
@@ -57,6 +58,10 @@ class AreaModalViewController: UIViewController {
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.bottom.equalToSuperview()
         }
+    }
+    
+    func config(insight: Insight) {
+        self.Insight = insight
     }
 }
 
