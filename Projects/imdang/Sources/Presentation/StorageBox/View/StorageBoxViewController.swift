@@ -15,6 +15,7 @@ final class StorageBoxViewController: BaseViewController {
     private var pageIndex = 0
     private var currentaddress: AddressResponse?
     private var toggleState = false
+    private var refreshable: Bool = true
     private let disposeBag = DisposeBag()
     
     private let currentPage = BehaviorRelay<Int>(value: 1)
@@ -223,12 +224,15 @@ final class StorageBoxViewController: BaseViewController {
     }
     
     func config(addresses: [AddressResponse]) {
-        guard let first = addresses.first else { return }
-        self.currentaddress = first
+        guard refreshable == true else {
+            refreshable = true
+            return
+        }
+        self.currentaddress = addresses[currentPage.value]
         self.addresses.accept(addresses)
         self.pageIndex = 0
         
-        storageBoxViewModel.loadStoregeInsights(address: first, pageIndex: 0)
+        storageBoxViewModel.loadStoregeInsights(address: addresses[currentPage.value], pageIndex: 0)
             .compactMap { $0 }
             .subscribe(with: self) { owner, data in
                 owner.insights.accept(data)
@@ -364,6 +368,7 @@ extension StorageBoxViewController: ReusableViewDelegate {
         vc.setIndex = { [self] in
             if let index = $0 {
                 collectionView.scrollToItem(at: IndexPath(item: index, section: 0), at: .left, animated: false)
+                refreshable = false
             }
         }
     }

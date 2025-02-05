@@ -14,7 +14,7 @@ final class SearchingViewModel {
     var isLoading = false
     var totalElements: Int?
     private var disposeBag = DisposeBag()
-    private let networkManager = NetworkManager()
+    private let networkManager = NetworkManager(session: .default)
     
     func loadInsights(page: Int, type: FullInsightType, address: AddressResponse? = nil) -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
