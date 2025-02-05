@@ -199,6 +199,15 @@ final class StorageBoxViewController: BaseViewController {
                 }
             }
             .disposed(by: disposeBag)
+        
+        mapButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = MapViewController()
+                vc.config(type: .storage)
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
     
     private func loadInsightData(address: AddressResponse) {

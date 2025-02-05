@@ -159,6 +159,32 @@ final class InsightDetailViewModel {
                 return Observable.just(false)
             }
     }
+    
+    func loadMyInsights() -> Observable<[Insight]?> {
+        let parameters: [String: Any] = [
+            "pageNumber": 0,
+            "pageSize": 100,
+            "direction": "ASC",
+            "properties": [ "created_at" ]
+        ]
+        
+        let endpoint = Endpoint<MyInsightResponse>(
+            baseURL: .imdangAPI,
+            path: "/my-insights/created-by-me",
+            method: .get,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
+        )
+        
+        return networkManager.request(with: endpoint)
+            .map { data in
+                return data.toEntitiy()
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(nil)
+            }
+    }
 }
 
 

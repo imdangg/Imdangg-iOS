@@ -51,6 +51,15 @@ class SearchingViewController: UIViewController {
                 owner.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)
+        
+        searchBoxView.mapButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = MapViewController()
+                vc.config(type: .search)
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -253,7 +262,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             searchingViewModel.loadInsightDetail(id: todayInsights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", insight: data, myInsights: myInsights.value)
+                        let vc = InsightDetailViewController(url: "", insight: data)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }
@@ -263,7 +272,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             searchingViewModel.loadInsightDetail(id: topInsights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", insight: data, myInsights: myInsights.value)
+                        let vc = InsightDetailViewController(url: "", insight: data)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }
@@ -287,14 +296,14 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 let title = "내가 다녀온 단지의 다른 인사이트"
                 headerView.configure(with: title, type: .notTopten, showHorizontalCollection: myInsights.value.isEmpty ? false : true)
                 headerView.buttonAction = {
-                    fullVC.config(type: .my, totalPage: self.searchingViewModel.myInsightTotalPage, title: title)
+                    fullVC.config(type: .my, title: title)
                     self.navigationController?.pushViewController(fullVC, animated: true)
                 }
             case 2:
                 let title = "오늘 새롭게 올라온 인사이트"
                 headerView.configure(with: title, type: .notTopten, showHorizontalCollection: false)
                 headerView.buttonAction = {
-                    fullVC.config(type: .today, totalPage: self.searchingViewModel.todayInsightTotalPage, title: title, myInsights: self.myInsights.value, chipViewHidden: true)
+                    fullVC.config(type: .today, title: title, myInsights: self.myInsights.value, chipViewHidden: true)
                     self.navigationController?.pushViewController(fullVC, animated: true)
                 }
             case 3:

@@ -72,7 +72,7 @@ struct InsightDetail: Codable {
     
     static var emptyInsight: InsightDetail {
         return InsightDetail(
-            memberId: "",
+            memberId: UserdefaultKey.memberId,
             memberNickname: "",
             score: 0,
             mainImage: "",

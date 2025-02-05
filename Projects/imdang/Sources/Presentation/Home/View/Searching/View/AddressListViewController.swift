@@ -13,14 +13,8 @@ import RxSwift
 class AddressListViewController: BaseViewController {
     private let searchingViewModel = SearchingViewModel()
     private var disposeBag = DisposeBag()
-    private var guList = ["강남구", "서초구", "송파구", "마포구", "종로구"]
-    private var addresses: [String: [String]] = [
-        "강남구": ["압구정동", "청담동", "삼성동"],
-        "서초구": ["반포동", "서초동", "양재동"],
-        "송파구": ["잠실동", "문정동", "가락동"],
-        "마포구": ["합정동", "서교동", "망원동"],
-        "종로구": ["삼청동", "가회동", "청운동"]
-    ]
+    private var guList = [String]()
+    private var addresses: [String: [String]] = [:]
     
     private var selectedGuIndex: Int = 0
 
@@ -50,11 +44,14 @@ class AddressListViewController: BaseViewController {
         super.viewDidLoad()
         customBackButton.isHidden = false
         
-        searchingViewModel.loadMyDistricts()
+        searchingViewModel.loadDistricts()
             .subscribe(with: self) { owner, result in
                 if let result {
-                    self.addresses = result
-                    self.guList = result.keys.sorted()
+                    owner.guList = result.sorted()
+                    if let first = owner.guList.first {
+                        owner.loadDongAddresses(siGunGu: first)
+                    }
+                    owner.guTableView.reloadData()
                 }
             }
             .disposed(by: disposeBag)
@@ -62,6 +59,18 @@ class AddressListViewController: BaseViewController {
         setupTableView()
         addSubViews()
         makeConstraints()
+    }
+    
+    private func loadDongAddresses(siGunGu: String) {
+        searchingViewModel.loadDongAddresses(siGunGu: siGunGu)
+            .subscribe(with: self) { owner, result in
+                if let result {
+                    owner.addresses = result
+                    owner.dongTableView.reloadData()
+                    owner.dongTableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+                }
+            }
+            .disposed(by: disposeBag)
     }
     
     private func setupTableView() {
@@ -72,6 +81,9 @@ class AddressListViewController: BaseViewController {
         dongTableView.delegate = self
         guTableView.dataSource = self
         dongTableView.dataSource = self
+        
+        guTableView.showsVerticalScrollIndicator = false
+        dongTableView.showsVerticalScrollIndicator = false
         
         guTableView.tag = 1
         dongTableView.tag = 2
@@ -134,7 +146,7 @@ extension AddressListViewController: UITableViewDelegate, UITableViewDataSource 
     func numberOfSections(in tableView: UITableView) -> Int { 1 }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableView.tag == 1 ? guList.count : addresses[guList[selectedGuIndex]]!.count
+        return tableView.tag == 1 ? guList.count : guList.isEmpty ? 0 : addresses[guList[selectedGuIndex]]?.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -155,8 +167,15 @@ extension AddressListViewController: UITableViewDelegate, UITableViewDataSource 
             selectedGuIndex = indexPath.row
             let selectedGu = guList[selectedGuIndex]
             
+            loadDongAddresses(siGunGu: selectedGu)
+            
             guTableView.reloadData()
-            dongTableView.reloadData()
+        } else {
+            let fullVC = FullInsightViewController()
+            fullVC.hidesBottomBarWhenPushed = true
+            let address = AddressResponse(siDo: "서울", siGunGu: guList[selectedGuIndex], eupMyeonDong: addresses[guList[selectedGuIndex]]![indexPath.row], apartmentComplexCount: 0, insightCount: 0)
+            fullVC.config(type: .search, title: "서울 \(address.siGunGu) \(address.eupMyeonDong)", address: address, chipViewHidden: true)
+            self.navigationController?.pushViewController(fullVC, animated: true)
         }
     }
 }

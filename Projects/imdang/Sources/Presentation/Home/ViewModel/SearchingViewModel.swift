@@ -12,12 +12,11 @@ import RxSwift
 
 final class SearchingViewModel {
     var isLoading = false
-    var myInsightTotalPage = 0
-    var todayInsightTotalPage = 0
+    var totalElements: Int?
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager()
     
-    func loadInsights(page: Int, type: FullInsightType) -> Observable<[Insight]?> {
+    func loadInsights(page: Int, type: FullInsightType, address: AddressResponse? = nil) -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
             "pageNumber": 0,
             "pageSize": 10 * (page + 1),
@@ -37,7 +36,7 @@ final class SearchingViewModel {
             
             return networkManager.request(with: endpoint)
                 .map { data in
-                    self.myInsightTotalPage = data.totalPages
+                    self.totalElements = data.totalElements
                     return data.toEntitiy()
                 }
                 .catch { error in
@@ -55,7 +54,7 @@ final class SearchingViewModel {
             
             return networkManager.request(with: endpoint)
                 .map { data in
-                    self.todayInsightTotalPage = data.totalPages
+                    self.totalElements = data.totalElements
                     return data.toEntitiy()
                 }
                 .catch { error in
@@ -63,7 +62,37 @@ final class SearchingViewModel {
                     return Observable.just(nil)
                 }
         case .search:
-            return Observable.just(nil)
+            if let address {
+                let parameters: [String: Any] = [
+                    "siGunGu": address.siGunGu,
+                    "eupMyeonDong": address.eupMyeonDong,
+                    "pageNumber" : 0,
+                    "pageSize" : 10 * (page + 1),
+                    "direction" : "DESC",
+                    "properties" : [],
+                ]
+                
+                let endpoint = Endpoint<InsightResponse>(
+                    baseURL: .imdangAPI,
+                    path: "/insights/by-district",
+                    method: .get,
+                    encodingType: .query,
+                    headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+                    parameters: parameters
+                )
+                
+                return networkManager.request(with: endpoint)
+                    .map { data in
+                        self.totalElements = data.totalElements
+                        return data.toEntitiy()
+                    }
+                    .catch { error in
+                        print("Error: \(error.localizedDescription)")
+                        return Observable.just(nil)
+                    }
+            } else {
+                return Observable.just(nil)
+            }
         }
     }
     
@@ -90,21 +119,20 @@ final class SearchingViewModel {
             }
     }
     
-    func loadMyDistricts() -> Observable<[String: [String]]?> {
-        let endpoint = Endpoint<[AddressResponse]>(
+    func loadDistricts() -> Observable<[String]?> {
+        let parameters: [String: Any] = ["pageSize": 100]
+        
+        let endpoint = Endpoint<DistrictsResponse>(
             baseURL: .imdangAPI,
-            path: "/my-insights/districts",
+            path: "/districts/si-gun-gu",
             method: .get,
-            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
         )
         
         return networkManager.request(with: endpoint)
             .map { data in
-                var result: [String: [String]] = [:]
-                data.filter { $0.eupMyeonDong != ""}.forEach {
-                    result[$0.siGunGu, default: [String]()].append($0.eupMyeonDong)
-                }
-                return result
+                return data.toAddresses().map { $0.siGunGu }
             }
             .catch { error in
                 print("Error: \(error.localizedDescription)")
@@ -112,4 +140,27 @@ final class SearchingViewModel {
             }
     }
     
+    func loadDongAddresses(siGunGu: String) -> Observable<[String: [String]]?> {
+        let parameters: [String: Any] = ["siGunGu": siGunGu, "pageSize": 100]
+        let endpoint = Endpoint<DistrictsResponse>(
+            baseURL: .imdangAPI,
+            path: "/districts/eup-myeon-dong",
+            method: .get,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
+        )
+        
+        return networkManager.request(with: endpoint)
+            .map { data in
+                var result: [String: [String]] = [:]
+                data.toAddresses().filter { $0.eupMyeonDong != "" || $0.eupMyeonDong != nil }.forEach {
+                    result[$0.siGunGu, default: [String]()].append($0.eupMyeonDong!)
+                }
+                return result.mapValues { $0.sorted() }
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(nil)
+            }
+    }
 }

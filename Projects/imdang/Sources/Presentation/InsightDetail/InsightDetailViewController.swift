@@ -18,7 +18,7 @@ final class InsightDetailViewController: BaseViewController {
     private var insightImageUrl = ""
     private var exchangeState: DetailExchangeState
     private var disposeBag = DisposeBag()
-    private let myInsights: [Insight]?
+    private var myInsights: [Insight]?
     private let insightDetailViewModel = InsightDetailViewModel()
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
@@ -40,11 +40,10 @@ final class InsightDetailViewController: BaseViewController {
     private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }.then { $0.applyTopBlur() }
     
-    init(url: String, image: UIImage? = nil, insight: InsightDetail, myInsights: [Insight]? = nil) {
+    init(url: String, image: UIImage? = nil, insight: InsightDetail) {
         exchangeState = insight.exchangeRequestStatus
         insightImageUrl = url
         mainImage = image
-        self.myInsights = myInsights
         self.insight = insight
         
         super.init(nibName: nil, bundle: nil)
@@ -69,6 +68,7 @@ final class InsightDetailViewController: BaseViewController {
         addSubviews()
         makeConstraints()
         bindActions()
+        loadMyInsights()
         
         view.addSubview(categoryTapView)
         categoryTapView.snp.makeConstraints {
@@ -78,7 +78,6 @@ final class InsightDetailViewController: BaseViewController {
         }
     }
     
-    
     @objc private func handleModalDismiss() {
         self.navigationController?.popToRootViewController(animated: true)
         self.navigationController?.viewControllers.forEach {
@@ -87,6 +86,7 @@ final class InsightDetailViewController: BaseViewController {
             }
         }
     }
+    
     private func setNavigationItem() {
         [reportButton, shareButton].forEach { rightNaviItemView.addSubview($0) }
         
@@ -298,6 +298,14 @@ final class InsightDetailViewController: BaseViewController {
         
         shareButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    private func loadMyInsights() {
+        insightDetailViewModel.loadMyInsights()
+            .subscribe(with: self, onNext: { owner, result in
+                owner.myInsights = result
             })
             .disposed(by: disposeBag)
     }
