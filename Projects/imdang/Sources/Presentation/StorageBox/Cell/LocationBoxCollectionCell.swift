@@ -15,7 +15,7 @@ class LocationBoxCollectionCell: UICollectionViewCell {
     static let identifier = "LocationBoxCollectionCell"
     private var pageIndex = 0
     
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
     private let locationImage = UIImageView().then {
         $0.image = ImdangImages.Image(resource: .location).withRenderingMode(.alwaysTemplate)
         $0.tintColor = .white
@@ -77,6 +77,7 @@ class LocationBoxCollectionCell: UICollectionViewCell {
     }
     
     override func prepareForReuse() {
+        disposeBag = DisposeBag()
     }
     
     required init?(coder: NSCoder) {
@@ -163,14 +164,16 @@ class LocationBoxCollectionCell: UICollectionViewCell {
     }
     
     func setTintColor(visiable: Bool) {
-        if visiable {
-            backgroundColor = .mainOrange500
-            zoneStackView.backgroundColor = .mainOrange400
-            insightStackView.backgroundColor = .mainOrange400
-        } else {
-            backgroundColor = .grayScale100
-            zoneStackView.backgroundColor = .grayScale50
-            insightStackView.backgroundColor = .grayScale50
+        UIView.animate(withDuration: 0.15) { [self] in
+            if visiable {
+                backgroundColor = .mainOrange500
+                zoneStackView.backgroundColor = .mainOrange400
+                insightStackView.backgroundColor = .mainOrange400
+            } else {
+                backgroundColor = .grayScale100
+                zoneStackView.backgroundColor = .grayScale50
+                insightStackView.backgroundColor = .grayScale50
+            }
         }
     }
 }

@@ -26,7 +26,11 @@ class OnboardingViewController: UIViewController {
     
     private let guideImageView = UIImageView()
     private let coverView = UIImageView().then { $0.backgroundColor = .white }.then { $0.isHidden = true }
-    private let imageButton = CommonButton(title: "교환 요청", initialButtonType: .enabled).then { $0.isHidden = true }
+    private let imageButton = CommonButton(title: "교환 요청", initialButtonType: .enabled).then {
+        $0.isHidden = true
+        $0.titleLabel?.font = .pretenSemiBold(11)
+        $0.setTitleColor(.white, for: .normal)
+    }
     
     init(title: String, description: String, image: UIImage) {
         super.init(nibName: nil, bundle: nil)

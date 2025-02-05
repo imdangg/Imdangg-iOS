@@ -69,6 +69,11 @@ public final class NetworkManager: Network {
                         if let data = response.data, !data.isEmpty {
                             do {
                                 let decodedData = try JSONDecoder().decode(E.Response.self, from: data)
+                                print("""
+                                📲 NETWORK Response LOG
+                                📲 StatusCode: \(response.response?.statusCode ?? 0)
+                                📲 Data: \(response.data?.toPrettyPrintedString ?? "")
+                                """)
                                 observer.onNext(decodedData)
                                 observer.onCompleted()
                             } catch {
@@ -82,7 +87,9 @@ public final class NetworkManager: Network {
                         if let errorData = response.data {
                             do {
                                 let decodedError = try JSONDecoder().decode(BasicResponse.self, from: errorData)
-                                observer.onError(NSError(domain: "Network Error", code: response.response?.statusCode ?? -1, userInfo: ["data": decodedError]))
+                                print("❌ 에러 메세지: \(decodedError.message)")
+                                print("❌ 에러 코드: \(response.response?.statusCode ?? -1)")
+                                observer.onError(NSError(domain: decodedError.message, code: response.response?.statusCode ?? -1, userInfo: ["data": decodedError]))
                             } catch {
                                 observer.onError(error)
                             }

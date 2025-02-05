@@ -8,9 +8,10 @@
 import UIKit
 import SnapKit
 import Then
+import RxSwift
 
 class StorageBoxEmptyViewController: BaseViewController {
-    
+    private var disposeBag = DisposeBag()
     private let navigationTitleButton = UILabel().then {
         $0.text = "보관함"
         $0.textColor = .grayScale900
@@ -57,6 +58,15 @@ class StorageBoxEmptyViewController: BaseViewController {
         setNavigationItem()
         addSubviews()
         makeConstraints()
+        
+        mapButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = MapViewController()
+                vc.config(type: .storage)
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
     
     private func setNavigationItem() {

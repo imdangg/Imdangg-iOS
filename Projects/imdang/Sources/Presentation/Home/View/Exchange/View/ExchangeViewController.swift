@@ -131,7 +131,7 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
         searchingViewModel.loadInsightDetail(id: insights[indexPath.row].insightId)
             .subscribe { [self] data in
                 if let data = data {
-                    let vc = InsightDetailViewController(url: "", insight: data, likeCount: insights[indexPath.row].likeCount)
+                    let vc = InsightDetailViewController(url: "", insight: data)
                     vc.hidesBottomBarWhenPushed = true
                     navigationController?.pushViewController(vc, animated: true)
                 }

@@ -128,15 +128,14 @@ extension NotificationViewController:  UICollectionViewDataSource, UICollectionV
                 guard let self = self else { return }
                 switch type {
                 case .request_accept:
-                    UIView.animate(withDuration: 5) {
-                        self.tabBarController?.selectedIndex = 2
-                        self.navigationController?.popViewController(animated: true)
-                    }
+                    let tab = TabBarController()
+                    tab.selectedIndex = 2
+                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(tab, animated: true)
                 case .request_reject:
-                    let view2 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight, likeCount: 0)
+                    let view2 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight)
                     self.navigationController?.pushViewController(view2, animated: true)
                 case .response:
-                    let view3 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight, likeCount: 0)
+                    let view3 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight)
                     self.navigationController?.pushViewController(view3, animated: true)
                 }
             }

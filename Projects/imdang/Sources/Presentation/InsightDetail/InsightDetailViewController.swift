@@ -9,28 +9,28 @@ import UIKit
 import SnapKit
 import Then
 import RxSwift
+
 final class InsightDetailViewController: BaseViewController {
 
     private var insight: InsightDetail!
     private var mainImage: UIImage?
     private var tableView: UITableView!
     private var insightImageUrl = ""
-    private var likeCount: Int
     private var exchangeState: DetailExchangeState
     private var disposeBag = DisposeBag()
-    private let myInsights: [Insight]?
+    private var myInsights: [Insight]?
     private let insightDetailViewModel = InsightDetailViewModel()
     
     private let categoryTapView = InsightDetailCategoryTapView().then {
         $0.isHidden = true
     }
     
-    private let reportIcon = UIImageView().then {
-        $0.image = ImdangImages.Image(resource: .report)
+    private let reportButton = UIButton().then {
+        $0.setImage(ImdangImages.Image(resource: .report), for: .normal)
     }
     
-    private let shareIcon = UIImageView().then {
-        $0.image = ImdangImages.Image(resource: .share)
+    private let shareButton = UIButton().then {
+        $0.setImage(ImdangImages.Image(resource: .share), for: .normal)
     }
     
     private let requestButton = CommonButton(title: "교환 요청", initialButtonType: .enabled)
@@ -40,12 +40,10 @@ final class InsightDetailViewController: BaseViewController {
     private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }.then { $0.applyTopBlur() }
     
-    init(url: String, image: UIImage? = nil, insight: InsightDetail, likeCount: Int, myInsights: [Insight]? = nil) {
+    init(url: String, image: UIImage? = nil, insight: InsightDetail) {
         exchangeState = insight.exchangeRequestStatus
         insightImageUrl = url
         mainImage = image
-        self.likeCount = likeCount
-        self.myInsights = myInsights
         self.insight = insight
         
         super.init(nibName: nil, bundle: nil)
@@ -70,6 +68,7 @@ final class InsightDetailViewController: BaseViewController {
         addSubviews()
         makeConstraints()
         bindActions()
+        loadMyInsights()
         
         view.addSubview(categoryTapView)
         categoryTapView.snp.makeConstraints {
@@ -79,7 +78,6 @@ final class InsightDetailViewController: BaseViewController {
         }
     }
     
-    
     @objc private func handleModalDismiss() {
         self.navigationController?.popToRootViewController(animated: true)
         self.navigationController?.viewControllers.forEach {
@@ -88,19 +86,20 @@ final class InsightDetailViewController: BaseViewController {
             }
         }
     }
+    
     private func setNavigationItem() {
-        [reportIcon, shareIcon].forEach { rightNaviItemView.addSubview($0) }
+        [reportButton, shareButton].forEach { rightNaviItemView.addSubview($0) }
         
-        shareIcon.snp.makeConstraints {
+        shareButton.snp.makeConstraints {
             $0.width.height.equalTo(24)
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().offset(10)
         }
         
-        reportIcon.snp.makeConstraints {
+        reportButton.snp.makeConstraints {
             $0.width.height.equalTo(24)
             $0.centerY.equalToSuperview()
-            $0.trailing.equalTo(shareIcon.snp.leading).offset(-12)
+            $0.trailing.equalTo(shareButton.snp.leading).offset(-12)
         }
     }
     
@@ -173,13 +172,13 @@ final class InsightDetailViewController: BaseViewController {
         
         switch exchangeState {
         case .null:
-            if myInsights != nil  {
-                requestButton.isHidden = false
-            } else {
+            if insight.memberId == UserdefaultKey.memberId {
                 buttonBackView.isHidden = true
                 tableView.snp.updateConstraints {
                     $0.bottom.equalToSuperview()
                 }
+            } else {
+                requestButton.isHidden = false
             }
         case .pending:
             if let state = insight.exchangeRequestCreatedByMe {
@@ -193,16 +192,13 @@ final class InsightDetailViewController: BaseViewController {
                 waitButton.isHidden = false
             }
         case .rejected:
-            if let state = insight.exchangeRequestCreatedByMe {
-                if state {
-                    buttonBackView.isHidden = true
-                    tableView.snp.updateConstraints {
-                        $0.bottom.equalToSuperview()
-                    }
-                } else {
-                    degreeButton.isHidden = false
-                    agreeButton.isHidden = false
+            if insight.memberId == UserdefaultKey.memberId {
+                buttonBackView.isHidden = true
+                tableView.snp.updateConstraints {
+                    $0.bottom.equalToSuperview()
                 }
+            } else {
+                requestButton.isHidden = false
             }
         case .accepted:
             if let state = insight.exchangeRequestCreatedByMe {
@@ -223,6 +219,9 @@ final class InsightDetailViewController: BaseViewController {
     private func bindActions() {
         requestButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
+                //                owner.showReportAlert(title: "인사이트 교환 불가", description: "신고로 인해 3일간\n인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "3일간", type: .confirmOnly)
+                //                owner.showReportAlert(title: "이미 신고한 인사이트에요", description: "신고로 인해 5일간\n인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "5일간", type: .confirmOnly)
+                //                owner.showReportAlert(title: "인사이트 교환 불가", description: "해당 인사이트는 신고로 인해\n교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", type: .confirmOnly)
                 
                 if let insights = owner.myInsights {
                     let vc = MyInsightsModalViewController(insightId: owner.insight.insightId, myInsights: insights)
@@ -279,12 +278,42 @@ final class InsightDetailViewController: BaseViewController {
                     .disposed(by: owner.disposeBag)
             })
             .disposed(by: disposeBag)
+        
+        reportButton.rx.tap
+            .subscribe(with: self, onNext: { owner, _ in
+                
+                owner.showReportAlert(title: "이 인사이트를 신고할까요?", description: "허위, 과다 신고시 불이익이\n발생할 수 있어요", type: .cancellable, comfrimAction: {
+                    
+                    owner.insightDetailViewModel.accueInsight(insightId: owner.insight.insightId)
+                        .subscribe(with: self) { owner, result in
+                            if result {
+                                owner.showAlert(text: "신고가 완료되었어요.", type: .confirmOnly)
+                            }
+                        }
+                        .disposed(by: owner.disposeBag)
+                })
+//                owner.showReportAlert(title: "이미 신고한 인사이트에요", description: "동일한 인사이트를 중복으로\n신고할 수 없어요", type: .confirmOnly)
+            })
+            .disposed(by: disposeBag)
+        
+        shareButton.rx.tap
+            .subscribe(with: self, onNext: { owner, _ in
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    private func loadMyInsights() {
+        insightDetailViewModel.loadMyInsights()
+            .subscribe(with: self, onNext: { owner, result in
+                owner.myInsights = result
+            })
+            .disposed(by: disposeBag)
     }
 }
 
 extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return exchangeState == .null ? myInsights == nil ? 7 : 3 : exchangeState == .accepted ? 7 : 3
+        return insight.memberId == UserdefaultKey.memberId ? 7 : exchangeState == .accepted ? 7 : 3
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -302,12 +331,32 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
-            cell.config(info: insight, likeCount: likeCount)
+            cell.config(info: insight)
             cell.selectionStyle = .none
+            
+            cell.likeButton.rx.tap
+                .subscribe(with: self) { owner, _ in
+                    owner.insightDetailViewModel.recommendInsight(insightId: owner.insight.insightId)
+                        .subscribe(with: self) { owner, result in
+                            switch result {
+                            case .success:
+                                cell.likeInsight()
+                            case .failure:
+                                break
+                            case .recommended:
+                                owner.showAlert(text: "이미 추천한 인사이트입니다", type: .confirmOnly)
+                            case .beforeExchange:
+                                owner.showAlert(text: "인사이트 추천은 교환 후 가능해요", type: .confirmOnly)
+                            }
+                        }
+                        .disposed(by: owner.disposeBag)
+                }
+                .disposed(by: disposeBag)
+            
             return cell
         case 2:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailDefaultInfoTableCell.self)
-            cell.config(info: insight, state: exchangeState, isMyInsight: myInsights == nil)
+            cell.config(info: insight, state: exchangeState, isMyInsight: insight.memberId == UserdefaultKey.memberId)
             cell.selectionStyle = .none
             return cell
         case 3:

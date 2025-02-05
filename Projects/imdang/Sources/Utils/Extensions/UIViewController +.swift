@@ -57,6 +57,16 @@ extension UIViewController {
         self.present(customAlertViewController, animated: true, completion: nil)
     }
     
+    func showReportAlert(title: String, description: String, highligshtText: String = "", email: Bool = false, type: AlertType, comfrimAction: (() -> Void)? = nil, etcAction: (() -> Void)? = nil) {
+        let customAlertViewController = ReportAlertViewController()
+        customAlertViewController.config(title: title, description: description, email: email, highligshtText: highligshtText, type: type)
+        customAlertViewController.confirmAction = comfrimAction
+        customAlertViewController.cancelAction = etcAction
+        customAlertViewController.modalPresentationStyle = .overFullScreen
+        customAlertViewController.modalTransitionStyle = .crossDissolve
+        self.present(customAlertViewController, animated: true, completion: nil)
+    }
+    
     func showLogoutAlert(comfrimAction: (() -> Void)? = nil, cancelAction: (() -> Void)? = nil) {
         let customAlertViewController = CommonAlertViewController()
         customAlertViewController.confirmAction = comfrimAction

@@ -18,7 +18,7 @@ enum FullInsightType: String {
 
 class FullInsightViewController: BaseViewController {
     private var pageIndex = 0
-    private var totalPage = 1
+    private var address: AddressResponse?
     private var tableView: UITableView!
     private var chipViewHidden: Bool = false
     private var myInsights: [Insight]?
@@ -47,7 +47,12 @@ class FullInsightViewController: BaseViewController {
         addSubViews()
         makeConstraints()
         configNavigationBarItem()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
+        loadInsights()
     }
     
     private func setupTableView() {
@@ -100,12 +105,11 @@ class FullInsightViewController: BaseViewController {
         }
     }
     
-    func config(type: FullInsightType, totalPage: Int, title: String, insights: [Insight], myInsights: [Insight]? = nil, chipViewHidden: Bool = false) {
+    func config(type: FullInsightType, title: String, address: AddressResponse? = nil, myInsights: [Insight]? = nil, chipViewHidden: Bool = false) {
         insightType = type
         titleLabel.text = title
-        countLabel.text = "\(insights.count)개"
-        self.totalPage = totalPage
-        self.insights.accept(insights)
+        countLabel.text = "\(insights.value.count)개"
+        self.address = address
         self.myInsights = myInsights
         self.chipViewHidden = chipViewHidden
         self.chipView.isHidden = chipViewHidden
@@ -129,65 +133,49 @@ extension FullInsightViewController: UITableViewDelegate, UITableViewDataSource 
         searchingViewModel.loadInsightDetail(id: insights.value[indexPath.row].insightId)
             .subscribe { [self] data in
                 if let data = data {
-                    let vc = InsightDetailViewController(url: "", insight: data, likeCount: insights.value[indexPath.row].likeCount, myInsights: myInsights)
+                    let vc = InsightDetailViewController(url: "", insight: data)
                     vc.hidesBottomBarWhenPushed = true
                     navigationController?.pushViewController(vc, animated: true)
                 }
             }
             .disposed(by: disposeBag)
     }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let scrollViewHeight = scrollView.frame.size.height
         
         if offsetY > contentHeight - scrollViewHeight - 100 { // 100px 여유
-            switch insightType {
-            case .my:
-                loadMoreMyData()
-            case .today:
-                loadMoreTodayData()
-            default:
-                break
-            }
+            loadInsights(loadMore: true)
         }
     }
     
-    private func loadMoreTodayData() {
+    private func loadInsights(loadMore: Bool = false) {
         guard !searchingViewModel.isLoading else { return }
-        guard pageIndex < totalPage else { return }
         
         searchingViewModel.isLoading = true
-        pageIndex += 1
-            searchingViewModel.loadTodayInsights(page: pageIndex)
+        if loadMore {
+            guard insights.value.count < searchingViewModel.totalElements! else {
+                searchingViewModel.isLoading = false
+                return
+            }
+            pageIndex += 1
+        } else {
+            guard insights.value.count <= searchingViewModel.totalElements ?? 0 else {
+                searchingViewModel.isLoading = false
+                return
+            }
+        }
+        
+        searchingViewModel.loadInsights(page: pageIndex, type: insightType, address: address)
                 .compactMap { $0 }
                 .distinctUntilChanged()
                 .subscribe(with: self, onNext: { owner, newData in
                     
                     var currentData = owner.insights.value
                     currentData.append(contentsOf: newData)
-                    owner.insights.accept(currentData)
-                    owner.countLabel.text = "\(owner.insights.value.count)개"
-                    owner.tableView.reloadData()
-                    owner.searchingViewModel.isLoading = false
-                })
-                .disposed(by: disposeBag)
-    }
-    
-    private func loadMoreMyData() {
-        guard !searchingViewModel.isLoading else { return }
-        guard pageIndex < totalPage else { return }
-        
-        searchingViewModel.isLoading = true
-        pageIndex += 1
-        searchingViewModel.loadMyInsights(page: pageIndex)
-                .compactMap { $0 }
-                .distinctUntilChanged()
-                .subscribe(with: self, onNext: { owner, newData in
-                    
-                    var currentData = owner.insights.value
-                    currentData.append(contentsOf: newData)
-                    owner.insights.accept(currentData)
+                    owner.insights.accept(newData)
                     owner.countLabel.text = "\(owner.insights.value.count)개"
                     owner.tableView.reloadData()
                     owner.searchingViewModel.isLoading = false

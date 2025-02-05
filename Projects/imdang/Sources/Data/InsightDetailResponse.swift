@@ -35,7 +35,7 @@ struct InsightDetailResponse: Codable {
     var accusedCount: Int?
     var createdAt: String?
     var viewCount: Int?
-    
+    var recommendedCount: Int
 }
 
 extension InsightDetailResponse {
@@ -65,7 +65,8 @@ extension InsightDetailResponse {
             accused: self.accused ?? false,
             accusedCount: self.accusedCount ?? 0,
             createdAt: self.createdAt ?? "",
-            viewCount: self.viewCount ?? 0
+            viewCount: self.viewCount ?? 0,
+            recommendedCount: self.recommendedCount
         )
     }
 }

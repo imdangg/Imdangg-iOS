@@ -28,11 +28,6 @@ class StorageBoxContainerViewController: UIViewController {
         super.viewDidLoad()
         
         addSubviews()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
         setView()
     }
     

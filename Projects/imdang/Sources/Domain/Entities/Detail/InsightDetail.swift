@@ -68,10 +68,11 @@ struct InsightDetail: Codable {
     var accusedCount: Int
     var createdAt: String
     var viewCount: Int
+    var recommendedCount: Int
     
     static var emptyInsight: InsightDetail {
         return InsightDetail(
-            memberId: "",
+            memberId: UserdefaultKey.memberId,
             memberNickname: "",
             score: 0,
             mainImage: "",
@@ -95,7 +96,8 @@ struct InsightDetail: Codable {
             accused: false,
             accusedCount: 0,
             createdAt: "",
-            viewCount: 0
+            viewCount: 0,
+            recommendedCount: 0
         )
     }
 }

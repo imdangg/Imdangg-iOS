@@ -16,7 +16,6 @@ class AreaListTableCell: UITableViewCell {
     private let disposeBag = DisposeBag()
     
     private let locationnLabel = UILabel().then {
-        $0.text = "서울시 강남구 신논현동"
         $0.font = .pretenMedium(16)
         $0.textColor = .grayScale900
     }
@@ -34,13 +33,11 @@ class AreaListTableCell: UITableViewCell {
     }
     
     private let zoneCountLabel = UILabel().then {
-        $0.text = "3개"
         $0.font = .pretenMedium(14)
         $0.textColor = .mainOrange500
     }
     
     private let insightCountLabel = UILabel().then {
-        $0.text = "3개"
         $0.font = .pretenMedium(14)
         $0.textColor = .mainOrange500
     }
@@ -59,6 +56,9 @@ class AreaListTableCell: UITableViewCell {
     }
     
     override func prepareForReuse() {
+        locationnLabel.text =  ""
+        zoneCountLabel.text = ""
+        insightCountLabel.text = ""
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -115,5 +115,11 @@ class AreaListTableCell: UITableViewCell {
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().offset(-20)
         }
+    }
+    
+    func config(address: AddressResponse) {
+        locationnLabel.text =  address.toAddress()
+        zoneCountLabel.text = "\(address.apartmentComplexCount)개"
+        insightCountLabel.text = "\(address.insightCount)개"
     }
 }

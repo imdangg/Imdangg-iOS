@@ -141,7 +141,7 @@ extension MyInsightsModalViewController: UITableViewDelegate, UITableViewDataSou
         cell.selectionStyle = .none
         switch indexPath.row {
         case 0:
-            cell.config(type: .ticket, ticketCount: 0)
+            cell.config(type: .ticket, ticketCount: UserdefaultKey.couponCount)
         default:
             cell.config(type: .insight, insight: myInsights[indexPath.row - 1])
         }

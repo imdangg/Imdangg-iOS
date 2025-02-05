@@ -126,7 +126,7 @@ class WriteInsightEtcViewController: UIViewController, View {
             .subscribe(onNext: { result in
                 self.showAlert(text: "인사이트 업로드가 완료되었어요.\n작성한 내 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton) { [self] in
                     if let image = reactor.mainImage {
-                        let vc = InsightDetailViewController(url: "", image: image, insight: reactor.detail, likeCount: 0)
+                        let vc = InsightDetailViewController(url: "", image: image, insight: reactor.detail)
                         self.navigationController?.pushViewController(vc, animated: true)
                         if let firstVC = self.navigationController?.viewControllers.first {
                             self.navigationController?.setViewControllers([firstVC, vc], animated: true)

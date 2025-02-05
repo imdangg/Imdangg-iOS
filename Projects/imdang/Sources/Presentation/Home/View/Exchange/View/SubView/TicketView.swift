@@ -19,7 +19,7 @@ final class TicketView: UIView {
     private let textLabel = UILabel().then {
         $0.text = "보유 패스권"
         $0.font = .pretenSemiBold(16)
-        $0.textColor = .grayScale600
+        $0.textColor = .grayScale900
         $0.numberOfLines = 0
     }
     

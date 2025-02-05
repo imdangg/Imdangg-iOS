@@ -16,6 +16,8 @@ class OnboardingContainerViewController: UIViewController {
     private let onboardingPageVC = OnboardingPageViewController()
     private let nextButton = UIButton().then {
         $0.setTitle("다음", for: .normal)
+        $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = .pretenSemiBold(16)
         $0.backgroundColor = .mainOrange500
         $0.layer.cornerRadius = 8
     }
