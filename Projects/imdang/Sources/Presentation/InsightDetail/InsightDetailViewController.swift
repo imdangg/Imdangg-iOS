@@ -15,7 +15,6 @@ final class InsightDetailViewController: BaseViewController {
     private var insight: InsightDetail!
     private var mainImage: UIImage?
     private var tableView: UITableView!
-    private var insightImageUrl = ""
     private var exchangeState: DetailExchangeState
     private var disposeBag = DisposeBag()
     private var myInsights: [Insight]?
@@ -40,12 +39,10 @@ final class InsightDetailViewController: BaseViewController {
     private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }.then { $0.applyTopBlur() }
     
-    init(url: String, image: UIImage? = nil, insight: InsightDetail) {
+    init(insight: InsightDetail, mainImage: UIImage? = nil) {
         exchangeState = insight.exchangeRequestStatus
-        insightImageUrl = url
-        mainImage = image
         self.insight = insight
-        
+        self.mainImage = mainImage
         super.init(nibName: nil, bundle: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleModalDismiss), name: .detailModalDidDismiss, object: nil)
     }
@@ -327,7 +324,7 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
         switch indexPath.section {
         case 0:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailImageCell.self)
-            cell.config(url: insightImageUrl, image: mainImage)
+            cell.config(url: insight.mainImage, mainImage: mainImage)
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)

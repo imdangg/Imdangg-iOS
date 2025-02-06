@@ -22,6 +22,12 @@ enum UserdefaultKey {
     @UserDefault(key: "accessToken", defaultValue: "")
     static var accessToken: String
     
+    @UserDefault(key: "refreshToken", defaultValue: "")
+    static var refreshToken: String
+    
+    @UserDefault(key: "expiresIn", defaultValue: nil)
+    static var expiresIn: Double?
+    
     @UserDefault(key: "dontSeeToday", defaultValue: "")
     static var dontSeeToday: String
     

@@ -64,6 +64,8 @@ class KakaoLoginService {
                     onNext: { entity in
                         UserdefaultKey.isJoined = entity.joined
                         UserdefaultKey.accessToken = entity.accessToken
+                        UserdefaultKey.refreshToken = entity.refreshToken
+                        UserdefaultKey.expiresIn = Date().timeIntervalSince1970
                         UserdefaultKey.memberId = entity.memberId
                         observer.onNext(true)
                         observer.onCompleted()

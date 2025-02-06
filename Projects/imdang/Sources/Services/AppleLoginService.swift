@@ -95,6 +95,8 @@ extension AppleLoginService {
                     onNext: { response in
                         UserdefaultKey.accessToken = response.accessToken
                         UserdefaultKey.memberId = response.memberId
+                        UserdefaultKey.refreshToken = response.refreshToken
+                        UserdefaultKey.expiresIn = Date().timeIntervalSince1970
 
                         observer.onNext(true)
                         observer.onCompleted()

@@ -61,6 +61,11 @@ class HomeContainerViewController: BaseViewController {
 //        presentTooltip()
         
         navigationViewBottomShadow.isHidden = true
+        HomeViewModel().tokenReissue()
+            .subscribe(onNext: { [weak self] state in
+                print(state)
+        })
+        .disposed(by: disposeBag)
     }
     
     override func viewDidAppear(_ animated: Bool) {

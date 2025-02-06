@@ -17,7 +17,7 @@ struct InsightSectionInfo {
     static let trafic: InsightSectionInfo = InsightSectionInfo(title: "교통*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "주차 편리", "지하철역 주변", "버스 정류장 주변"])
     static let educationInfo: InsightSectionInfo = InsightSectionInfo(title: "학군*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "초품아", "어린이집", "중학교", "고등학교", "학원가"])
     static let livingFacility: InsightSectionInfo = InsightSectionInfo(title: "생활 편의시설*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "주민센터", "편의점", "소형마트", "대형마트", "병원", "은행", "카페", "미용실", "약국", "우체국"])
-    static let culturalAndLeisure: InsightSectionInfo = InsightSectionInfo(title: "문화 및 여가시설 (단지외부)*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "도서관", "영화관", "체육관", "헬스장", "수영장", "배드민턴장", "테니스장", "골프 연습장"])
+    static let culturalAndLeisure: InsightSectionInfo = InsightSectionInfo(title: "문화 및 여가시설 (단지외부)*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "도서관", "영화관", "체육관", "헬스장", "수영장", "배드민턴장", "테니스장", "골프연습장"])
     static let surroundEnvironment: InsightSectionInfo = InsightSectionInfo(title: "주변환경*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "강", "바다", "산", "공원", "산책로", "교회", "성당", "식당가", "시장"])
     static let landMark: InsightSectionInfo = InsightSectionInfo(title: "랜드마크*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "놀이공원", "복합 쇼핑몰", "고궁", "전망대", "국립공원", "한옥마을", "사찰", "미술관", "박물관"])
     static let repellentFacility: InsightSectionInfo = InsightSectionInfo(title: "기피시설*", subTitle: nil, description: "복수 선택 가능", buttonTitles: ["해당 없음", "고속도로", "철도", "유흥거리", "산업단지", "공장", "쓰레기 소각장", "고층 건물", "공사중 건물"])

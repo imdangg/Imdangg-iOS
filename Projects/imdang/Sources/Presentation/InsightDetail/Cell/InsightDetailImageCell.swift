@@ -21,6 +21,11 @@ final class InsightDetailImageCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         addSubview(insightImageView)
+        
+        insightImageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+            $0.height.equalTo(300).priority(999)
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -31,18 +36,17 @@ final class InsightDetailImageCell: UITableViewCell {
         insightImageView.image = UIImage()
     }
     
-    func config(url: String, image: UIImage?) {
-        if let image = image {
-            insightImageView.image = image
+    func config(url: String, mainImage: UIImage? = nil) {
+        // 인사이트 작성후 보여지는 이미지 필요시
+        if let image = mainImage {
+            insightImageView.image = UIImage()
         } else {
-            guard let url = URL(string: url) else { return }
+            guard let url = URL(string: url) else {
+                insightImageView.image = UIImage()
+                return
+            }
             insightImageView.kf.setImage(with: url)
             insightImageView.contentMode = .scaleAspectFill
-        }
-        
-        insightImageView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-            $0.height.equalTo(300).priority(999)
         }
     }
 }
