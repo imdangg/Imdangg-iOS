@@ -13,10 +13,11 @@ import Then
 
 final class StorageBoxViewController: BaseViewController {
     private var pageIndex = 0
-    private var currentaddress: AddressResponse?
     private var toggleState = false
     private var refreshable: Bool = true
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
+    private var currentaddress: AddressResponse?
+    private var selectedComplex = BehaviorRelay<String?>(value: nil)
     
     private let currentPage = BehaviorRelay<Int>(value: 1)
     private let addresses = BehaviorRelay<[AddressResponse]>(value: [])
@@ -25,6 +26,8 @@ final class StorageBoxViewController: BaseViewController {
     private let storageBoxViewModel = StorageBoxViewModel()
     
     private var collectionView: UICollectionView!
+    
+    private let modalVC = AreaModalViewController()
     
     private let navigationTitleButton = ImageTextButton(type: .textFirst, horizonPadding: 0, spacing: 8).then {
         $0.customText.text = "보관함"
@@ -94,6 +97,7 @@ final class StorageBoxViewController: BaseViewController {
         collectionView.register(cell: LocationBoxCollectionCell.self)
         collectionView.register(cell: InsightCollectionCell.self)
         collectionView.register(cell: EmptyMyInsightCollectionCell.self)
+        collectionView.register(cell: StorageFilterCollectionCell.self)
         
         collectionView.register(header: InsightHeaderView.self)
         collectionView.register(header: LocationBoxHeaderView.self)
@@ -114,6 +118,8 @@ final class StorageBoxViewController: BaseViewController {
             case 0:
                 return self.createHorizontalScrollSection()
             case 1:
+                return self.cac()
+            case 2:
                 return self.createStickyHeaderSection()
             default:
                 return nil
@@ -173,12 +179,26 @@ final class StorageBoxViewController: BaseViewController {
         section.contentInsets = NSDirectionalEdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 20)
         
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                heightDimension: .absolute(122))
+                                                heightDimension: .absolute(54))
         let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -20, bottom: 0, trailing: -20)
         header.pinToVisibleBounds = true // 헤더 고정
         
         section.boundarySupplementaryItems = [header]
+        return section
+    }
+    
+    private func cac() -> NSCollectionLayoutSection {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                              heightDimension: .absolute(68))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                               heightDimension: .absolute(68))
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+        
+        let section = NSCollectionLayoutSection(group: group)
+        
         return section
     }
     
@@ -197,6 +217,8 @@ final class StorageBoxViewController: BaseViewController {
                 if !owner.addresses.value.isEmpty {
                     owner.pageIndex = 0
                     owner.loadInsightData(address: owner.addresses.value[currentPage])
+                    owner.loadMyComplexes(address: owner.addresses.value[currentPage])
+                    owner.selectedComplex.accept(nil)
                 }
             }
             .disposed(by: disposeBag)
@@ -211,18 +233,29 @@ final class StorageBoxViewController: BaseViewController {
             .disposed(by: disposeBag)
     }
     
-    private func loadInsightData(address: AddressResponse) {
-        storageBoxViewModel.loadStoregeInsights(address: address, pageIndex: pageIndex, onlyMine: toggleState)
+    private func loadInsightData(address: AddressResponse, aptName: String? = nil) {
+        storageBoxViewModel.loadStoregeInsights(address: address, pageIndex: pageIndex, apartmentComplexName: aptName, onlyMine: toggleState)
             .compactMap { $0 }
             .subscribe(with: self) { owner, data in
+                
                 owner.currentaddress = address
                 owner.insights.accept(data)
-                owner.collectionView.reloadSections(IndexSet(integer: 1))
+                
+                owner.collectionView.reloadSections([2])
                 owner.storageBoxViewModel.isLoading = false
             }
             .disposed(by: disposeBag)
     }
     
+    private func loadMyComplexes(address: AddressResponse) {
+        storageBoxViewModel.loadMyComplexes(address: address)
+            .compactMap { $0 }
+            .subscribe(with: self) { owner, data in
+                owner.modalVC.config(complexes: data)
+            }
+            .disposed(by: disposeBag)
+    }
+
     func config(addresses: [AddressResponse]) {
         guard refreshable == true else {
             refreshable = true
@@ -236,6 +269,7 @@ final class StorageBoxViewController: BaseViewController {
             .compactMap { $0 }
             .subscribe(with: self) { owner, data in
                 owner.insights.accept(data)
+                owner.loadMyComplexes(address: addresses[owner.currentPage.value])
                 owner.collectionView.reloadData()
             }
             .disposed(by: disposeBag)
@@ -244,11 +278,18 @@ final class StorageBoxViewController: BaseViewController {
 
 extension StorageBoxViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 2
+        return 3
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return section == 0 ? addresses.value.count : insights.value.isEmpty ? 1 : insights.value.count
+        switch section {
+        case 0:
+            return addresses.value.count
+        case 2:
+            return insights.value.isEmpty ? 1 : insights.value.count
+        default:
+            return 1
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -261,10 +302,11 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
                 headerView.delegate = self
                 
                 return headerView
-            case 1:
+            case 2:
                 let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: InsightHeaderView.reuseIdentifier, for: indexPath) as! InsightHeaderView
                 headerView.delegate = self
                 headerView.config(insightCount: storageBoxViewModel.totalCount, toggleState: self.toggleState)
+                
                 return headerView
             default:
                 return UICollectionReusableView()
@@ -274,8 +316,6 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             case 0:
                 let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: SectionSeparatorView.reuseIdentifier, for: indexPath) as! SectionSeparatorView
                 return footerView
-            case 1:
-                return UICollectionReusableView()
             default:
                 return UICollectionReusableView()
             }
@@ -291,6 +331,45 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             cell.setTintColor(visiable: indexPath.item == currentPage.value)
             return cell
         case 1:
+            let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: StorageFilterCollectionCell.self)
+            cell.delegate = self
+            
+            cell.viewAllButton.rx.tap
+                .subscribe(with: self) { owner, _ in
+                    guard let currentaddress = owner.currentaddress else { return }
+                    owner.loadInsightData(address: currentaddress)
+                    owner.pageIndex = 0
+                }
+                .disposed(by: disposeBag)
+            
+            currentPage
+                .distinctUntilChanged()
+                .subscribe(with: self) { _, _ in
+                    cell.config()
+                }
+                .disposed(by: disposeBag)
+            
+            selectedComplex
+                .compactMap { $0 }
+                .distinctUntilChanged()
+                .subscribe(with: self) { _, complex in
+                    print("selected complex: \(complex)")
+                    cell.updateLabel(complex: complex)
+                }
+                .disposed(by: disposeBag)
+            
+            modalVC.selectedComplex
+                .compactMap { $0 }
+                .distinctUntilChanged()
+                .subscribe(with: self) { owner, complex in
+                    guard let currentaddress = owner.currentaddress else { return }
+                    owner.selectedComplex.accept(complex)
+                    owner.loadInsightData(address: currentaddress, aptName: complex)
+                    owner.pageIndex = 0
+                }
+                .disposed(by: disposeBag)
+            return cell
+        case 2:
             if insights.value.isEmpty {
                 let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: EmptyMyInsightCollectionCell.self)
                 return cell
@@ -307,7 +386,7 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
     }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch indexPath.section {
-        case 1:
+        case 2:
             storageBoxViewModel.loadInsightDetail(id: insights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
@@ -374,9 +453,6 @@ extension StorageBoxViewController: ReusableViewDelegate {
     }
     
     func didTapAreaSeletButton() {
-        let modalVC = AreaModalViewController()
-        modalVC.modalPresentationStyle = .pageSheet
-        modalVC.modalTransitionStyle = .coverVertical
         self.present(modalVC, animated: true, completion: nil)
     }
 }
