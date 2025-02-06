@@ -16,6 +16,52 @@ final class SearchingViewModel {
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager(session: .default)
     
+    func loadMyvisited() -> Observable<[String]?> {
+        let endpoint = Endpoint<[ApartmentComplexResponse]>(
+            baseURL: .imdangAPI,
+            path: "/apartment-complexes/my-visited",
+            method: .get,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
+        )
+        
+        return networkManager.request(with: endpoint)
+            .map { data in
+                return data.map { $0.name }
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(nil)
+            }
+    }
+    
+    /// 아파트 단지별 인사이트 목록 조회
+    func loadInsightsByApartment(aptName: String) -> Observable<[Insight]?> {
+        let parameters: [String: Any] = [
+            "apartmentComplexName": aptName,
+            "pageNumber": 0,
+            "pageSize": 100,
+            "direction": "DESC",
+            "properties": [ "created_at" ]
+        ]
+        
+        let endpoint = Endpoint<InsightResponse>(
+            baseURL: .imdangAPI,
+            path: "/insights/by-apartment-complex",
+            method: .get,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
+        )
+        
+        return networkManager.request(with: endpoint)
+            .map { data in
+                return data.toEntitiy()
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(nil)
+            }
+    }
+    
     func loadInsights(page: Int, type: FullInsightType, address: AddressResponse? = nil) -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
             "pageNumber": 0,
@@ -26,23 +72,7 @@ final class SearchingViewModel {
         
         switch type {
         case .my:
-            let endpoint = Endpoint<MyInsightResponse>(
-                baseURL: .imdangAPI,
-                path: "/my-insights/created-by-me",
-                method: .get,
-                headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
-                parameters: parameters
-            )
-            
-            return networkManager.request(with: endpoint)
-                .map { data in
-                    self.totalElements = data.totalElements
-                    return data.toEntitiy()
-                }
-                .catch { error in
-                    print("Error: \(error.localizedDescription)")
-                    return Observable.just(nil)
-                }
+            return Observable.just(nil)
         case .today:
             let endpoint = Endpoint<InsightResponse>(
                 baseURL: .imdangAPI,

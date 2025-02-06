@@ -18,7 +18,8 @@ class SearchingSectionHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "SearchingSectionHeaderView"
     
     var buttonAction: (() -> Void)?
-    private let disposeBag = DisposeBag()
+    let selectedItem = BehaviorRelay<String?>(value: nil)
+    private var disposeBag = DisposeBag()
     private var collectionView: UICollectionView?
     private var currentPage = 1 {
         didSet {
@@ -69,12 +70,16 @@ class SearchingSectionHeaderView: UICollectionReusableView {
         $0.textAlignment = .center
     }
     
-    private var horizontalCollectionView: HorizontalCollectionChipView?
-        
+    var chipView = HorizontalCollectionChipView()
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         bindAction()
+    }
+    
+    override func prepareForReuse() {
+        chipView = HorizontalCollectionChipView()
     }
     
     required init?(coder: NSCoder) {
@@ -93,12 +98,9 @@ class SearchingSectionHeaderView: UICollectionReusableView {
         
         addSubview(titleLabel)
         
-        // [FIXME]
         if let shouldShowHorizontal = isShowHorizontalCollectionChipView, shouldShowHorizontal {
-            let collectionView = HorizontalCollectionChipView()
-            horizontalCollectionView = collectionView
             
-            addSubview(collectionView)
+            addSubview(chipView)
             
             titleLabel.snp.remakeConstraints {
                 $0.top.equalToSuperview()
@@ -107,7 +109,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
                 $0.height.equalTo(25)
             }
             
-            collectionView.snp.makeConstraints {
+            chipView.snp.makeConstraints {
                 $0.top.equalTo(titleLabel.snp.bottom).offset(16)
                 $0.horizontalEdges.equalToSuperview().inset(-20) //바깥 여백 없애기
                 $0.height.equalTo(36)
@@ -147,7 +149,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             .disposed(by: disposeBag)
     }
     
-    func configure(with title: String, type: HeaderType, showHorizontalCollection: Bool) {
+    func configure(with title: String, type: HeaderType, showHorizontalCollection: Bool, aptItems: [String]? = nil) {
         titleLabel.text = title
         headerType = type
         isShowHorizontalCollectionChipView = showHorizontalCollection
@@ -159,6 +161,10 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             
             titleLabel.attributedText = attributedString
         }
+        
+        if let aptItems {
+            chipView.updateItems(aptItems)
+        }
     }
     
     func bind(input: Observable<Int>, indexPath: IndexPath, collectionView: UICollectionView) {
@@ -169,6 +175,6 @@ class SearchingSectionHeaderView: UICollectionReusableView {
                 self?.currentPage = currentPage + 1
             })
             .disposed(by: disposeBag)
-
+        
     }
 }

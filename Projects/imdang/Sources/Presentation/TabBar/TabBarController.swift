@@ -31,6 +31,10 @@ class TabBarController: UITabBarController {
             }
         }
     }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print("asdasd")
+    }
     
     private func configureTabBar() {
         let firstViewController = HomeContainerViewController()

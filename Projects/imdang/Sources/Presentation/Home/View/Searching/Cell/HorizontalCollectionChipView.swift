@@ -13,11 +13,11 @@ import RxSwift
 // [FIXME]
 class HorizontalCollectionChipView: UIView {
     
-    // Mock
-    private var items: [String] = ["신논현 더 센트럴 푸르지오 1", "신논현 더 센트럴 푸르지오 2", "신논현 더 센트럴 푸르지오 3", "신논현 더 센트럴 푸르지오 4", "신논현 더 센트럴 푸르지오 5", "신논현 더 센트럴 푸르지오 6"]
+    let selectedItem = BehaviorRelay<String?>(value: nil)
+    private var selectedIndex: Int?
+    private var items: [String] = []
     
-    private let selectedItem = BehaviorRelay<String?>(value: nil)
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -37,7 +37,6 @@ class HorizontalCollectionChipView: UIView {
         super.init(frame: frame)
         setupView()
         bindCollectionView()
-        setDefaultSelection()
     }
     
     required init?(coder: NSCoder) {
@@ -45,7 +44,7 @@ class HorizontalCollectionChipView: UIView {
     }
     
     private func setDefaultSelection() {
-        selectedItem.accept(items.first)
+        selectedItem.accept(items[selectedIndex ?? 0])
     }
     
     private func setupView() {
@@ -57,6 +56,7 @@ class HorizontalCollectionChipView: UIView {
     
     private func bindCollectionView() {
         selectedItem
+            .distinctUntilChanged()
             .subscribe(onNext: { [weak self] selected in
                 self?.collectionView.reloadSections([0])
                 if let selected = selected {
@@ -68,6 +68,7 @@ class HorizontalCollectionChipView: UIView {
     
     func updateItems(_ newItems: [String]) {
         items = newItems
+        setDefaultSelection()
         collectionView.reloadData()
     }
 }
@@ -157,5 +158,6 @@ extension HorizontalCollectionChipView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedItem = items[indexPath.item]
         self.selectedItem.accept(selectedItem)
+        self.selectedIndex = indexPath.item
     }
 }
