@@ -44,33 +44,14 @@ class SearchingViewController: UIViewController {
         bindActions()
     }
     
-    func bindActions() {
-        searchBoxView.searchButton.rx.tap
-            .subscribe(with: self) { owner, _ in
-                let vc = AddressListViewController()
-                vc.hidesBottomBarWhenPushed = true
-                owner.navigationController?.pushViewController(vc, animated: true)
-            }
-            .disposed(by: disposeBag)
-        
-        searchBoxView.mapButton.rx.tap
-            .subscribe(with: self) { owner, _ in
-                let vc = MapViewController()
-                vc.config(type: .search)
-                vc.hidesBottomBarWhenPushed = true
-                owner.navigationController?.pushViewController(vc, animated: true)
-            }
-            .disposed(by: disposeBag)
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
         loadInsightData()
     }
     
     private func fetchMyVisitedInsight(aptName: String) {
-        searchingViewModel.loadInsightsByApartment(aptName: aptName)
+        searchingViewModel.loadInsightsByApartment(page: 0, aptName: aptName)
             .compactMap { $0 }
             .subscribe(with: self, onNext: { owner, data in
                 
@@ -125,6 +106,28 @@ class SearchingViewController: UIViewController {
             $0.bottom.equalToSuperview().offset(-20)
         }
     }
+    
+    func bindActions() {
+        searchBoxView.searchButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = AddressListViewController()
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        searchBoxView.mapButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = MapViewController()
+                vc.config(type: .search)
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
+    }
+}
+
+extension SearchingViewController {
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, _ in
@@ -242,7 +245,6 @@ class SearchingViewController: UIViewController {
         
         return section
     }
-    
 }
 
 extension SearchingViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -312,7 +314,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 let title = "내가 다녀온 단지의 다른 인사이트"
                 headerView.configure(with: title, type: .notTopten, showHorizontalCollection: apartmentComplexes == nil ? false : true, aptItems: apartmentComplexes)
                 headerView.buttonAction = {
-                    fullVC.config(type: .my, title: title)
+                    fullVC.config(type: .my, title: title, chipItems: self.apartmentComplexes)
                     self.navigationController?.pushViewController(fullVC, animated: true)
                 }
                 

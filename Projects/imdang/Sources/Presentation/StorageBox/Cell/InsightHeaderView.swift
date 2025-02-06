@@ -179,5 +179,4 @@ class InsightHeaderView: UICollectionReusableView {
         self.insightCount.text = "\(insightCount)개"
         self.toggleSwitch.setOn(toggleState)
     }
-
 }

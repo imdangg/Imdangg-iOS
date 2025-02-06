@@ -105,7 +105,7 @@ class FullInsightViewController: BaseViewController {
         }
     }
     
-    func config(type: FullInsightType, title: String, address: AddressResponse? = nil, myInsights: [Insight]? = nil, chipViewHidden: Bool = false) {
+    func config(type: FullInsightType, title: String, address: AddressResponse? = nil, myInsights: [Insight]? = nil, chipViewHidden: Bool = false, chipItems: [String]? = nil) {
         insightType = type
         titleLabel.text = title
         countLabel.text = "\(insights.value.count)개"
@@ -113,6 +113,9 @@ class FullInsightViewController: BaseViewController {
         self.myInsights = myInsights
         self.chipViewHidden = chipViewHidden
         self.chipView.isHidden = chipViewHidden
+        if let chipItems {
+            self.chipView.updateItems(chipItems)
+        }
     }
 }
 
@@ -168,18 +171,40 @@ extension FullInsightViewController: UITableViewDelegate, UITableViewDataSource 
             }
         }
         
-        searchingViewModel.loadInsights(page: pageIndex, type: insightType, address: address)
-                .compactMap { $0 }
+        if chipViewHidden {
+            searchingViewModel.loadInsights(page: pageIndex, type: insightType, address: address)
+                    .compactMap { $0 }
+                    .distinctUntilChanged()
+                    .subscribe(with: self) { owner, newData in
+                        
+                        var currentData = owner.insights.value
+                        currentData.append(contentsOf: newData)
+                        owner.insights.accept(newData)
+                        owner.countLabel.text = "\(owner.insights.value.count)개"
+                        owner.tableView.reloadData()
+                        owner.searchingViewModel.isLoading = false
+                    }
+                    .disposed(by: disposeBag)
+        } else {
+            chipView.selectedItem
                 .distinctUntilChanged()
-                .subscribe(with: self, onNext: { owner, newData in
+                .subscribe(with: self) { owner, selected in
+                    guard let selected = selected else { return }
                     
-                    var currentData = owner.insights.value
-                    currentData.append(contentsOf: newData)
-                    owner.insights.accept(newData)
-                    owner.countLabel.text = "\(owner.insights.value.count)개"
-                    owner.tableView.reloadData()
-                    owner.searchingViewModel.isLoading = false
-                })
+                    owner.searchingViewModel.loadInsightsByApartment(page: owner.pageIndex, aptName: selected)
+                        .compactMap { $0 }
+                        .distinctUntilChanged()
+                        .subscribe(with: self) { owner, newData in
+                            var currentData = owner.insights.value
+                            currentData.append(contentsOf: newData)
+                            owner.insights.accept(newData)
+                            owner.countLabel.text = "\(owner.insights.value.count)개"
+                            owner.tableView.reloadData()
+                            owner.searchingViewModel.isLoading = false
+                        }
+                        .disposed(by: owner.disposeBag)
+                }
                 .disposed(by: disposeBag)
+        }
     }
 }

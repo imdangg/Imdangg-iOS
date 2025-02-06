@@ -35,11 +35,11 @@ final class SearchingViewModel {
     }
     
     /// 아파트 단지별 인사이트 목록 조회
-    func loadInsightsByApartment(aptName: String) -> Observable<[Insight]?> {
+    func loadInsightsByApartment(page: Int, aptName: String) -> Observable<[Insight]?> {
         let parameters: [String: Any] = [
             "apartmentComplexName": aptName,
             "pageNumber": 0,
-            "pageSize": 100,
+            "pageSize": 10 * (page + 1),
             "direction": "DESC",
             "properties": [ "created_at" ]
         ]
@@ -54,6 +54,7 @@ final class SearchingViewModel {
         
         return networkManager.request(with: endpoint)
             .map { data in
+                self.totalElements = data.totalElements
                 return data.toEntitiy()
             }
             .catch { error in
