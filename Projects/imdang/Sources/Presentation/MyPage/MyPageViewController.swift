@@ -53,7 +53,7 @@ final class MyPageViewController: BaseViewController, View {
         addSubViews()
         layout()
     }
-    
+   
     private func configNavigationBarItem() {
         customBackButton.isHidden = false
         leftNaviItemView.addSubview(navigationTitleLabel)
@@ -116,7 +116,7 @@ final class MyPageViewController: BaseViewController, View {
                   .distinctUntilChanged()
                   .subscribe(onNext: { success in
                       if success {
-                          (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(), animated: true)
+                          (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(alertType: .logout), animated: true)
                       } else {
                           print("Logout failed")
                       }
@@ -150,20 +150,9 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
             cell.selectionStyle = .none
             cell.configure(name: info?.nickname ?? "임당님")
             cell.onLogoutButtonTapped = {
-
-                let vc = CommonAlertViewController()
-                vc.configure(script: "로그아웃 시 서비스 사용이 제한돼요. 그래도 로그아웃 할까요?", confirmString: "로그아웃")
-                vc.hidesBottomBarWhenPushed = false
-                vc.modalPresentationStyle = .overFullScreen
-                self.present(vc, animated: false)
-                
-                vc.confirmAction = {
+                self.showAlert(text: "로그아웃 시 서비스 사용이\n제한돼요. 그래도 로그아웃 할까요?", type: .cancellable) {
                     self.reactor?.action.onNext(.logout)
-                    vc.dismiss(animated: true)
-                }
-                vc.cancelAction = {
-                    print("ㅊㅅ")
-                }
+                } etcAction: { }
             }
             
             return cell

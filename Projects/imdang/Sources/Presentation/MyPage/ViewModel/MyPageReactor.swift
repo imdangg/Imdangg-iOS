@@ -12,6 +12,7 @@ import RxSwift
 final class MyPageReactor: Reactor {
     
     private let myPageService = MyPageService.shared
+    private let aple = AppleLoginService.shared
     
     struct State {
         var myPageInfo: MyPageResponse?
@@ -38,15 +39,19 @@ final class MyPageReactor: Reactor {
         switch action {
         case .loadInfo:
             return myPageService.fetchMyPageInfo()
-                .map { Mutation.setInfo($0)}
+                .map {
+                    Mutation.setInfo($0)
+                }
             
         case .logout:
             return myPageService.logout()
-                .map { _ in Mutation.setLogoutSuccess(true) }
-                .catch { error in
-                    print("Logout failed with error: \(error)")
-                    return Observable.just(Mutation.setLogoutSuccess(false))
-                }
+                   .map { response in
+                       return Mutation.setLogoutSuccess(response)
+                   }
+                   .catch { error in
+                       print("Logout failed with error: \(error)")
+                       return Observable.just(Mutation.setLogoutSuccess(false))
+                   }
         }
     }
     
