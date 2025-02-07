@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Then
 import RxSwift
+import RxRelay
 
 final class InsightDetailViewController: BaseViewController {
 
@@ -19,10 +20,7 @@ final class InsightDetailViewController: BaseViewController {
     private var disposeBag = DisposeBag()
     private var myInsights: [Insight]?
     private let insightDetailViewModel = InsightDetailViewModel()
-    
-    private let categoryTapView = InsightDetailCategoryTapView().then {
-        $0.isHidden = true
-    }
+    private let selectedIndex = BehaviorRelay<Int?>(value: nil)
     
     private let reportButton = UIButton().then {
         $0.setImage(ImdangImages.Image(resource: .report), for: .normal)
@@ -38,6 +36,11 @@ final class InsightDetailViewController: BaseViewController {
     private let waitButton = CommonButton(title: "대기중", initialButtonType: .disabled)
     private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }.then { $0.applyTopBlur() }
+    private let headerView = InsightDetailCategoryTapView()
+    private let categoryTapView = InsightDetailCategoryTapView().then {
+        $0.isHidden = true
+    }
+    
     
     init(insight: InsightDetail, mainImage: UIImage? = nil) {
         exchangeState = insight.exchangeRequestStatus
@@ -297,8 +300,51 @@ final class InsightDetailViewController: BaseViewController {
             .subscribe(with: self, onNext: { owner, _ in
             })
             .disposed(by: disposeBag)
+        
+        headerView.selectedIndex
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .subscribe(with: self, onNext: { owner, index in
+                owner.selectedIndex.accept(index)
+            })
+            .disposed(by: disposeBag)
+        
+        categoryTapView.selectedIndex
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .subscribe(with: self, onNext: { owner, index in
+                owner.selectedIndex.accept(index)
+            })
+            .disposed(by: disposeBag)
+        
+        selectedIndex
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .background))
+            .observe(on: MainScheduler.asyncInstance)
+            .subscribe(with: self, onNext: { owner, index in
+                owner.headerView.selectedIndex.accept(index)
+                owner.categoryTapView.selectedIndex.accept(index)
+                owner.tableView.scrollToRow(at: IndexPath(row: 0, section: index + 2), at: .top, animated: true)
+            })
+            .disposed(by: disposeBag)
     }
     
+    func scrollToSection(index: Int) {
+        let indexPath = IndexPath(row: 0, section: index + 2)
+        
+        guard let cell = tableView.cellForRow(at: indexPath) else { return }
+        
+        let cellTopY = cell.frame.origin.y
+        
+        let targetOffsetY = cellTopY - 70
+        
+        var offset = tableView.contentOffset
+        offset.y = targetOffsetY
+        
+        tableView.setContentOffset(offset, animated: true)
+    }
+
     private func loadMyInsights() {
         insightDetailViewModel.loadMyInsights()
             .subscribe(with: self, onNext: { owner, result in
@@ -377,20 +423,17 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
         switch section {
         case 2:
             return 44
-        case 3,4,5,6:
-            return 32
         default:
             return 0
         }
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = InsightDetailCategoryTapView()
         switch section {
         case 2:
             return headerView
         default:
-            return UIView().then { $0.backgroundColor = .white }
+            return nil
         }
     }
     
@@ -434,4 +477,17 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             categoryTapView.isHidden = true
         }
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        switch indexPath.section {
+            case 2,3,4,5,6:
+            if indexPath.row == 0 {
+                categoryTapView.setCurrentIndex.accept(indexPath.section - 2)
+                headerView.setCurrentIndex.accept(indexPath.section - 2)
+            }
+        default:
+            return
+        }
+    }
+
 }

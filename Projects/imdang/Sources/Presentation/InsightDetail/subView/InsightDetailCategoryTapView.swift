@@ -7,10 +7,14 @@
 import UIKit
 import Then
 import SnapKit
+import RxSwift
+import RxRelay
 
 final class InsightDetailCategoryTapView: UIView {
+    let selectedIndex = BehaviorRelay<Int?>(value: nil)
+    let setCurrentIndex = BehaviorRelay<Int?>(value: nil)
+    private var disposeBag = DisposeBag()
     private let buttonTitles = ["기본 정보", "인프라", "단지 환경", "단지 시설", "호재"]
-    private var selectedIndex = 0
 
     private let buttonStackView = UIStackView().then {
         $0.axis = .horizontal
@@ -33,10 +37,23 @@ final class InsightDetailCategoryTapView: UIView {
         addSubviews()
         makeConstraints()
         setupButtons()
+        setupUI()
         
-        if selectedIndex == 0, let firstButton = getButton(at: 0) {
-            updateUnderlinePosition(for: firstButton)
-        }
+        selectedIndex
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .subscribe(with: self, onNext: { owner, index in
+                owner.setupUI(index: index)
+            })
+            .disposed(by: disposeBag)
+        
+        setCurrentIndex
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .subscribe(with: self, onNext: { owner, index in
+                owner.setupUI(index: index)
+            })
+            .disposed(by: disposeBag)
     }
     
     required init?(coder: NSCoder) {
@@ -67,7 +84,7 @@ final class InsightDetailCategoryTapView: UIView {
         buttonTitles.enumerated().forEach { index, title in
             let button = UIButton()
             button.setTitle(title, for: .normal)
-            button.setTitleColor(index == selectedIndex ? .grayScale900 : .grayScale500, for: .normal)
+            button.setTitleColor(index == selectedIndex.value ? .grayScale900 : .grayScale500, for: .normal)
             button.titleLabel?.font = .pretenSemiBold(14)
             button.titleLabel?.adjustsFontSizeToFitWidth = true
             button.titleLabel?.minimumScaleFactor = 0.8
@@ -84,18 +101,19 @@ final class InsightDetailCategoryTapView: UIView {
     }
 
     @objc private func didTapTabButton(_ sender: UIButton) {
-        selectedIndex = sender.tag
-
-        for (index, button) in buttonStackView.arrangedSubviews.enumerated() {
+        selectedIndex.accept(sender.tag)
+        setupUI(index: sender.tag)
+    }
+    
+    private func setupUI(index: Int = 0) {
+        for (i, button) in buttonStackView.arrangedSubviews.enumerated() {
             let btn = button as! UIButton
-            btn.setTitleColor(index == selectedIndex ? .grayScale900 : .grayScale500, for: .normal)
+            btn.setTitleColor(i == index ? .grayScale900 : .grayScale500, for: .normal)
         }
 
-        if let button = getButton(at: selectedIndex) {
+        if let button = getButton(at: index) {
             self.updateUnderlinePosition(for: button)
         }
-
-        showInsightSubViewController(at: selectedIndex)
     }
     
     private func updateUnderlinePosition(for button: UIButton) {
@@ -110,8 +128,4 @@ final class InsightDetailCategoryTapView: UIView {
         }
     }
     
-    private func showInsightSubViewController(at index: Int) {
-    }
-    func config(info: InsightDetail) {
-    }
 }
