@@ -16,6 +16,9 @@ enum UserdefaultKey {
     @UserDefault(key: "memberId", defaultValue: "")
     static var memberId: String
     
+    @UserDefault(key: "memberNickname", defaultValue: "")
+    static var memberNickname: String
+    
     @UserDefault(key: "deviceToken", defaultValue: "")
     static var deviceToken: String
     

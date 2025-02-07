@@ -22,7 +22,7 @@ struct MyInsightResponse: Codable {
     
     func toEntitiy() -> [Insight] {
         return content.map {
-            Insight(insightId: $0.insightId, titleName: $0.title, mainImageUrl: $0.mainImage, userName: $0.memberNickname, profileImageUrl: "", adress: $0.address.toShortString(), likeCount: $0.recommendedCount ?? 0)
+            Insight(insightId: $0.insightId, titleName: $0.title, mainImageUrl: "", userName: UserdefaultKey.memberNickname, profileImageUrl: "", adress: $0.address.toShortString(), likeCount: $0.recommendedCount ?? 0)
         }
     }
 }
@@ -32,8 +32,6 @@ struct MyInsightContent: Codable {
     let recommendedCount: Int?
     let address: Address
     let title: String
-    let mainImage: String
-    let memberNickname: String
 }
 
 struct Sort: Codable {
