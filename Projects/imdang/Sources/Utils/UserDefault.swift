@@ -23,7 +23,7 @@ enum UserdefaultKey {
     static var accessToken: String
     
     @UserDefault(key: "refreshToken", defaultValue: "")
-    static var appleRefreshToken: String
+    static var refreshToken: String
     
     @UserDefault(key: "dontSeeToday", defaultValue: "")
     static var dontSeeToday: String
