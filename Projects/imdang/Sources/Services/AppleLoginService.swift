@@ -98,7 +98,7 @@ extension AppleLoginService {
                         UserdefaultKey.isJoined = response.joined
                         UserdefaultKey.accessToken = response.accessToken
                         UserdefaultKey.memberId = response.memberId
-                        UserdefaultKey.appleRefreshToken = response.appleRefreshToken ?? ""
+                        UserdefaultKey.refreshToken = response.appleRefreshToken ?? ""
                         observer.onNext(true)
                         observer.onCompleted()
                     },
@@ -120,7 +120,7 @@ extension AppleLoginService {
     func sendAppleWithdrawalToServer() -> Observable<Bool> {
         
         let parameters: [String: Any] = [
-            "token": UserdefaultKey.appleRefreshToken
+            "token": UserdefaultKey.refreshToken
         ]
         
         let endpoint = Endpoint<EmptyResponse>(
