@@ -257,7 +257,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             }
             
             cell.buttonAction = { result in
-                let webViewController = WebViewController(url: "https://daejinlim.github.io/kakaoAddress/")
+                let webViewController = WebViewController()
                 self.present(webViewController, animated: true, completion: nil)
                 
                 webViewController.onAddressSelected = { [self] data in

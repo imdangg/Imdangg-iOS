@@ -154,17 +154,17 @@ final class ExchangeHeaderCell: UITableViewCell {
     private func updateButtonTitle(state: ExchangeState, num: Int) {
         switch state {
         case .waiting:
-            exchangeStateButtonView.waitingButton.setButtonTitle(title: "\(ExchangeState.waiting.rawValue)(\(num))")
+            exchangeStateButtonView.waitingButton.setButtonTitle(title: "\(ExchangeState.waiting.rawValue) (\(num))")
             exchangeStateButtonView.rejectButton.setButtonTitle(title: "\(ExchangeState.reject.rawValue)")
             exchangeStateButtonView.doneButton.setButtonTitle(title: "\(ExchangeState.done.rawValue)")
         case .reject:
             exchangeStateButtonView.waitingButton.setButtonTitle(title: "\(ExchangeState.waiting.rawValue)")
-            exchangeStateButtonView.rejectButton.setButtonTitle(title: "\(ExchangeState.reject.rawValue)(\(num))")
+            exchangeStateButtonView.rejectButton.setButtonTitle(title: "\(ExchangeState.reject.rawValue) (\(num))")
             exchangeStateButtonView.doneButton.setButtonTitle(title: "\(ExchangeState.done.rawValue)")
         case .done:
             exchangeStateButtonView.waitingButton.setButtonTitle(title: "\(ExchangeState.waiting.rawValue)")
             exchangeStateButtonView.rejectButton.setButtonTitle(title: "\(ExchangeState.reject.rawValue)")
-            exchangeStateButtonView.doneButton.setButtonTitle(title: "\(ExchangeState.done.rawValue)(\(num))")
+            exchangeStateButtonView.doneButton.setButtonTitle(title: "\(ExchangeState.done.rawValue) (\(num))")
         }
     }
     

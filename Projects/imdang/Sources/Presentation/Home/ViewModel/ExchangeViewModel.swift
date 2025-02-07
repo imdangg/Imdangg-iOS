@@ -22,7 +22,7 @@ final class ExchangeViewModel {
                 "exchangeRequestStatus": state.rawValue.uppercased(),
                 "pageNumber": 0,
                 "pageSize": 10,
-                "direction": "DESC",
+                "direction": "ASC",
                 "properties": [
                   "string"
                 ]

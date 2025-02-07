@@ -74,6 +74,13 @@ class HomeContainerViewController: BaseViewController {
         loadCoupon()
     }
     
+    private func popReportAlert() {
+//                showReportAlert(title: "신고가 5회 누적되었어요", description: "3일간 인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "3일간", email: true, type: .confirmOnly)
+//                showReportAlert(title: "신고가 15회 누적되었어요", description: "5일간 인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "5일간", email: true, type: .confirmOnly)
+//                showReportAlert(title: "신고가 30회 누적되었어요", description: "7일간 인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "7일간", email: true, type: .confirmOnly)
+//                showReportAlert(title: "신고가 50회 누적되었어요", description: "해당 계정은 서비스를 사용할 수 없어요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "서비스를 사용할 수 없어요.", email: true, type: .confirmOnly)
+    }
+    
     private func presentModal() {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"

@@ -28,7 +28,7 @@ final class InsightDetailTitleTableCell: UITableViewCell {
         $0.textColor = .grayScale700
     }
     
-    private let likeButton = ImageTextButton(type: .imageFirst, horizonPadding: 12, spacing: 2).then {
+    let likeButton = ImageTextButton(type: .imageFirst, horizonPadding: 12, spacing: 2).then {
         $0.customText.textColor = .grayScale700
         $0.customText.font = .pretenMedium(14)
         
@@ -50,13 +50,11 @@ final class InsightDetailTitleTableCell: UITableViewCell {
                 likeButton.customImage.tintColor = .mainOrange500
                 likeButton.customText.textColor = .mainOrange500
                 likeButton.layer.borderColor = UIColor.mainOrange500.cgColor
-                likeButton.customText.text = "추천 \(likeCount + 1)"
             } else {
                 likeButton.backgroundColor = .white
                 likeButton.customImage.tintColor = .grayScale700
                 likeButton.customText.textColor = .grayScale700
                 likeButton.layer.borderColor = UIColor.grayScale100.cgColor
-                likeButton.customText.text = "추천 \(likeCount)"
             }
         }
     }
@@ -71,7 +69,6 @@ final class InsightDetailTitleTableCell: UITableViewCell {
         
         addSubviews()
         makeConstraints()
-        bindAction()
     }
     
     required init?(coder: NSCoder) {
@@ -112,19 +109,17 @@ final class InsightDetailTitleTableCell: UITableViewCell {
         }
     }
     
-    private func bindAction() {
-        likeButton.rx.tap
-            .subscribe(onNext: {
-                self.isLike.toggle()
-            })
-            .disposed(by: disposeBag)
-    }
-    
-    func config(info: InsightDetail, likeCount: Int) {
+    func config(info: InsightDetail) {
         profileImageView.image = ImdangImages.Image(resource: .person)
         userNameLabel.text = info.memberNickname
-        self.likeCount = likeCount
-        likeButton.customText.text = "추천 \(likeCount)"
+        likeButton.customText.text = "추천 \(info.recommendedCount)"
         titleLabel.text = info.title
+        isLike = info.recommended
+        self.likeCount = info.recommendedCount
+    }
+    
+    func likeInsight() {
+        likeButton.customText.text = "추천 \(likeCount + 1)"
+        isLike = true
     }
 }

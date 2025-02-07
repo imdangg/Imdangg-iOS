@@ -115,8 +115,9 @@ extension NotificationViewController:  UICollectionViewDataSource, UICollectionV
                 userName: notification.username
             )
             
-            // Dummy
-            let testState: [DetailExchangeState] = [.pending, .pending, .accepted,.pending, .pending, .accepted,.pending, .pending, .accepted,.pending, .pending, .accepted,.rejected, .pending, .accepted,.pending, .pending, .accepted,.accepted, .rejected, .accepted,.pending, .accepted, .accepted,.accepted, .accepted, .accepted,.rejected, .rejected, .accepted,.accepted, .rejected, .accepted,]
+
+//            let testState: [DetailExchangeState] = [.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,.beforeRequest, .afterRequest, .done,]
+
             
             let textImage = UIImageView().then {
                 guard let url = URL(string: "https://img1.newsis.com/2023/07/12/NISI20230712_0001313626_web.jpg") else { return }
@@ -128,15 +129,14 @@ extension NotificationViewController:  UICollectionViewDataSource, UICollectionV
                 guard let self = self else { return }
                 switch type {
                 case .request_accept:
-                    UIView.animate(withDuration: 5) {
-                        self.tabBarController?.selectedIndex = 2
-                        self.navigationController?.popViewController(animated: true)
-                    }
+                    let tab = TabBarController()
+                    tab.selectedIndex = 2
+                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(tab, animated: true)
                 case .request_reject:
-                    let view2 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight, likeCount: 0)
+                    let view2 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight)
                     self.navigationController?.pushViewController(view2, animated: true)
                 case .response:
-                    let view3 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight, likeCount: 0)
+                    let view3 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight)
                     self.navigationController?.pushViewController(view3, animated: true)
                 }
             }

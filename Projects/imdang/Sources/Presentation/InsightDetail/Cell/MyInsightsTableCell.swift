@@ -18,9 +18,14 @@ enum MyInsightsTableCellType {
 class MyInsightsTableCell: UITableViewCell {
     static let identifier = "MyInsightsTableCell"
     private var disposeBag = DisposeBag()
-    
+    private var type: MyInsightsTableCellType!
     private let lineView = UIImageView().then {
         $0.backgroundColor = .grayScale100
+    }
+    
+    private var stackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.spacing = 4
     }
     
     private let ticketBackgroundView = UIView().then {
@@ -64,7 +69,6 @@ class MyInsightsTableCell: UITableViewCell {
     }
     
     private let titleLabel = UILabel().then {
-        $0.text = "아파트임당 패스권 사용"
         $0.textColor = .grayScale900
         $0.font = .pretenMedium(16)
     }
@@ -75,9 +79,11 @@ class MyInsightsTableCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         addSubview()
+        makeConstraints()
     }
     
     override func prepareForReuse() {
+        titleLabel.text = ""
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -94,70 +100,23 @@ class MyInsightsTableCell: UITableViewCell {
         [ticketIcon, ticketCountLabel].forEach { ticketBackgroundView.addSubview($0) }
         [addressIcon, addressLabel].forEach { addressBackgroundView.addSubview($0) }
         
-        [ticketBackgroundView, addressBackgroundView, likeLabel, titleLabel, selectButton, lineView].forEach {
+        [stackView, titleLabel, selectButton, lineView].forEach {
             contentView.addSubview($0)
         }
     }
     
-    private func makeConstraints(type: MyInsightsTableCellType) {
-        switch type {
-        case .ticket:
-            ticketBackgroundView.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(16)
-                $0.leading.equalToSuperview().offset(20)
-                $0.height.equalTo(25)
-            }
-            
-            ticketIcon.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(4.5)
-                $0.leading.equalToSuperview().offset(8)
-                $0.bottom.equalToSuperview().offset(-4.5)
-                $0.width.height.equalTo(16)
-            }
-            
-            ticketCountLabel.snp.makeConstraints {
-                $0.centerY.equalTo(ticketIcon.snp.centerY)
-                $0.leading.equalTo(ticketIcon.snp.trailing).offset(2)
-                $0.trailing.equalToSuperview().offset(-8)
-            }
-            
-            titleLabel.snp.makeConstraints {
-                $0.top.equalTo(ticketBackgroundView.snp.bottom).offset(12)
-                $0.leading.equalToSuperview().offset(20)
-                $0.bottom.equalToSuperview().offset(-16)
-                $0.height.equalTo(22)
-            }
-        case .insight:
-            addressBackgroundView.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(16)
-                $0.leading.equalToSuperview().offset(20)
-                $0.height.equalTo(25)
-            }
-            
-            addressIcon.snp.makeConstraints {
-                $0.leading.equalToSuperview().offset(8)
-                $0.centerY.equalToSuperview()
-                $0.width.height.equalTo(12)
-            }
-            
-            addressLabel.snp.makeConstraints {
-                $0.leading.equalTo(addressIcon.snp.trailing).offset(2)
-                $0.trailing.equalToSuperview().offset(-8)
-                $0.centerY.equalToSuperview()
-            }
-            
-            likeLabel.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(16)
-                $0.leading.equalTo(addressBackgroundView.snp.trailing).offset(4)
-                $0.height.equalTo(25)
-            }
-            
-            titleLabel.snp.makeConstraints {
-                $0.top.equalTo(addressBackgroundView.snp.bottom).offset(12)
-                $0.leading.equalToSuperview().offset(20)
-                $0.bottom.equalToSuperview().offset(-16)
-                $0.height.equalTo(22)
-            }
+    private func makeConstraints() {
+        stackView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(16)
+            $0.leading.equalToSuperview().offset(20)
+            $0.height.equalTo(25)
+        }
+        
+        titleLabel.snp.makeConstraints {
+            $0.top.equalTo(stackView.snp.bottom).offset(12)
+            $0.leading.equalToSuperview().offset(20)
+            $0.bottom.equalToSuperview().offset(-16)
+            $0.height.equalTo(22)
         }
         
         selectButton.snp.makeConstraints {
@@ -174,11 +133,46 @@ class MyInsightsTableCell: UITableViewCell {
     }
     
     func config(type: MyInsightsTableCellType, ticketCount: Int? = 0, insight: Insight? = nil) {
-        
-        makeConstraints(type: type)
+        switch type {
+        case .ticket:
+            stackView.subviews.forEach { $0.removeFromSuperview() }
+            [ticketBackgroundView].forEach { stackView.addArrangedSubview($0) }
+            ticketIcon.snp.makeConstraints {
+                $0.top.equalToSuperview().offset(4.5)
+                $0.leading.equalToSuperview().offset(8)
+                $0.bottom.equalToSuperview().offset(-4.5)
+                $0.width.height.equalTo(16)
+            }
+
+            ticketCountLabel.snp.makeConstraints {
+                $0.centerY.equalTo(ticketIcon.snp.centerY)
+                $0.leading.equalTo(ticketIcon.snp.trailing).offset(2)
+                $0.trailing.equalToSuperview().offset(-8)
+            }
+        case .insight:
+            stackView.subviews.forEach { $0.removeFromSuperview() }
+            [addressBackgroundView, likeLabel].forEach { stackView.addArrangedSubview($0) }
+            addressIcon.snp.makeConstraints {
+                $0.leading.equalToSuperview().offset(8)
+                $0.centerY.equalToSuperview()
+                $0.width.height.equalTo(12)
+            }
+
+            addressLabel.snp.makeConstraints {
+                $0.leading.equalTo(addressIcon.snp.trailing).offset(2)
+                $0.trailing.equalToSuperview().offset(-8)
+                $0.centerY.equalToSuperview()
+            }
+
+            likeLabel.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.height.equalTo(25)
+            }
+        }
         
         if let count = ticketCount {
             ticketCountLabel.text = "\(count)개 보유"
+            titleLabel.text = "아파트임당 패스권 사용"
         }
         
         if let insight = insight {

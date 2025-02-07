@@ -15,6 +15,7 @@ final class StorageBoxViewController: BaseViewController {
     private var pageIndex = 0
     private var currentaddress: AddressResponse?
     private var toggleState = false
+    private var refreshable: Bool = true
     private let disposeBag = DisposeBag()
     
     private let currentPage = BehaviorRelay<Int>(value: 1)
@@ -49,10 +50,10 @@ final class StorageBoxViewController: BaseViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if let _ = collectionView, !addresses.value.isEmpty {
-            let indexPath = IndexPath(item: 0, section: 0)
-            collectionView.scrollToItem(at: indexPath, at: .left, animated: false)
-        }
+//        if let _ = collectionView, !addresses.value.isEmpty {
+//            let indexPath = IndexPath(item: 0, section: 0)
+//            collectionView.scrollToItem(at: indexPath, at: .left, animated: false)
+//        }
     }
     
     override func viewDidLoad() {
@@ -199,6 +200,15 @@ final class StorageBoxViewController: BaseViewController {
                 }
             }
             .disposed(by: disposeBag)
+        
+        mapButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = MapViewController()
+                vc.config(type: .storage)
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
     
     private func loadInsightData(address: AddressResponse) {
@@ -214,12 +224,15 @@ final class StorageBoxViewController: BaseViewController {
     }
     
     func config(addresses: [AddressResponse]) {
-        guard let first = addresses.first else { return }
-        self.currentaddress = first
+        guard refreshable == true else {
+            refreshable = true
+            return
+        }
+        self.currentaddress = addresses[currentPage.value]
         self.addresses.accept(addresses)
         self.pageIndex = 0
         
-        storageBoxViewModel.loadStoregeInsights(address: first, pageIndex: 0)
+        storageBoxViewModel.loadStoregeInsights(address: addresses[currentPage.value], pageIndex: 0)
             .compactMap { $0 }
             .subscribe(with: self) { owner, data in
                 owner.insights.accept(data)
@@ -275,7 +288,7 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: LocationBoxCollectionCell.self)
             cell.bind(input: currentPage.asObservable(), pageIndex: indexPath.item)
             cell.configure(address: addresses.value[indexPath.row])
-            cell.setTintColor(visiable: indexPath.item == 0)
+            cell.setTintColor(visiable: indexPath.item == currentPage.value)
             return cell
         case 1:
             if insights.value.isEmpty {
@@ -298,7 +311,7 @@ extension StorageBoxViewController: UICollectionViewDataSource, UICollectionView
             storageBoxViewModel.loadInsightDetail(id: insights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", insight: data, likeCount: insights.value[indexPath.row].likeCount)
+                        let vc = InsightDetailViewController(url: "", insight: data)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }
@@ -348,8 +361,16 @@ extension StorageBoxViewController: ReusableViewDelegate {
     
     func didTapFullViewButton() {
         let vc = AreaListViewController()
+        vc.config(addresses: addresses.value)
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
+        
+        vc.setIndex = { [self] in
+            if let index = $0 {
+                collectionView.scrollToItem(at: IndexPath(item: index, section: 0), at: .left, animated: false)
+                refreshable = false
+            }
+        }
     }
     
     func didTapAreaSeletButton() {
