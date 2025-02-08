@@ -36,6 +36,7 @@ final class HomeViewModel {
         
         return networkManager.requestOptional(with: endpoint)
             .map { _ in
+                print("쿠폰 발급 성공")
                 return true
             }
             .catch { error in
