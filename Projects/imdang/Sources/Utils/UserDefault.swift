@@ -7,6 +7,12 @@
 
 import Foundation
 
+enum SignInType: String {
+    case apple = "apple"
+    case kakao = "kakao"
+    case google = "google"
+}
+
 enum UserdefaultKey {
     // 저장: UserdefaultKey.test = "~~"
     // 읽기: let test = UserdefaultKey.test
@@ -46,6 +52,8 @@ enum UserdefaultKey {
     @UserDefault(key: "couponCount", defaultValue: nil)
     static var couponCount: Int?
     
+    @UserDefault(key: "signInType", defaultValue: "")
+    static var signInType: String
 }
 
 

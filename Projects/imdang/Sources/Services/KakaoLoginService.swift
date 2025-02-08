@@ -67,6 +67,7 @@ class KakaoLoginService {
                         UserdefaultKey.refreshToken = entity.refreshToken
                         UserdefaultKey.expiresIn = Date().timeIntervalSince1970
                         UserdefaultKey.memberId = entity.memberId
+                        UserdefaultKey.signInType = SignInType.kakao.rawValue
                         observer.onNext(true)
                         observer.onCompleted()
                     },
@@ -92,13 +93,50 @@ class KakaoLoginService {
             .disposed(by: disposeBag)
     }
     
-    func kakaoUnlink() {
-        UserApi.shared.rx.unlink()
-            .subscribe(onCompleted:{
-                print("unlink() success.")
-            }, onError: {error in
-                print(error)
-            })
-            .disposed(by: disposeBag)
+    func kakaoUnlink() -> Observable<Bool> {
+        return Observable.create { observer in
+            UserApi.shared.rx.unlink()
+                .subscribe(
+                    onCompleted: {
+                        print("kakaoSDK unlink success.")
+                        observer.onNext(true)
+                        observer.onCompleted()
+                    },
+                    onError: { error in
+                        print("kakaoSDK unlink failed: \(error)")
+                        observer.onNext(false)
+                        observer.onCompleted()
+                    }
+                )
+                .disposed(by: self.disposeBag)
+            
+            return Disposables.create()
+        }
+    }
+
+    func withdrawalToServer() -> Observable<Bool> {
+        let parameters: [String: Any] = [
+            "token": UserdefaultKey.refreshToken
+        ]
+        
+        let endpoint = Endpoint<BasicResponse>(
+            baseURL: .imdangAPI,
+            path: "/members/withdrawal/kakao",
+            method: .post,
+            headers: [
+                .contentType("application/json"),
+                .authorization(bearerToken: UserdefaultKey.accessToken)
+            ],
+            parameters: parameters
+        )
+        
+        return networkManager.requestOptional(with: endpoint)
+            .flatMap { _ in
+                return self.kakaoUnlink()
+            }
+            .catch { error in
+                print("Withdrawal request failed with error: \(error)")
+                return Observable.just(false)
+            }
     }
 }

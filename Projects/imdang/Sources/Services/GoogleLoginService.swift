@@ -52,6 +52,7 @@ class GoogleLoginService {
                                     UserdefaultKey.refreshToken = entity.refreshToken
                                     UserdefaultKey.expiresIn = Date().timeIntervalSince1970
                                     UserdefaultKey.memberId = entity.memberId
+                                    UserdefaultKey.signInType = SignInType.google.rawValue
                                     observer.onNext(true)
                                     observer.onCompleted()
                                 },
@@ -71,6 +72,48 @@ class GoogleLoginService {
             
             return Disposables.create()
         }
+    }
+    
+    func googleUnlink() -> Observable<Bool> {
+        return Observable.create { observer in
+            GIDSignIn.sharedInstance.disconnect { error in
+                if let error = error {
+                    print("Google unlink failed: \(error.localizedDescription)")
+                    observer.onNext(false)
+                } else {
+                    print("Google unlink success.")
+                    observer.onNext(true)
+                }
+                observer.onCompleted()
+            }
+            return Disposables.create()
+        }
+    }
+    
+    func withdrawalToServer() -> Observable<Bool> {
+        let parameters: [String: Any] = [
+            "token": UserdefaultKey.refreshToken
+        ]
+        
+        let endpoint = Endpoint<BasicResponse>(
+            baseURL: .imdangAPI,
+            path: "/members/withdrawal/google",
+            method: .post,
+            headers: [
+                .contentType("application/json"),
+                .authorization(bearerToken: UserdefaultKey.accessToken)
+            ],
+            parameters: parameters
+        )
+        
+        return networkManager.requestOptional(with: endpoint)
+            .flatMap { _ in
+                return self.googleUnlink()
+            }
+            .catch { error in
+                print("Withdrawal request failed with error: \(error)")
+                return Observable.just(false)
+            }
     }
 }
 

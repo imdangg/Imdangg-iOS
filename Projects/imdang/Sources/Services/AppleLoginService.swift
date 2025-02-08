@@ -100,6 +100,7 @@ extension AppleLoginService {
                         UserdefaultKey.memberId = response.memberId
                         UserdefaultKey.expiresIn = Date().timeIntervalSince1970
                         UserdefaultKey.refreshToken = response.appleRefreshToken ?? ""
+                        UserdefaultKey.signInType = SignInType.apple.rawValue
                         observer.onNext(true)
                         observer.onCompleted()
                     },
