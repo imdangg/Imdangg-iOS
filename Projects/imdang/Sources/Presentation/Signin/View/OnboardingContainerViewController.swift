@@ -32,9 +32,15 @@ class OnboardingContainerViewController: UIViewController {
         
         addSubView()
         makeConstraints()
-        configButton()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backbutton)
+        bindActions()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backbutton)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+
     
     private func addSubView() {
         addChild(onboardingPageVC)
@@ -55,13 +61,19 @@ class OnboardingContainerViewController: UIViewController {
         }
     }
     
-    private func configButton() {
-        nextButton.rx.tap.subscribe(onNext: {
-            self.onboardingPageVC.goToNextPage()
-        }).disposed(by: disposeBag)
+    private func bindActions() {
+        onboardingPageVC.crrentPageIndex
+            .subscribe(with: self) { owner, value in
+                owner.navigationItem.leftBarButtonItem?.customView?.isHidden = value == 0 ? false : true
+            }
+            .disposed(by: disposeBag)
         
-        backbutton.rx.tap.subscribe(onNext: {
-            self.navigationController?.popViewController(animated: true)
-        }).disposed(by: disposeBag)
+            nextButton.rx.tap.subscribe(onNext: {
+                self.onboardingPageVC.goToNextPage()
+            }).disposed(by: disposeBag)
+            
+            backbutton.rx.tap.subscribe(onNext: {
+                self.navigationController?.popViewController(animated: true)
+            }).disposed(by: disposeBag)
     }
 }

@@ -64,7 +64,7 @@ final class InsightDetailViewModel {
         
         let endpoint = Endpoint<ExchangeResponse>(
             baseURL: .imdangAPI,
-            path: "/exchanges/reject",
+            path: "/exchanges/accept",
             method: .post,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
             parameters: parameters

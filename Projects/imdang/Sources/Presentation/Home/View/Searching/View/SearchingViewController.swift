@@ -68,6 +68,8 @@ class SearchingViewController: UIViewController {
             .subscribe(with: self, onNext: { owner, data in
                 if data.isEmpty { return }
                 owner.apartmentComplexes = data
+                owner.collectionView.reloadData()
+                
                 owner.fetchMyVisitedInsight(aptName: data[0])
             })
             .disposed(by: disposeBag)
