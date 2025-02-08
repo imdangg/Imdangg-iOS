@@ -38,6 +38,7 @@ class ServerJoinService {
         
         return networkManager.requestOptional(with: endpoint)
             .map { _ in
+                UserdefaultKey.isSiginedIn = true
                 return true
             }
             .catch { error in

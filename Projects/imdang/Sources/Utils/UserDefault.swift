@@ -17,7 +17,14 @@ enum UserdefaultKey {
     // 저장: UserdefaultKey.test = "~~"
     // 읽기: let test = UserdefaultKey.test
     @UserDefault(key: "isJoined", defaultValue: false)
-    static var isJoined: Bool
+    static var isJoined: Bool {
+        didSet {
+            UserdefaultKey.isSiginedIn = UserdefaultKey.isJoined
+        }
+    }
+    
+    @UserDefault(key: "isSiginedIn", defaultValue: false)
+    static var isSiginedIn: Bool
     
     @UserDefault(key: "memberId", defaultValue: "")
     static var memberId: String

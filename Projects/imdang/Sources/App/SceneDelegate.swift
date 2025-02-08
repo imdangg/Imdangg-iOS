@@ -16,13 +16,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-//        let tab = TabBarController()
+        let tabBarController = TabBarController()
         let viewController = SigninViewController()
         viewController.view.backgroundColor = .white
 
         let navigationController = UINavigationController(rootViewController: viewController)
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = navigationController
+        window?.rootViewController = UserdefaultKey.isSiginedIn ? tabBarController : navigationController
         window?.makeKeyAndVisible()
         
     }
