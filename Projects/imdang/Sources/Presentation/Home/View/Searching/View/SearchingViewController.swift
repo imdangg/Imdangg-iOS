@@ -264,6 +264,10 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch indexPath.section {
+        case 0:
+            let vc =  IntroViewController(type: .normal)
+            vc.hidesBottomBarWhenPushed = false
+            self.navigationController?.pushViewController(vc, animated: true)
         case 1:
             if !myInsights.value.isEmpty {
                 searchingViewModel.loadInsightDetail(id: myInsights.value[indexPath.row].insightId)

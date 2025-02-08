@@ -39,6 +39,8 @@ enum UserdefaultKey {
     
     @UserDefault(key: "couponCount", defaultValue: nil)
     static var couponCount: Int?
+    
+    
 }
 
 

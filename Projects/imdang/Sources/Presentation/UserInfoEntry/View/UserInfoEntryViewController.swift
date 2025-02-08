@@ -33,12 +33,12 @@ final class UserInfoEntryViewController: BaseViewController, View {
     
     //nickname
     private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임", isEssential: false, descriptionText: "최소 2자-최대10자", limitNumber: 10)
-    private var nicknameTextField = CommomTextField(placeholderText: "임당이", textfieldType: .namePhonePad)
+    private var nicknameTextField = CommomTextField(placeholderText: "임당이", textfieldType: .stringInput)
     private var niknameFooterView = TextFieldFooterView()
     
     //birth
     private var birthHeaderView = TextFieldHeaderView(title: "생년월일", isEssential: false)
-    private var birthTextField = CommomTextField(placeholderText: "2000.01.01", textfieldType: .decimalPad)
+    private var birthTextField = CommomTextField(placeholderText: "2000.01.01", textfieldType: .dateInput)
     private var birthFooterView = TextFieldFooterView()
     
     //gender
@@ -57,6 +57,8 @@ final class UserInfoEntryViewController: BaseViewController, View {
     init(reactor: UserInfoEntryReactor) {
         super.init(nibName: nil, bundle: nil)
         self.reactor = reactor
+        reactor.action.onNext(.changeNicknameTextFieldState(.normal))
+        reactor.action.onNext(.changeBirthTextFieldState(.normal))
     }
     
     required init?(coder: NSCoder) {
@@ -183,30 +185,6 @@ final class UserInfoEntryViewController: BaseViewController, View {
             .drive(reactor.action)
             .disposed(by: disposeBag)
         
-        
-        nicknameTextField.rx.controlEvent([.editingDidEnd])
-            .asDriver()
-            .map { [weak self] in
-                
-                // 닉네임 미입력 오류 처리
-                guard let text = self?.nicknameTextField.text, !text.isEmpty else {
-                    self?.niknameFooterView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
-                    return .changeNicknameTextFieldState(.error)
-                }
-                
-                // 닉네임 글자 수 오류 처리
-                guard text.count >= 2 && text.count <= 10 else {
-                    self?.niknameFooterView.rx.textFieldErrorMessage.onNext("2자~10자로 입력해주세요.")
-                    return .changeNicknameTextFieldState(.error)
-                }
-                
-                // 닉네임 입력 완료 상태
-                return .changeNicknameTextFieldState(.done)
-            }
-            .drive(reactor.action) // Reactor로 Action 전달
-            .disposed(by: disposeBag)
-        
-        
         nicknameTextField.rx.text
             .orEmpty
             .bind { [weak self] text in
@@ -214,17 +192,23 @@ final class UserInfoEntryViewController: BaseViewController, View {
             }
             .disposed(by: disposeBag)
         
-        nicknameTextField.isClearButtonTapped
-            .asDriver(onErrorJustReturn: false)
-            .filter { $0 }
-            .map { [weak self] _ in
-                self?.nicknameHeaderView.setTextNumber(0)
-                self?.nicknameTextField.isClearButtonTapped.onNext(false)
-                return Reactor.Action.changeNicknameTextFieldState(.normal)
+        nicknameTextField.rx.controlEvent([.editingDidEnd])
+            .asDriver()
+            .map { [weak self] in
+                self?.validateNicknameInput(text: self?.nicknameTextField.text) ?? .changeNicknameTextFieldState(.normal)
             }
             .drive(reactor.action)
             .disposed(by: disposeBag)
         
+        nicknameTextField.isClearButtonTapped
+            .asDriver(onErrorJustReturn: false)
+            .map { [weak self] _ in
+                guard let self = self else { return .changeNicknameTextFieldState(.normal) }
+                self.nicknameHeaderView.setTextNumber(0)
+                return self.validateNicknameInput(text: self.nicknameTextField.text)
+            }
+            .drive(reactor.action)
+            .disposed(by: disposeBag)
         
         // birth
         birthTextField.rx.controlEvent(.primaryActionTriggered)
@@ -233,38 +217,24 @@ final class UserInfoEntryViewController: BaseViewController, View {
         
         birthTextField.rx.controlEvent([.editingDidBegin])
             .asDriver()
-            .map { Reactor.Action.changeBirthTextFieldState(.editing) }
+            .map { .changeBirthTextFieldState(.editing) }
             .drive(reactor.action)
             .disposed(by: disposeBag)
         
         birthTextField.rx.controlEvent([.editingDidEnd])
             .asDriver()
             .map { [weak self] in
-                
-                // 미입력 오류
-                guard let text = self?.birthTextField.text, !text.isEmpty else {
-                    self?.birthFooterView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
-                    return Reactor.Action.changeBirthTextFieldState(.error)
-                }
-                
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy.MM.dd"
-                
-                // 잘못된 날짜 형식 or 다른게 들어갔을때
-                if dateFormatter.date(from: text) == nil {
-                    self?.birthFooterView.rx.textFieldErrorMessage.onNext("잘못된 생년월일을 입력하셨어요.")
-                    return Reactor.Action.changeBirthTextFieldState(.error)
-                }
-                
-                // 과거 또는 오늘 날짜 체크
-                let currentDate = Date()
-                if let inputDate = dateFormatter.date(from: text), inputDate > currentDate {
-                    self?.birthFooterView.rx.textFieldErrorMessage.onNext("과거 또는 오늘 날짜를 입력해주세요.")
-                    return Reactor.Action.changeBirthTextFieldState(.error)
-                }
-                
-                // TODO: 유효한 날짜 추가 필요해보임
-                return Reactor.Action.changeBirthTextFieldState(.done)
+                self?.validateBirthInput(text: self?.birthTextField.text) ?? .changeBirthTextFieldState(.normal)
+            }
+            .drive(reactor.action)
+            .disposed(by: disposeBag)
+
+        birthTextField.isClearButtonTapped
+            .asDriver(onErrorJustReturn: false)
+            .map { [weak self] _ in
+                guard let self = self else { return .changeBirthTextFieldState(.normal) }
+                self.birthHeaderView.setTextNumber(0)
+                return self.validateBirthInput(text: self.birthTextField.text)
             }
             .drive(reactor.action)
             .disposed(by: disposeBag)
@@ -360,5 +330,46 @@ final class UserInfoEntryViewController: BaseViewController, View {
         modalVC.modalPresentationStyle = .overFullScreen
         modalVC.modalTransitionStyle = .crossDissolve
         self.present(modalVC, animated: true, completion: nil)
+    }
+    
+    
+    private func validateNicknameInput(text: String?) -> UserInfoEntryReactor.Action {
+        // 닉네임 미입력 오류 처리
+        guard let text = self.nicknameTextField.text, !text.isEmpty else {
+            self.niknameFooterView.rx.textFieldErrorMessage.onNext("닉네임을 입력해주세요.")
+            return .changeNicknameTextFieldState(.error)
+        }
+        
+        // 닉네임 글자 수 오류 처리
+        guard text.count >= 2 && text.count <= 10 else {
+            self.niknameFooterView.rx.textFieldErrorMessage.onNext("2자~10자로 입력해주세요.")
+            return .changeNicknameTextFieldState(.error)
+        }
+        
+        // 닉네임 입력 완료 상태
+        return .changeNicknameTextFieldState(.done)
+    }
+    
+    private func validateBirthInput(text: String?) -> UserInfoEntryReactor.Action {
+        guard let text = text, !text.isEmpty else {
+            birthFooterView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
+            return .changeBirthTextFieldState(.error)
+        }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy.MM.dd"
+
+        if dateFormatter.date(from: text) == nil {
+            birthFooterView.rx.textFieldErrorMessage.onNext("잘못된 생년월일을 입력하셨어요.")
+            return .changeBirthTextFieldState(.error)
+        }
+
+        let currentDate = Date()
+        if let inputDate = dateFormatter.date(from: text), inputDate > currentDate {
+            birthFooterView.rx.textFieldErrorMessage.onNext("과거 또는 오늘 날짜를 입력해주세요.")
+            return .changeBirthTextFieldState(.error)
+        }
+
+        return .changeBirthTextFieldState(.done)
     }
 }

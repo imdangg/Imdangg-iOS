@@ -12,8 +12,27 @@ import RxCocoa
 import Then
 import ReactorKit
 
+
+enum SigninAlertType {
+    case normal
+    case withdrawal
+    case logout
+    
+    
+    var message: String {
+        switch self {
+        case .withdrawal: return "계정이 정상적으로 탈퇴되었어요."
+        case .logout: return "정상적으로 로그아웃 되었어요."
+        case .normal: return ""
+        }
+    }
+}
+
 final class SigninViewController: UIViewController, View {
+    
     var disposeBag = DisposeBag()
+    
+    private let alertType: SigninAlertType?
     
     let kakaoButton = UIButton().then {
         $0.backgroundColor = UIColor(red: 1.0, green: 0.89, blue: 0.0, alpha: 1.0)
@@ -58,9 +77,9 @@ final class SigninViewController: UIViewController, View {
         $0.image = ImdangImages.Image(resource: .appleLogo)
     }
     
-    init() {
+    init(alertType: SigninAlertType? = .normal) {
+        self.alertType = alertType
         super.init(nibName: nil, bundle: nil)
-        
         self.reactor = SigninReactor()
     }
     
@@ -74,6 +93,15 @@ final class SigninViewController: UIViewController, View {
         
         addSubView()
         makeConstraints()
+        
+        if let alertType = alertType {
+            showAlert(type: alertType)
+        }
+    }
+    
+    private func showAlert(type: SigninAlertType) {
+        if type == .normal { return }
+        showAlert(text: type.message, type: .confirmOnly)
     }
     
     private func addSubView() {
@@ -128,7 +156,8 @@ final class SigninViewController: UIViewController, View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        reactor.state.map { $0.appleLoginResult }
+        reactor.state
+            .map { $0.appleLoginResult }
             .compactMap { $0 }
             .subscribe(onNext: { result in
                 switch result {
@@ -184,6 +213,5 @@ final class SigninViewController: UIViewController, View {
             })
             .disposed(by: disposeBag)
     }
-    
 }
 

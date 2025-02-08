@@ -16,7 +16,7 @@ final class DeleteAccountViewController: BaseViewController {
     
     private let disposeBag = DisposeBag()
     private var onTabCheckButton = false
-
+    let appleService = AppleLoginService.shared
     private let noticeScripts = [
         "1. 탈퇴한 계정의 이용 내역, 쿠폰, 혜택은 복구되지 않습니다.",
         "2. 작성하신 인사이트 및 댓글은 삭제되지 않습니다. 삭제 희망시 탈퇴 전 고객센터로 요청해 주시길 바랍니다.",
@@ -107,24 +107,19 @@ final class DeleteAccountViewController: BaseViewController {
             .disposed(by: disposeBag)
  
         deleteButton.rx.tap
-            .subscribe(onNext: {
-                print("탈퇴 완료")
-                
-                let vc = CommonAlertViewController()
-                vc.configure(script: "정상적으로 로그아웃 되었어요.", confirmString: "로그아웃")
-                vc.hidesBottomBarWhenPushed = false
-                vc.modalPresentationStyle = .overFullScreen
-                self.present(vc, animated: false)
-                
-                vc.confirmAction = {
-                    vc.dismiss(animated: true)
-                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(), animated: true)
-                }
-                vc.cancelAction = {
-                    print("취소핑")
-                }
+            .flatMap { [weak self] in
+                // 다른 로그인 판별 필요
+                self?.appleService.sendAppleWithdrawalToServer() ?? .just(false)
+            }
+            .filter { $0 }
+            .subscribe(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                self.showAlert(text: "정상적으로 탈퇴 되었어요.", type: .confirmOnly)
+                (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?
+                    .changeNavigationRootView(SigninViewController(alertType: .withdrawal), animated: true)
             })
             .disposed(by: disposeBag)
+
     }
     
     private func configNavigationBarItem() {

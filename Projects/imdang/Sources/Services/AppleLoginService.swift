@@ -38,9 +38,11 @@ class AppleLoginService: NSObject, ASAuthorizationControllerDelegate, ASAuthoriz
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+            
             if let authorizationCode = appleIDCredential.authorizationCode,
                let code = String(data: authorizationCode, encoding: .utf8) {
                 print("Authorization Code: \(code)")
+//                UserdefaultKey.refreshToken = appleIDCredential.authorizationCode.
                 
                 // 서버로 authorizationCode 전송
                 sendAppleInfoToServer(authorizationCode: code)
@@ -93,11 +95,11 @@ extension AppleLoginService {
             networkManager.request(with: endpoint)
                 .subscribe(
                     onNext: { response in
+                        UserdefaultKey.isJoined = response.joined
                         UserdefaultKey.accessToken = response.accessToken
                         UserdefaultKey.memberId = response.memberId
-                        UserdefaultKey.refreshToken = response.refreshToken
                         UserdefaultKey.expiresIn = Date().timeIntervalSince1970
-
+                        UserdefaultKey.refreshToken = response.appleRefreshToken ?? ""
                         observer.onNext(true)
                         observer.onCompleted()
                     },
@@ -114,36 +116,32 @@ extension AppleLoginService {
         }
     }
     
-    func sendAppleWithdrawalToServer(refreshToken: String) -> Observable<Bool> {
-        return Observable.create { [self] observer in
-            
-            let parameters: [String: Any] = [
-                "token": refreshToken
-            ]
-            
-            let endpoint = Endpoint<User>(
-                baseURL: .imdangAPI,
-                path: "/members/withdrawal/apple",
-                method: .post,
-                parameters: parameters
-            )
-            
-            networkManager.request(with: endpoint)
-                .subscribe(
-                    onNext: { response in
-                        observer.onNext(true)
-                        observer.onCompleted()
-                    },
-                    onError: { error in
-                        print("Request failed with error: \(error)")
-
-                        observer.onNext(false)
-                        observer.onCompleted()
-                    }
-                )
-                .disposed(by: disposebag)
-            
-            return Disposables.create()
-        }
+    
+    
+    func sendAppleWithdrawalToServer() -> Observable<Bool> {
+        
+        let parameters: [String: Any] = [
+            "token": UserdefaultKey.refreshToken
+        ]
+        
+        let endpoint = Endpoint<EmptyResponse>(
+            baseURL: .imdangAPI,
+            path: "/members/withdrawal/apple",
+            method: .post,
+            encodingType: .body,
+            headers: [
+                .contentType("application/json"),
+                .authorization(bearerToken: UserdefaultKey.accessToken)
+            ],
+            parameters: parameters
+        )
+        
+        return networkManager.requestOptional(with: endpoint)
+            .map { response in true }
+            .catch { error in
+                print("Withdrawal request failed with error: \(error)")
+                return Observable.just(false)
+            }
     }
 }
+
