@@ -18,6 +18,7 @@ class MyInsightsModalViewController: UIViewController {
     private var selectedInsightId: String?
     private var myInsights: [Insight] = []
     private let disposeBag = DisposeBag()
+    private let couponService = CouponService.shared
     private let insightDetailViewModel = InsightDetailViewModel()
     
     private let grabber = UIButton().then {
@@ -51,6 +52,7 @@ class MyInsightsModalViewController: UIViewController {
         
         setupTableView()
         bindAction()
+        loadCoupon()
         
         if let sheetPresentationController = sheetPresentationController {
             sheetPresentationController.detents = [.medium(), .large()]
@@ -128,6 +130,18 @@ class MyInsightsModalViewController: UIViewController {
                 }
             })
             .disposed(by: disposeBag)
+    }
+    
+    private func loadCoupon() {
+        couponService.getCoupons()
+            .subscribe { success in
+                if success {
+                    print("\(UserdefaultKey.couponCount ?? 0)")
+                 }
+                else {
+                    print("쿠폰 받기 실패")
+                }
+            }.disposed(by: disposeBag)
     }
 }
 
