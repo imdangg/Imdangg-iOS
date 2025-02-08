@@ -80,6 +80,7 @@ class WriteInsightEtcViewController: UIViewController, View {
         }
         if categoryName == "호재" {
             nextButtonView.config(needBack: false, title: "작성완료 및 업로드")
+            presentTooltip()
         } else {
             nextButtonView.config(needBack: true)
         }
@@ -139,6 +140,14 @@ class WriteInsightEtcViewController: UIViewController, View {
                 }
             })
             .disposed(by: disposeBag)
+    }
+    
+    private func presentTooltip() {
+        let toolTipView = ToolTipView(type: .down)
+        view.addSubview(toolTipView)
+        toolTipView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
     }
 }
 

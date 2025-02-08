@@ -37,9 +37,14 @@ enum UserdefaultKey {
     @UserDefault(key: "ticketReceived", defaultValue: false)
     static var ticketReceived: Bool
     
+    @UserDefault(key: "homeToolTip", defaultValue: false)
+    static var homeToolTip: Bool
+    
+    @UserDefault(key: "wirteToolTip", defaultValue: false)
+    static var wirteToolTip: Bool
+    
     @UserDefault(key: "couponCount", defaultValue: nil)
     static var couponCount: Int?
-    
     
 }
 
