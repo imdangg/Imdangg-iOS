@@ -18,6 +18,7 @@ enum HomeTapState {
 class HomeContainerViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     
+    private let couponService = CouponService.shared
     private let searchViewController = SearchingViewController()
     private let exchangeViewController = ExchangeViewController(reactor: ExchangeReactor())
     
@@ -69,6 +70,8 @@ class HomeContainerViewController: BaseViewController {
         if !UserdefaultKey.ticketReceived {
             presentModal()
         }
+        
+        loadCoupon()
     }
     
     private func popReportAlert() {
@@ -93,6 +96,18 @@ class HomeContainerViewController: BaseViewController {
         }
     }
     
+    private func loadCoupon() {
+        couponService.getCoupons()
+            .subscribe { success in
+                if success {
+                    print("\(UserdefaultKey.couponCount ?? 0)")
+                 }
+                else {
+                    print("쿠폰 받기 실패")
+                }
+            }.disposed(by: disposeBag)
+    }
+                
     private func presentTooltip() {
         let vc = HomeToolTipViewController(point: myPageButton)
         vc.modalPresentationStyle = .overFullScreen
@@ -184,7 +199,7 @@ class HomeContainerViewController: BaseViewController {
         
         myPageButton.rx.tap
             .subscribe(onNext: { [weak self] state in
-                let vc = MyPageViewController()
+                let vc = MyPageViewController(reactor: MyPageReactor())
                 vc.hidesBottomBarWhenPushed = true
                 self?.navigationController?.pushViewController(vc, animated: true)
         })

@@ -9,10 +9,13 @@ import UIKit
 import SnapKit
 import Then
 import RxSwift
+import ReactorKit
 
-final class MyPageViewController: BaseViewController {
+final class MyPageViewController: BaseViewController, View {
 
-    let disposeBag = DisposeBag()
+    private var info: MyPageResponse?
+    
+    var disposeBag = DisposeBag()
     
     private let tableView = UITableView(frame: .zero, style: .grouped)
     private let deleteAccountButton = CommonButton(title: "계정 탈퇴", initialButtonType: .unselectedBorderStyle).then {
@@ -25,16 +28,32 @@ final class MyPageViewController: BaseViewController {
         $0.text = "MY 페이지"
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.reactor?.action.onNext(.loadInfo)
+    }
+    
+    init(reactor: MyPageReactor) {
+        super.init(nibName: nil, bundle: nil)
+        self.reactor = reactor
+        bind(reactor: reactor)
+    }
+    
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .grayScale25
+        
         configNavigationBarItem()
         setupTableView()
         addSubViews()
         layout()
-        bind()
     }
-    
+   
     private func configNavigationBarItem() {
         customBackButton.isHidden = false
         leftNaviItemView.addSubview(navigationTitleLabel)
@@ -76,7 +95,14 @@ final class MyPageViewController: BaseViewController {
         tableView.register(TermsCell.self, forCellReuseIdentifier: "TermsCell")
     }
     
-    func bind() {
+    func bind(reactor: MyPageReactor) {
+        reactor.state.map { $0.myPageInfo }
+            .subscribe(onNext: { [weak self] info in
+                self?.info = info
+                self?.tableView.reloadData()
+            })
+            .disposed(by: disposeBag)
+        
         deleteAccountButton.rx.tap
             .subscribe(onNext: {
                 let vc =  DeleteAccountViewController()
@@ -84,6 +110,18 @@ final class MyPageViewController: BaseViewController {
                 self.navigationController?.pushViewController(vc, animated: true)
             })
             .disposed(by: disposeBag)
+        
+        reactor.state
+                  .map { $0.isLogout }
+                  .distinctUntilChanged()
+                  .subscribe(onNext: { success in
+                      if success {
+                          (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(alertType: .logout), animated: true)
+                      } else {
+                          print("Logout failed")
+                      }
+                  })
+                  .disposed(by: disposeBag)
     }
 }
 
@@ -110,23 +148,11 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             cell.selectionStyle = .none
-            cell.configure(name: "홍길동")
+            cell.configure(name: info?.nickname ?? "임당님")
             cell.onLogoutButtonTapped = {
-                
-                print("Logout!")
-                let vc = CommonAlertViewController()
-                vc.configure(script: "로그아웃 시 서비스 사용이 제한돼요. 그래도 로그아웃 할까요?", confirmString: "로그아웃")
-                vc.hidesBottomBarWhenPushed = false
-                vc.modalPresentationStyle = .overFullScreen
-                self.present(vc, animated: false)
-                
-                vc.confirmAction = {
-                    vc.dismiss(animated: true)
-                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeNavigationRootView(SigninViewController(), animated: true)
-                }
-                vc.cancelAction = {
-                    print("취소핑")
-                }
+                self.showAlert(text: "로그아웃 시 서비스 사용이\n제한돼요. 그래도 로그아웃 할까요?", type: .cancellable) {
+                    self.reactor?.action.onNext(.logout)
+                } etcAction: { }
             }
             
             return cell
@@ -137,9 +163,9 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
             }
             cell.selectionStyle = .none
             if indexPath.row == 0 {
-                cell.configure(title: "작성한 인사이트", num: "16개")
+                cell.configure(title: "작성한 인사이트", num: "\(info?.insightCount ?? 0)건")
             } else {
-                cell.configure(title: "누적 교환", num: "8건")
+                cell.configure(title: "누적 교환", num: "\(info?.insightCount ?? 0)건")
             }
             return cell
             
@@ -197,7 +223,7 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 2 {
             if indexPath.row == 0 {
-                let vc =  IntroServiceViewController()
+                let vc =  IntroViewController(type: .intro)
                 vc.hidesBottomBarWhenPushed = false
                 self.navigationController?.pushViewController(vc, animated: true)
             }

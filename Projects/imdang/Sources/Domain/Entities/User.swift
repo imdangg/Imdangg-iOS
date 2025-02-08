@@ -12,5 +12,6 @@ struct User: Codable {
     let refreshToken: String
     let expiresIn: Int
     let memberId: String
+    let appleRefreshToken: String?
     let joined: Bool
 }

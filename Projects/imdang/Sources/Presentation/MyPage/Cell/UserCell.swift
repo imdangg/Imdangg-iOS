@@ -64,7 +64,7 @@ final class UserCell: UITableViewCell {
         userNameLabel.snp.makeConstraints {
             $0.centerY.equalTo(profileImageView.snp.centerY)
             $0.leading.equalTo(profileImageView.snp.trailing).offset(15)
-            $0.width.lessThanOrEqualTo(86)
+            $0.width.lessThanOrEqualTo(134)
         }
         
         logoutButton.snp.makeConstraints {

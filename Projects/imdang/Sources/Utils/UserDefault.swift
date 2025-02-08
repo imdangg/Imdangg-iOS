@@ -22,6 +22,9 @@ enum UserdefaultKey {
     @UserDefault(key: "accessToken", defaultValue: "")
     static var accessToken: String
     
+    @UserDefault(key: "refreshToken", defaultValue: "")
+    static var refreshToken: String
+    
     @UserDefault(key: "dontSeeToday", defaultValue: "")
     static var dontSeeToday: String
     
@@ -30,6 +33,8 @@ enum UserdefaultKey {
     
     @UserDefault(key: "couponCount", defaultValue: nil)
     static var couponCount: Int?
+    
+    
 }
 
 
