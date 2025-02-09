@@ -97,7 +97,6 @@ class InsightReactor: Reactor {
             return Observable.just(.backSubview)
             
         case .updateSectionState(let section, let newStateValue):
-            print("리액터 액션 뉴 스테이트 \(section):\(newStateValue)")
             return Observable.just(.updateSectionNewState(section, newStateValue))
         }
      
@@ -153,9 +152,7 @@ class InsightReactor: Reactor {
             newState.setCurrentCategory -= 1
             
         case .updateSectionNewState(let section, let newStateValue):
-           
             newState.checkSectionState[section] = newStateValue
-            print("리액터 뉴 스테이트 \(newState.checkSectionState)")
         }
         
         return newState

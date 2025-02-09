@@ -84,7 +84,6 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
         ]
     
     func bind(reactor: InsightReactor) {
-        print("바인딩 리액터 \(reactor)")
         nextButtonView.nextButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
                 if owner.nextButtonView.isEnable {
@@ -231,8 +230,6 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                         }
 
                         selectedSetRelay.accept(selectedSet)
-                        
-                        print("Section: \(indexPath.section), Selected: \(selectedSet.map { itemArray[$0.row] })")
                         
                         switch indexPath.section {
                         case 4:
