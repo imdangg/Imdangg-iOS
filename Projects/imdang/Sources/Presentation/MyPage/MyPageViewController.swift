@@ -29,14 +29,13 @@ final class MyPageViewController: BaseViewController, View {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+        super.viewWillAppear(animated)
         self.reactor?.action.onNext(.loadInfo)
     }
     
     init(reactor: MyPageReactor) {
         super.init(nibName: nil, bundle: nil)
         self.reactor = reactor
-        bind(reactor: reactor)
     }
     
 
