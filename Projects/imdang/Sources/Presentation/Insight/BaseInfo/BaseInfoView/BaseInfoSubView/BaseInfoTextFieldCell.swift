@@ -44,6 +44,18 @@ class BaseInfoTextFieldCell: UICollectionViewCell {
     }
     
     private func bind() {
+        titleTextField.rx.controlEvent([.editingDidBegin])
+            .subscribe(onNext: { [weak self] _ in
+                self?.titleTextField.setState(.editing)
+            })
+            .disposed(by: disposeBag)
+        
+        titleTextField.rx.controlEvent([.editingDidEnd])
+            .subscribe(onNext: { [weak self] _ in
+                self?.titleTextField.setState(.normal)
+            })
+            .disposed(by: disposeBag)
+        
         titleTextField.isClearButtonTapped
             .subscribe(onNext: { [weak self] bool in
                 guard let self = self else { return }
