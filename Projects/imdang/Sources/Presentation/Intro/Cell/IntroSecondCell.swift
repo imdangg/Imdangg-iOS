@@ -31,7 +31,7 @@ class SecondCell: UICollectionViewCell {
     
     private let stackView = UIStackView().then {
         $0.axis = .vertical
-        $0.spacing = 8
+        $0.spacing = 4
         $0.distribution = .fillEqually
         $0.alignment = .fill
     }
@@ -73,7 +73,7 @@ class SecondCell: UICollectionViewCell {
 
         stackView.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.top.equalTo(titleLabel.snp.bottom).offset(40)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(32)
             $0.bottom.equalToSuperview().inset(40)
         }
     }
@@ -102,7 +102,7 @@ class SecondCell: UICollectionViewCell {
             stackView.addArrangedSubview(imageView)
 
             imageView.snp.makeConstraints {
-                $0.height.equalTo(80)
+                $0.height.equalTo(90)
             }
         }
     }

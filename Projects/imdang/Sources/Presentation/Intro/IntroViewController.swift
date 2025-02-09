@@ -113,7 +113,7 @@ extension IntroViewController: UICollectionViewDataSource, UICollectionViewDeleg
         if indexPath.section == 0 {
             return CGSize(width: width, height: 621)
         } else if indexPath.section == 1 {
-            return CGSize(width: width, height: 436)
+            return CGSize(width: width, height: 450)
         } else if indexPath.section == 2 {
             return CGSize(width: width, height: 465)
         } else if indexPath.section == 3 {
