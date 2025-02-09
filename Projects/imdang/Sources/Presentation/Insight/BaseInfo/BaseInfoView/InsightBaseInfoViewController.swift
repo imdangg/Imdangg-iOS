@@ -265,6 +265,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                         cell.resultImageAccept(image: image)
                         
                         self.imageData = image
+                        cell.setButtonConfigure()
                         self.updateSectionState(index: indexPath.section, newState: self.imageData != nil ? TextFieldState.done : TextFieldState.normal)
                     }
                     imageModal.onCameraSelected = { image in
@@ -272,6 +273,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                         
                         self.imageData = image
                         self.updateSectionState(index: indexPath.section, newState: self.imageData != nil ? TextFieldState.done : TextFieldState.normal)
+                        cell.setButtonConfigure()
                     }
                 })
                 .disposed(by: disposeBag)

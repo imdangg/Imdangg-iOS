@@ -27,7 +27,7 @@ class BaseInfoImageCell: UICollectionViewCell {
         $0.layer.borderColor = UIColor.grayScale100.cgColor
     }
     
-    private let addButton = ImageTextButton(type: .imageFirst, horizonPadding: 12, spacing: 3).then {
+    private let addButton = ImageTextButton(type: .imageFirst, horizonPadding: 12, spacing: 1).then {
         $0.customText.text = "이미지 추가"
         $0.customText.textColor = .grayScale700
         $0.customText.font = .pretenBold(12)
@@ -79,5 +79,14 @@ class BaseInfoImageCell: UICollectionViewCell {
         addButton.rx.tap
             .bind(to: buttonTapState)
             .disposed(by: disposeBag)
+    }
+    
+    func setButtonConfigure() {
+        addButton.imageSize = 0
+        addButton.customText.text = "이미지 수정"
+        addButton.customText.textColor = .grayScale700
+        addButton.customText.font = .pretenBold(12)
+        addButton.customImage.image = nil
+        addButton.spacing = 0
     }
 }
