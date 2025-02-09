@@ -70,5 +70,51 @@ class ServerJoinService {
                 return Observable.just(false)
             }
     }
+    
+    func checkTokenExpired() {
+        guard let savedTime = UserdefaultKey.tokenTimeInterval else { return }
+        let expirationTime: TimeInterval = 18000
+        let currentTime = Date().timeIntervalSince1970
+
+        if (currentTime - savedTime) >= expirationTime {
+            tokenReissue()
+                .subscribe { result in
+                    print(result ? "토근 갱신 완료" : "토근 갱신 실패")
+                }
+                .disposed(by: disposeBag)
+        } else {
+            print("토큰 만료 \((savedTime + expirationTime) - currentTime)초전")
+        }
+    }
+    
+    private func tokenReissue() -> Observable<Bool> {
+        let parameters: [String: Any] = [
+            "memberId": UserdefaultKey.memberId,
+            "refreshToken": UserdefaultKey.refreshToken
+        ]
+        print("parameters : \(parameters)")
+        
+        let endpoint = Endpoint<TokenResponse>(
+            baseURL: .imdangAPI,
+            path: "/auth/reissue",
+            method: .post,
+            headers: [.contentType("application/json")],
+            parameters: parameters
+        )
+        
+        return networkManager.requestOptional(with: endpoint)
+            .map { result in
+                if let result = result {
+                    UserdefaultKey.accessToken = result.accessToken
+                    UserdefaultKey.refreshToken = result.refreshToken
+                    UserdefaultKey.tokenTimeInterval = Date().timeIntervalSince1970
+                }
+                return true
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(false)
+            }
+    }
 }
 

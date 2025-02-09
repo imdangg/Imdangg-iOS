@@ -19,7 +19,7 @@ final class SearchingViewModel {
     func loadMyvisited() -> Observable<[String]?> {
         let endpoint = Endpoint<[ApartmentComplexResponse]>(
             baseURL: .imdangAPI,
-            path: "/apartment-complexes/my-visited",
+            path: "/insights/created-by-me/apartment-complexes",
             method: .get,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
         )
@@ -77,7 +77,7 @@ final class SearchingViewModel {
         case .today:
             let endpoint = Endpoint<InsightResponse>(
                 baseURL: .imdangAPI,
-                path: "/insights",
+                path: "/insights/by-date",
                 method: .get,
                 headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
                 parameters: parameters
@@ -124,6 +124,27 @@ final class SearchingViewModel {
             } else {
                 return Observable.just(nil)
             }
+        case .topTen:
+            let parameters: [String: Any] = [
+                "pageNumber": 0,
+                "pageSize": 10
+            ]
+            let endpoint = Endpoint<InsightResponse>(
+                baseURL: .imdangAPI,
+                path: "/insights",
+                method: .get,
+                headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+                parameters: parameters
+            )
+            
+            return networkManager.request(with: endpoint)
+                .map { data in
+                    return data.toEntitiy()
+                }
+                .catch { error in
+                    print("Error: \(error.localizedDescription)")
+                    return Observable.just(nil)
+                }
         }
     }
     

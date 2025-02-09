@@ -19,7 +19,7 @@ class CouponService {
     func issueCoupons(id: String) -> Observable<Bool> {
         let parameters: [String: Any] = [
             "memberId": UserdefaultKey.memberId,
-            "couponId": id,
+            "name": id,
         ]
         
         let endpoint = Endpoint<BasicResponse>(
@@ -54,7 +54,7 @@ class CouponService {
     func getCoupons() -> Observable<Bool> {
         let endpoint = Endpoint<CouponsResponse>(
             baseURL: .imdangAPI,
-            path: "/coupons",
+            path: "/my-coupons/detail",
             method: .get,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
         )

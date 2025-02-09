@@ -50,7 +50,7 @@ class GoogleLoginService {
                                     UserdefaultKey.isJoined = entity.joined
                                     UserdefaultKey.accessToken = entity.accessToken
                                     UserdefaultKey.refreshToken = entity.refreshToken
-                                    UserdefaultKey.expiresIn = Date().timeIntervalSince1970
+                                    UserdefaultKey.tokenTimeInterval = Date().timeIntervalSince1970
                                     UserdefaultKey.memberId = entity.memberId
                                     UserdefaultKey.signInType = SignInType.google.rawValue
                                     observer.onNext(true)
@@ -74,46 +74,48 @@ class GoogleLoginService {
         }
     }
     
-    func googleUnlink() -> Observable<Bool> {
+    func withdrawalToServer() -> Observable<Bool> {
         return Observable.create { observer in
-            GIDSignIn.sharedInstance.disconnect { error in
+            GIDSignIn.sharedInstance.currentUser?.refreshTokensIfNeeded { [self] user, error in
                 if let error = error {
-                    print("Google unlink failed: \(error.localizedDescription)")
+                    print("Token refresh error: \(error.localizedDescription)")
                     observer.onNext(false)
-                } else {
-                    print("Google unlink success.")
-                    observer.onNext(true)
+                    observer.onCompleted()
                 }
-                observer.onCompleted()
+
+                if let newAccessToken = user?.accessToken.tokenString {
+                    let parameters: [String: Any] = [
+                        "token": newAccessToken
+                    ]
+                    
+                    let endpoint = Endpoint<BasicResponse>(
+                        baseURL: .imdangAPI,
+                        path: "/members/withdrawal/google",
+                        method: .post,
+                        headers: [
+                            .contentType("application/json"),
+                            .authorization(bearerToken: UserdefaultKey.accessToken)
+                        ],
+                        parameters: parameters
+                    )
+                    
+                    networkManager.requestOptional(with: endpoint)
+                        .subscribe(onNext: { _ in
+                            UserdefaultKey.resetUserDefaults()
+                            observer.onNext(true)
+                            observer.onCompleted()
+                        },
+                        onError: { error in
+                            print("Google Withdrawal request failed with error: \(error)")
+                            observer.onNext(false)
+                            observer.onCompleted()
+                        }
+                    )
+                    .disposed(by: disposeBag)
+                }
             }
             return Disposables.create()
         }
-    }
-    
-    func withdrawalToServer() -> Observable<Bool> {
-        let parameters: [String: Any] = [
-            "token": UserdefaultKey.refreshToken
-        ]
-        
-        let endpoint = Endpoint<BasicResponse>(
-            baseURL: .imdangAPI,
-            path: "/members/withdrawal/google",
-            method: .post,
-            headers: [
-                .contentType("application/json"),
-                .authorization(bearerToken: UserdefaultKey.accessToken)
-            ],
-            parameters: parameters
-        )
-        
-        return networkManager.requestOptional(with: endpoint)
-            .flatMap { _ in
-                return self.googleUnlink()
-            }
-            .catch { error in
-                print("Withdrawal request failed with error: \(error)")
-                return Observable.just(false)
-            }
     }
 }
 

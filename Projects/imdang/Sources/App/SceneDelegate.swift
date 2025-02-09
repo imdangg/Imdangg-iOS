@@ -7,6 +7,7 @@ import GoogleSignIn
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
+    private let serverService = ServerJoinService.shared
     static let kakaoCodeRelay = PublishRelay<String>()
     static let googleCodeRelay = PublishRelay<String>()
     
@@ -44,6 +45,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         } else if let error = url.queryParameters?["error"] {
             print("Error: \(error)")
         }
+    }
+    
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        serverService.checkTokenExpired()
     }
 
     // 사용법 :

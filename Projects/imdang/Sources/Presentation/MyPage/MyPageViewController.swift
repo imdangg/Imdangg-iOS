@@ -165,7 +165,7 @@ extension MyPageViewController: UITableViewDataSource, UITableViewDelegate {
             if indexPath.row == 0 {
                 cell.configure(title: "작성한 인사이트", num: "\(info?.insightCount ?? 0)건")
             } else {
-                cell.configure(title: "누적 교환", num: "\(info?.insightCount ?? 0)건")
+                cell.configure(title: "누적 교환", num: "\(info?.requestCount ?? 0)건")
             }
             return cell
             

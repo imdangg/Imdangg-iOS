@@ -18,45 +18,7 @@ struct TokenResponse: Codable {
 
 final class HomeViewModel {
     private var disposeBag = DisposeBag()
-    private let networkManager = NetworkManager()
-    
-    func isTokenExpired() -> Bool {
-        guard let savedTime = UserdefaultKey.expiresIn else { return false }
-        let expirationTime: TimeInterval = 18000
-        let currentTime = Date().timeIntervalSince1970
-
-        return (currentTime - savedTime) >= expirationTime
-    }
-    
-    func tokenReissue() -> Observable<Bool> {
-        let parameters: [String: Any] = [
-            "memberId": UserdefaultKey.memberId,
-            "refreshToken": UserdefaultKey.refreshToken
-        ]
-        print("parameters : \(parameters)")
-        
-        let endpoint = Endpoint<TokenResponse>(
-            baseURL: .imdangAPI,
-            path: "/auth/reissue",
-            method: .post,
-            headers: [.contentType("application/json")],
-            parameters: parameters
-        )
-        
-        return networkManager.requestOptional(with: endpoint)
-            .map { result in
-                if let result = result {
-                    UserdefaultKey.accessToken = result.accessToken
-                    UserdefaultKey.refreshToken = result.refreshToken
-                    UserdefaultKey.expiresIn = result.expiresIn
-                }
-                return true
-            }
-            .catch { error in
-                print("Error: \(error.localizedDescription)")
-                return Observable.just(false)
-            }
-    }
+    private let networkManager = NetworkManager(session: .default)
     
     func loadMyNickname() {
         let endpoint = Endpoint<UserDetail>(

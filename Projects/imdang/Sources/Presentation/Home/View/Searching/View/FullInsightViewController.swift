@@ -13,7 +13,7 @@ import RxRelay
 enum FullInsightType: String {
     case my = "내가 다녀온 단지의 다른 인사이트"
     case today = "오늘 새롭게 올라온 인사이트"
-    case search
+    case search, topTen
 }
 
 class FullInsightViewController: BaseViewController {

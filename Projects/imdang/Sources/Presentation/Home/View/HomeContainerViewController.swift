@@ -18,6 +18,7 @@ enum HomeTapState {
 class HomeContainerViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private let homeViewModel = HomeViewModel()
+    private let serverService = ServerJoinService.shared
     
     private let couponService = CouponService.shared
     private let searchViewController = SearchingViewController()
@@ -56,11 +57,6 @@ class HomeContainerViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         homeViewModel.loadMyNickname()
-        homeViewModel.tokenReissue()
-            .subscribe(onNext: { [weak self] state in
-                print(state)
-        })
-        .disposed(by: disposeBag)
         
         addSubviews()
         configNavigationBarItem()
@@ -75,6 +71,7 @@ class HomeContainerViewController: BaseViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        serverService.checkTokenExpired()
         presentModal()
         loadCoupon()
     }

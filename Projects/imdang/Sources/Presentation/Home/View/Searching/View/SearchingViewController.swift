@@ -80,7 +80,15 @@ class SearchingViewController: UIViewController {
                 
                 owner.todayInsights.accept(data)
                 
-                owner.topInsights.accept(Array(data.sorted { $0.likeCount > $1.likeCount }.prefix(10)))
+                owner.collectionView.reloadData()
+            })
+            .disposed(by: disposeBag)
+        
+        searchingViewModel.loadInsights(page: 0, type: .topTen)
+            .compactMap { $0 }
+            .subscribe(with: self, onNext: { owner, data in
+                
+                owner.topInsights.accept(data)
                 
                 owner.collectionView.reloadData()
             })

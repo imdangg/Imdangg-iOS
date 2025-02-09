@@ -12,6 +12,7 @@ import RxSwift
 
 class StorageBoxContainerViewController: UIViewController {
     private var disposeBag = DisposeBag()
+    private let serverService = ServerJoinService.shared
     private let emptyView = StorageBoxEmptyViewController()
     private let storageBoxViewController = StorageBoxViewController()
     private let storageBoxViewModel = StorageBoxViewModel()
@@ -33,6 +34,7 @@ class StorageBoxContainerViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        serverService.checkTokenExpired()
         setView()
     }
     

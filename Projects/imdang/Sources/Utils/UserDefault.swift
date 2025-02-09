@@ -41,8 +41,8 @@ enum UserdefaultKey {
     @UserDefault(key: "refreshToken", defaultValue: "")
     static var refreshToken: String
     
-    @UserDefault(key: "expiresIn", defaultValue: nil)
-    static var expiresIn: Double?
+    @UserDefault(key: "tokenTimeInterval", defaultValue: nil)
+    static var tokenTimeInterval: Double?
     
     @UserDefault(key: "dontSeeToday", defaultValue: "")
     static var dontSeeToday: String
@@ -61,6 +61,26 @@ enum UserdefaultKey {
     
     @UserDefault(key: "signInType", defaultValue: "")
     static var signInType: String
+    
+    //탈퇴시 적용
+    static func resetUserDefaults() {
+        UserdefaultKey.isJoined = false
+        UserdefaultKey.isSiginedIn = false
+        UserdefaultKey.memberId = ""
+        UserdefaultKey.memberNickname = ""
+        UserdefaultKey.deviceToken = ""
+        UserdefaultKey.accessToken = ""
+        UserdefaultKey.refreshToken = ""
+        UserdefaultKey.tokenTimeInterval = nil
+        UserdefaultKey.dontSeeToday = ""
+        UserdefaultKey.ticketReceived = false
+        UserdefaultKey.homeToolTip = false
+        UserdefaultKey.wirteToolTip = false
+        UserdefaultKey.couponCount = nil
+        UserdefaultKey.signInType = ""
+        
+        UserDefaults.standard.synchronize()
+    }
 }
 
 
