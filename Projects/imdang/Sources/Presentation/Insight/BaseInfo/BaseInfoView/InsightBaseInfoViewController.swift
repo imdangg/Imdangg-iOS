@@ -127,6 +127,7 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     
     private func headerCheckIconProcessing(_ collectionView: UICollectionView, indexPath: IndexPath) {
         if let header = collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: indexPath.section)) as? BaseInfoHeaderCell {
+
             header.headerView.setState(checkSectionState.value[indexPath.section])
             header.configure(title: items[indexPath.section].header,
                                  script: items[indexPath.section].script)
@@ -149,19 +150,17 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
         switch item {
         case .text:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BaseInfoTextFieldCell.identifier, for: indexPath) as! BaseInfoTextFieldCell
+            
             cell.titleTextField.rx.text
                 .subscribe(onNext: { [weak self] text in
                     guard let self = self else { return }
                     
                     if indexPath.section == 1 {
-
                         baseInfo.title = text ?? ""
-                        updateSectionState(index: indexPath.section, newState: baseInfo.title != "" ? TextFieldState.done : TextFieldState.normal)
-                        
-                     
+                        updateSectionState(index: indexPath.section, newState: text != "" ? TextFieldState.done : TextFieldState.normal)
                     } else if indexPath.section == 3 {
                         baseInfo.visitAt = text.map { $0.replacingOccurrences(of: ".", with: "-") } ?? ""
-                        
+
                         let dateFormatter = DateFormatter()
                         dateFormatter.dateFormat = "yyyy.MM.dd"
 
@@ -173,14 +172,12 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                       
                     }
                 })
-                .disposed(by: disposeBag)
+                .disposed(by: cell.disposeBag)
             
-            cell.titleTextField.isClearButtonTapped
-                .subscribe(onNext: { [weak self] _ in
-                    guard let self = self else { return }
-                    updateSectionState(index: indexPath.section, newState: TextFieldState.normal)
-                })
-                .disposed(by: disposeBag)
+            
+            cell.didTappedClearButton = {
+                self.updateSectionState(index: indexPath.section, newState: TextFieldState.normal)
+            }
             
             if indexPath.section == 3 {
                 cell.titleTextField.setConfigure(placeholderText: "예시) 2024.01.01", textfieldType: .dateInput)
@@ -346,13 +343,7 @@ extension InsightBaseInfoViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: BaseInfoHeaderCell.identifier, for: indexPath) as! BaseInfoHeaderCell
-            
-//            if let state = reactor?.currentState.checkSectionState[indexPath.section] {
-//                headerView.headerView.setState(state)
-//            } else {
-//                headerView.headerView.setState(.normal)
-//            }
-            print("헤더에서 받은거\(indexPath.section): \(checkSectionState.value[indexPath.section])")
+
             headerView.headerView.setState(checkSectionState.value[indexPath.section])
             headerView.configure(title: items[indexPath.section].header,
                                  script: items[indexPath.section].script)
