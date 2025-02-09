@@ -6,11 +6,14 @@
 //
 
 import UIKit
+import RxSwift
 
 class BaseInfoHeaderCell: UICollectionReusableView {
     static let identifier = "BaseInfoHeaderCell"
     
     let headerView = TextFieldHeaderView(title: "", isEssential: true, descriptionText: "", limitNumber: 10)
+    
+    var disposeBag = DisposeBag()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -22,6 +25,11 @@ class BaseInfoHeaderCell: UICollectionReusableView {
         }
         
         bind()
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
     }
     
     required init?(coder: NSCoder) {

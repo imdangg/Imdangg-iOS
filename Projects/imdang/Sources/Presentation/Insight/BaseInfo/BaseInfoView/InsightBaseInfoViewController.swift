@@ -50,7 +50,7 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
         $0.dataSource = self
         $0.delegate = self
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         layout()
@@ -84,7 +84,7 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
         ]
     
     func bind(reactor: InsightReactor) {
-        
+        print("바인딩 리액터 \(reactor)")
         nextButtonView.nextButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
                 if owner.nextButtonView.isEnable {
@@ -104,12 +104,34 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
 //                owner.nextButtonView.nextButtonEnable(value: true)
             })
             .disposed(by: disposeBag)
+
+        
+     checkSectionState
+         .subscribe(onNext: { [weak self] states in
+             guard let self = self else { return }
+             for section in 0..<states.count {
+                 let indexPath = IndexPath(item: 0, section: section)
+                 self.headerCheckIconProcessing(self.collectionView, indexPath: indexPath)
+             }
+         })
+         .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.checkSectionState }
+            .bind(to: checkSectionState)
+            .disposed(by: disposeBag)
     }
     
     private func updateSectionState(index: Int, newState: TextFieldState) {
-        var currentStates = checkSectionState.value
-        currentStates[index] = newState
-        checkSectionState.accept(currentStates)
+        self.reactor?.action.onNext(.updateSectionState(index, newState))
+    }
+    
+    private func headerCheckIconProcessing(_ collectionView: UICollectionView, indexPath: IndexPath) {
+        if let header = collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: indexPath.section)) as? BaseInfoHeaderCell {
+            header.headerView.setState(checkSectionState.value[indexPath.section])
+            header.configure(title: items[indexPath.section].header,
+                                 script: items[indexPath.section].script)
+        }
     }
 }
 
@@ -131,17 +153,33 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             cell.titleTextField.rx.text
                 .subscribe(onNext: { [weak self] text in
                     guard let self = self else { return }
+                    
                     if indexPath.section == 1 {
-                        
+
                         baseInfo.title = text ?? ""
                         updateSectionState(index: indexPath.section, newState: baseInfo.title != "" ? TextFieldState.done : TextFieldState.normal)
                         
+                     
                     } else if indexPath.section == 3 {
-                        
                         baseInfo.visitAt = text.map { $0.replacingOccurrences(of: ".", with: "-") } ?? ""
-                        updateSectionState(index: indexPath.section, newState: baseInfo.visitAt != "" ? TextFieldState.done : TextFieldState.normal)
                         
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateFormat = "yyyy.MM.dd"
+
+                        if dateFormatter.date(from: cell.titleTextField.text ?? "") == nil {
+                            updateSectionState(index: indexPath.section, newState: TextFieldState.normal)
+                        } else {
+                            updateSectionState(index: indexPath.section, newState: TextFieldState.done)
+                        }
+                      
                     }
+                })
+                .disposed(by: disposeBag)
+            
+            cell.titleTextField.isClearButtonTapped
+                .subscribe(onNext: { [weak self] _ in
+                    guard let self = self else { return }
+                    updateSectionState(index: indexPath.section, newState: TextFieldState.normal)
                 })
                 .disposed(by: disposeBag)
             
@@ -199,6 +237,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                         switch indexPath.section {
                         case 4:
                             baseInfo.visitTimes = selectedSet.map { itemArray[$0.row] }
+                            
                             updateSectionState(index: indexPath.section, newState: baseInfo.visitTimes.isEmpty == false ? TextFieldState.done : TextFieldState.normal)
                             
                         case 5:
@@ -209,6 +248,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                             baseInfo.access = selectedSet.map { itemArray[$0.row] }[safe: 0]?.replacingOccurrences(of: " ", with: "_") ?? ""
                             updateSectionState(index: indexPath.section, newState: baseInfo.access != "" ? TextFieldState.done : TextFieldState.normal)
                             
+                          
                         default:
                             break
                         }
@@ -250,6 +290,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                 baseInfo.address.siDo == ""
                 ? cell.configure(title: "지번 주소")
                 : cell.setData(title: baseInfo.address.toString())
+            
             } else {
                 buildingName == ""
                 ? cell.configure(title: "아파트 단지 명")
@@ -282,7 +323,6 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                             self.showAlert(text: "지금은 서울 지역만 서비스가 가능합니다.", type: .confirmOnly, dimAction: false , comfrimAction: {
                                 self.baseInfo.address = Address(siDo: "", siGunGu: "", eupMyeonDong: "", buildingNumber: "")
                                 self.buildingName = ""
-                                collectionView.reloadSections(IndexSet([2]))
                             })
                         }
                     }
@@ -310,8 +350,12 @@ extension InsightBaseInfoViewController: UICollectionViewDelegateFlowLayout {
         if kind == UICollectionView.elementKindSectionHeader {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: BaseInfoHeaderCell.identifier, for: indexPath) as! BaseInfoHeaderCell
             
-            headerView.adjustTopPadding(indexPath.section == 0 ? 20 : 0)
-//            print("header state : \(checkSectionState[indexPath.section])")
+//            if let state = reactor?.currentState.checkSectionState[indexPath.section] {
+//                headerView.headerView.setState(state)
+//            } else {
+//                headerView.headerView.setState(.normal)
+//            }
+            print("헤더에서 받은거\(indexPath.section): \(checkSectionState.value[indexPath.section])")
             headerView.headerView.setState(checkSectionState.value[indexPath.section])
             headerView.configure(title: items[indexPath.section].header,
                                  script: items[indexPath.section].script)

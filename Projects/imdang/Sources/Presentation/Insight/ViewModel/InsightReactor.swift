@@ -37,6 +37,7 @@ class InsightReactor: Reactor {
         case tapFacilityInfoConfirm(Facility)
         case tapFavorableNewsInfoConfirm(FavorableNews)
         //        case selectItems(IndexPath, [String])
+        case updateSectionState(Int, TextFieldState)
     }
     
     enum Mutation {
@@ -48,6 +49,8 @@ class InsightReactor: Reactor {
         case setUploadSuccess(Bool)
         case backSubview
         //        case updateSelectedItems(IndexPath, [String])
+        
+        case updateSectionNewState(Int, TextFieldState)
     }
     
     let initialState = State()
@@ -92,7 +95,12 @@ class InsightReactor: Reactor {
             
         case .tapBackButton:
             return Observable.just(.backSubview)
+            
+        case .updateSectionState(let section, let newStateValue):
+            print("리액터 액션 뉴 스테이트 \(section):\(newStateValue)")
+            return Observable.just(.updateSectionNewState(section, newStateValue))
         }
+     
     }
     
     func reduce(state: State, mutation: Mutation) -> State {
@@ -143,6 +151,11 @@ class InsightReactor: Reactor {
             
             newState.isChangeScore = detail.score
             newState.setCurrentCategory -= 1
+            
+        case .updateSectionNewState(let section, let newStateValue):
+           
+            newState.checkSectionState[section] = newStateValue
+            print("리액터 뉴 스테이트 \(newState.checkSectionState)")
         }
         
         return newState

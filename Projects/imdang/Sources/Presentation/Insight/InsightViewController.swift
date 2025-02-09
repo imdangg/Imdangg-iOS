@@ -67,7 +67,7 @@ class InsightViewController: BaseViewController, View {
         presentAlert()
         setBackButton()
     }
-    
+
     private func setupSubviews() {
         baseVC.reactor = self.reactor
         infraVC.reactor = self.reactor
