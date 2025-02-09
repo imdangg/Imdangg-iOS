@@ -18,9 +18,9 @@ class BaseInfoImageCell: UICollectionViewCell {
     let buttonTapState = PublishRelay<Void>()
     
     private let imageButton = UIButton(type: .custom).then {
-        $0.contentMode = .scaleAspectFit
+        $0.imageView?.contentMode = .scaleAspectFill
+        $0.imageView?.clipsToBounds = true
         $0.setImage(UIImage(resource: .photo), for: .normal)
-        $0.clipsToBounds = true
         $0.backgroundColor = .grayScale50
         $0.layer.borderWidth = 1
         $0.layer.cornerRadius = 4
