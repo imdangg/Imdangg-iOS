@@ -212,7 +212,7 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
                 if cell.label.text == row.replacingOccurrences(of: "_", with: " ") {
                     cell.isClicked = true
                     setSectionState(isClear: false, index: i)
-                    selectedButtonNames[indexPath.section]?.insert(cell.label.text ?? "")
+                    selectedButtonNames[indexPath.section, default: []].insert(cell.label.text ?? "")
                 }
             }
             headerCheckIconProcessing(isClear: false, collectionView, indexPath: indexPath)
