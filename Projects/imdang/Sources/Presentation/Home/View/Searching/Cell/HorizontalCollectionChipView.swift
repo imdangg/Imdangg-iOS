@@ -13,11 +13,11 @@ import RxSwift
 // [FIXME]
 class HorizontalCollectionChipView: UIView {
     
-    // Mock
-    private var items: [String] = ["신논현 더 센트럴 푸르지오 1", "신논현 더 센트럴 푸르지오 2", "신논현 더 센트럴 푸르지오 3", "신논현 더 센트럴 푸르지오 4", "신논현 더 센트럴 푸르지오 5", "신논현 더 센트럴 푸르지오 6"]
+    let selectedItem = BehaviorRelay<String?>(value: nil)
+    let selectedIndex = BehaviorRelay<Int>(value: 0)
+    private var items: [String] = []
     
-    private let selectedItem = BehaviorRelay<String?>(value: nil)
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -36,8 +36,6 @@ class HorizontalCollectionChipView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
-        bindCollectionView()
-        setDefaultSelection()
     }
     
     required init?(coder: NSCoder) {
@@ -45,7 +43,7 @@ class HorizontalCollectionChipView: UIView {
     }
     
     private func setDefaultSelection() {
-        selectedItem.accept(items.first)
+        selectedItem.accept(items[selectedIndex.value])
     }
     
     private func setupView() {
@@ -55,19 +53,10 @@ class HorizontalCollectionChipView: UIView {
         collectionView.delegate = self
     }
     
-    private func bindCollectionView() {
-        selectedItem
-            .subscribe(onNext: { [weak self] selected in
-                self?.collectionView.reloadSections([0])
-                if let selected = selected {
-                    print("아파트 이름\(selected)")
-                }
-            })
-            .disposed(by: disposeBag)
-    }
-    
-    func updateItems(_ newItems: [String]) {
+    func updateItems(_ newItems: [String], index: Int = 0) {
         items = newItems
+        print("index : \(index)")
+        self.selectedIndex.accept(index)
         collectionView.reloadData()
     }
 }
@@ -96,7 +85,7 @@ extension HorizontalCollectionChipView: UICollectionViewDataSource {
         label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         cell.contentView.addSubview(label)
         
-        if items[indexPath.item] == selectedItem.value {
+        if indexPath.item == selectedIndex.value {
             cell.backgroundColor = .mainOrange500
             label.textColor = .white
             cell.layer.borderColor = UIColor.mainOrange500.cgColor
@@ -157,5 +146,7 @@ extension HorizontalCollectionChipView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedItem = items[indexPath.item]
         self.selectedItem.accept(selectedItem)
+        self.selectedIndex.accept(indexPath.item)
+        self.collectionView.reloadData()
     }
 }

@@ -15,13 +15,11 @@ class AreaModalTableCell: UITableViewCell {
     static let identifier = "AreaModalTableCell"
     
     private let titleLabel = UILabel().then {
-        $0.text = "신논현 더 센트럴 푸르지오"
         $0.font = .pretenMedium(16)
         $0.textColor = .grayScale900
     }
     
     private let countLabel = UILabel().then {
-        $0.text = "12개"
         $0.font = .pretenMedium(14)
         $0.textColor = .mainOrange500
     }
@@ -64,5 +62,11 @@ class AreaModalTableCell: UITableViewCell {
             $0.trailing.equalToSuperview().offset(-16)
             $0.centerY.equalToSuperview()
         }
+    }
+    
+    func config(apt: AptComplexByDistrict?) {
+        guard let apt else { return }
+        titleLabel.text = apt.apartmentComplexName
+        countLabel.text = "\(apt.insightCount)개"
     }
 }

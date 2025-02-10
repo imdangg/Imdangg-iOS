@@ -28,7 +28,7 @@ struct InsightIDResponse: Codable {
 
 final class InsightDetailViewModel {
     private var disposeBag = DisposeBag()
-    private let networkManager = NetworkManager()
+    private let networkManager = NetworkManager(session: .default)
     
     func requestInsight(thisInsightId: String, myInsightId: String) -> Observable<Bool> {
         let parameters: [String: Any] = [
@@ -64,7 +64,7 @@ final class InsightDetailViewModel {
         
         let endpoint = Endpoint<ExchangeResponse>(
             baseURL: .imdangAPI,
-            path: "/exchanges/reject",
+            path: "/exchanges/accept",
             method: .post,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
             parameters: parameters

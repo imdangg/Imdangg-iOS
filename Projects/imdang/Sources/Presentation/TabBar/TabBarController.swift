@@ -31,10 +31,16 @@ class TabBarController: UITabBarController {
             }
         }
     }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print("asdasd")
+    }
     
     private func configureTabBar() {
         let firstViewController = HomeContainerViewController()
         let secondViewController = InsightViewController()
+        let reactor = InsightReactor()
+        secondViewController.reactor = reactor
         let thirdViewController = StorageBoxContainerViewController()
         
         let firstNav = UINavigationController(rootViewController: firstViewController)
@@ -94,6 +100,8 @@ extension TabBarController: UITabBarControllerDelegate {
             return false
         } else if tabBarController.viewControllers?.firstIndex(of: viewController) == 1{
             let vc = InsightViewController()
+            let reactor = InsightReactor()
+            vc.reactor = reactor
             vc.hidesBottomBarWhenPushed = true
             
             if let fromView = selectedViewController as? UINavigationController {

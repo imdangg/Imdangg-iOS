@@ -88,7 +88,6 @@ public final class NetworkManager: Network {
                             do {
                                 let decodedError = try JSONDecoder().decode(BasicResponse.self, from: errorData)
                                 print("❌ 에러 메세지: \(decodedError.message)")
-                                print("❌ 에러 코드: \(response.response?.statusCode ?? -1)")
                                 observer.onError(NSError(domain: decodedError.message, code: response.response?.statusCode ?? -1, userInfo: ["data": decodedError]))
                             } catch {
                                 observer.onError(error)

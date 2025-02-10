@@ -15,7 +15,9 @@ import RxRelay
 
 class SearchingViewController: UIViewController {
     private var disposeBag = DisposeBag()
+    private var apartmentComplexes: [String]?
     private let searchingViewModel = SearchingViewModel()
+    private var selectedIndex: Int = 0
     private let myInsights = BehaviorRelay<[Insight]>(value: [])
     private let todayInsights = BehaviorRelay<[Insight]>(value: [])
     private let topInsights = BehaviorRelay<[Insight]>(value: [])
@@ -43,35 +45,35 @@ class SearchingViewController: UIViewController {
         bindActions()
     }
     
-    func bindActions() {
-        searchBoxView.searchButton.rx.tap
-            .subscribe(with: self) { owner, _ in
-                let vc = AddressListViewController()
-                vc.hidesBottomBarWhenPushed = true
-                owner.navigationController?.pushViewController(vc, animated: true)
-            }
-            .disposed(by: disposeBag)
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
-        searchBoxView.mapButton.rx.tap
-            .subscribe(with: self) { owner, _ in
-                let vc = MapViewController()
-                vc.config(type: .search)
-                vc.hidesBottomBarWhenPushed = true
-                owner.navigationController?.pushViewController(vc, animated: true)
-            }
-            .disposed(by: disposeBag)
+        selectedIndex = 0
+        loadInsightData()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        searchingViewModel.loadInsights(page: 0, type: .my)
+    private func fetchMyVisitedInsight(aptName: String) {
+        searchingViewModel.loadInsightsByApartment(page: 0, aptName: aptName)
             .compactMap { $0 }
             .subscribe(with: self, onNext: { owner, data in
                 
                 owner.myInsights.accept(data)
+                
+                owner.collectionView.reloadSections([1])
+            })
+            .disposed(by: disposeBag)
+    }
     
-                owner.collectionView.reloadData()
+    private func loadInsightData() {
+        searchingViewModel.loadMyvisited()
+            .compactMap { $0 }
+            .subscribe(with: self, onNext: { owner, data in
+                if data.isEmpty { return }
+                owner.apartmentComplexes = data
+                
+                owner.collectionView.reloadSections([1])
+                
+                owner.fetchMyVisitedInsight(aptName: data[0])
             })
             .disposed(by: disposeBag)
         
@@ -81,9 +83,17 @@ class SearchingViewController: UIViewController {
                 
                 owner.todayInsights.accept(data)
                 
-                owner.topInsights.accept(Array(data.sorted { $0.likeCount > $1.likeCount }.prefix(10)))
+                owner.collectionView.reloadSections([2])
+            })
+            .disposed(by: disposeBag)
+        
+        searchingViewModel.loadInsights(page: 0, type: .topTen)
+            .compactMap { $0 }
+            .subscribe(with: self, onNext: { owner, data in
                 
-                owner.collectionView.reloadData()
+                owner.topInsights.accept(data)
+                
+                owner.collectionView.reloadSections([3])
             })
             .disposed(by: disposeBag)
     }
@@ -109,6 +119,28 @@ class SearchingViewController: UIViewController {
             $0.bottom.equalToSuperview().offset(-20)
         }
     }
+    
+    func bindActions() {
+        searchBoxView.searchButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = AddressListViewController()
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        searchBoxView.mapButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let vc = MapViewController()
+                vc.config(type: .search)
+                vc.hidesBottomBarWhenPushed = true
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
+    }
+}
+
+extension SearchingViewController {
     
     private func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, _ in
@@ -226,7 +258,6 @@ class SearchingViewController: UIViewController {
         
         return section
     }
-    
 }
 
 extension SearchingViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -255,7 +286,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 searchingViewModel.loadInsightDetail(id: myInsights.value[indexPath.row].insightId)
                     .subscribe { [self] data in
                         if let data = data {
-                            let vc = InsightDetailViewController(url: "", insight: data)
+                            let vc = InsightDetailViewController(insight: data)
                             vc.hidesBottomBarWhenPushed = true
                             navigationController?.pushViewController(vc, animated: true)
                         }
@@ -266,7 +297,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             searchingViewModel.loadInsightDetail(id: todayInsights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", insight: data)
+                        let vc = InsightDetailViewController(insight: data)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }
@@ -276,7 +307,7 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             searchingViewModel.loadInsightDetail(id: topInsights.value[indexPath.row].insightId)
                 .subscribe { [self] data in
                     if let data = data {
-                        let vc = InsightDetailViewController(url: "", insight: data)
+                        let vc = InsightDetailViewController(insight: data)
                         vc.hidesBottomBarWhenPushed = true
                         navigationController?.pushViewController(vc, animated: true)
                     }
@@ -298,11 +329,25 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 return UICollectionReusableView()
             case 1:
                 let title = "내가 다녀온 단지의 다른 인사이트"
-                headerView.configure(with: title, type: .notTopten, showHorizontalCollection: myInsights.value.isEmpty ? false : true)
+                headerView.configure(with: title, type: .notTopten, showHorizontalCollection: apartmentComplexes == nil ? false : true, aptItems: apartmentComplexes, index: selectedIndex)
                 headerView.buttonAction = {
-                    fullVC.config(type: .my, title: title)
+                    fullVC.config(type: .my, title: title, chipItems: self.apartmentComplexes)
                     self.navigationController?.pushViewController(fullVC, animated: true)
                 }
+                headerView.chipView.selectedIndex
+                    .distinctUntilChanged()
+                    .subscribe(with: self) { owner, selected in
+                        owner.selectedIndex = selected
+                    }
+                    .disposed(by: disposeBag)
+                
+                headerView.chipView.selectedItem
+                    .distinctUntilChanged()
+                    .subscribe(with: self) { owner, selected in
+                        guard let selected = selected else { return }
+                        owner.fetchMyVisitedInsight(aptName: selected)
+                    }
+                    .disposed(by: disposeBag)
             case 2:
                 let title = "오늘 새롭게 올라온 인사이트"
                 headerView.configure(with: title, type: .notTopten, showHorizontalCollection: false)
@@ -348,12 +393,12 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             bannerImageView.snp.makeConstraints { $0.edges.equalToSuperview() }
             return cell
         case 1:
-            if myInsights.value.isEmpty {
-                let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: EmptyMyInsightCollectionCell.self)
-                return cell
-            } else {
+            if !myInsights.value.isEmpty {
                 let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
                 cell.configure(insight: myInsights.value[indexPath.row], layoutType: .horizontal)
+                return cell
+            } else {
+                let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: EmptyMyInsightCollectionCell.self)
                 return cell
             }
         case 2:

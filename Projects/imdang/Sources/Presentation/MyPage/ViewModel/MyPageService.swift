@@ -41,7 +41,10 @@ class MyPageService {
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
         )
         return networkManager.requestOptional(with: endpoint)
-            .map { response in true }
+            .map { response in
+                UserdefaultKey.isSiginedIn = false
+                return true
+            }
             .catch { error in
                 print("Logout request failed with error: \(error)")
                 return Observable.just(false)

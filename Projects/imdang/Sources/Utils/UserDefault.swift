@@ -7,14 +7,30 @@
 
 import Foundation
 
+enum SignInType: String {
+    case apple = "apple"
+    case kakao = "kakao"
+    case google = "google"
+}
+
 enum UserdefaultKey {
     // 저장: UserdefaultKey.test = "~~"
     // 읽기: let test = UserdefaultKey.test
     @UserDefault(key: "isJoined", defaultValue: false)
-    static var isJoined: Bool
+    static var isJoined: Bool {
+        didSet {
+            UserdefaultKey.isSiginedIn = UserdefaultKey.isJoined
+        }
+    }
+    
+    @UserDefault(key: "isSiginedIn", defaultValue: false)
+    static var isSiginedIn: Bool
     
     @UserDefault(key: "memberId", defaultValue: "")
     static var memberId: String
+    
+    @UserDefault(key: "memberNickname", defaultValue: "")
+    static var memberNickname: String
     
     @UserDefault(key: "deviceToken", defaultValue: "")
     static var deviceToken: String
@@ -25,16 +41,46 @@ enum UserdefaultKey {
     @UserDefault(key: "refreshToken", defaultValue: "")
     static var refreshToken: String
     
+    @UserDefault(key: "tokenTimeInterval", defaultValue: nil)
+    static var tokenTimeInterval: Double?
+    
     @UserDefault(key: "dontSeeToday", defaultValue: "")
     static var dontSeeToday: String
     
     @UserDefault(key: "ticketReceived", defaultValue: false)
     static var ticketReceived: Bool
     
+    @UserDefault(key: "homeToolTip", defaultValue: false)
+    static var homeToolTip: Bool
+    
+    @UserDefault(key: "wirteToolTip", defaultValue: false)
+    static var wirteToolTip: Bool
+    
     @UserDefault(key: "couponCount", defaultValue: nil)
     static var couponCount: Int?
     
+    @UserDefault(key: "signInType", defaultValue: "")
+    static var signInType: String
     
+    //탈퇴시 적용
+    static func resetUserDefaults() {
+        UserdefaultKey.isJoined = false
+        UserdefaultKey.isSiginedIn = false
+        UserdefaultKey.memberId = ""
+        UserdefaultKey.memberNickname = ""
+        UserdefaultKey.deviceToken = ""
+        UserdefaultKey.accessToken = ""
+        UserdefaultKey.refreshToken = ""
+        UserdefaultKey.tokenTimeInterval = nil
+        UserdefaultKey.dontSeeToday = ""
+        UserdefaultKey.ticketReceived = false
+        UserdefaultKey.homeToolTip = false
+        UserdefaultKey.wirteToolTip = false
+        UserdefaultKey.couponCount = nil
+        UserdefaultKey.signInType = ""
+        
+        UserDefaults.standard.synchronize()
+    }
 }
 
 

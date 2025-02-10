@@ -73,13 +73,13 @@ final class InsightProgressBar: UIView {
         $0.tag = 1
     }
     private var label3 = UILabel().then {
-        $0.text = "단지환경"
+        $0.text = "단지 환경"
         $0.textColor = .grayScale300
         $0.font = .pretenSemiBold(12)
         $0.tag = 2
     }
     private var label4 = UILabel().then {
-        $0.text = "단지시설"
+        $0.text = "단지 시설"
         $0.textColor = .grayScale300
         $0.font = .pretenSemiBold(12)
         $0.tag = 3

@@ -211,7 +211,7 @@ final class InsightDetailDefaultInfoTableCell: UITableViewCell {
     func config(info: InsightDetail, state: DetailExchangeState, isMyInsight: Bool) {
         address = "\(info.address.toString())"
         addressLabel.text = "\(info.address.toString())\n(\(info.apartmentComplex.name))"
-        dateLabel.text = info.visitAt
+        dateLabel.text = "\(info.visitAt) / \(info.visitTimes.joined(separator: ","))"
         transLabel.text = info.visitMethods.joined(separator: " ")
         accessLabel.text = info.access.replacingOccurrences(of: "_", with: " ")
         summaryLabel.setTextWithLineHeight(text: info.summary, lineHeight: 22.4)

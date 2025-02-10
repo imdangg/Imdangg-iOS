@@ -12,7 +12,7 @@ import RxSwift
 import RxCocoa
 
 class TicketModalViewController: UIViewController {
-    private let homeViewModel = HomeViewModel()
+    private let couponService = CouponService.shared
     private let disposeBag = DisposeBag()
     
     private let dimView = UIView().then {
@@ -174,15 +174,10 @@ class TicketModalViewController: UIViewController {
                 guard let self = self else { return }
                 
                 if let id = Bundle.main.object(forInfoDictionaryKey: "WELCOME_COUPON") as? String {
-                    homeViewModel.issueCoupons(id: id)
+                    couponService.issueCoupons(id: id)
                         .subscribe { success in
                             if success {
                                 UserdefaultKey.ticketReceived = true
-                                if let _ = UserdefaultKey.couponCount {
-                                    UserdefaultKey.couponCount! += 1
-                                } else {
-                                    UserdefaultKey.couponCount = 1
-                                }
                             } else {
                                 print("쿠폰 발급 실패")
                             }

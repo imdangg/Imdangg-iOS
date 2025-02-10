@@ -26,13 +26,13 @@ struct Address: Codable {
     var siGunGu: String
     var eupMyeonDong: String
     var roadName: String? = ""
-    var buildingNumber: String
+    var buildingNumber: String?
     var detail: String? = ""
     var latitude: Double?
     var longitude: Double?
     
     func toString() -> String {
-        return "\(siDo) \(siGunGu) \(eupMyeonDong) \(buildingNumber)\( detail ?? "")"
+        return "\(siDo) \(siGunGu) \(eupMyeonDong) \(buildingNumber ?? "")\( detail ?? "")"
     }
     
     func toShortString() -> String {
@@ -113,7 +113,7 @@ extension InsightDetail {
                 siGunGu: self.address.siGunGu,
                 eupMyeonDong: self.address.eupMyeonDong,
                 roadName: self.address.roadName ?? "",
-                buildingNumber: self.address.buildingNumber,
+                buildingNumber: self.address.buildingNumber ?? "",
                 detail: self.address.detail ?? "",
                 latitude: self.address.latitude ?? 0,
                 longitude: self.address.longitude ?? 0

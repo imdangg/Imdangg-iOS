@@ -17,6 +17,8 @@ enum HomeTapState {
 
 class HomeContainerViewController: BaseViewController {
     private let disposeBag = DisposeBag()
+    private let homeViewModel = HomeViewModel()
+    private let serverService = ServerJoinService.shared
     
     private let couponService = CouponService.shared
     private let searchViewController = SearchingViewController()
@@ -54,23 +56,23 @@ class HomeContainerViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        homeViewModel.loadMyNickname()
         
         addSubviews()
         configNavigationBarItem()
         makeConstraints()
         bindActions()
-//        presentTooltip()
+        presentTooltip()
         
         navigationViewBottomShadow.isHidden = true
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if !UserdefaultKey.ticketReceived {
-            presentModal()
-        }
-        
+        serverService.checkTokenExpired()
+        presentModal()
         loadCoupon()
     }
     
@@ -79,21 +81,6 @@ class HomeContainerViewController: BaseViewController {
 //                showReportAlert(title: "신고가 15회 누적되었어요", description: "5일간 인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "5일간", email: true, type: .confirmOnly)
 //                showReportAlert(title: "신고가 30회 누적되었어요", description: "7일간 인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "7일간", email: true, type: .confirmOnly)
 //                showReportAlert(title: "신고가 50회 누적되었어요", description: "해당 계정은 서비스를 사용할 수 없어요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "서비스를 사용할 수 없어요.", email: true, type: .confirmOnly)
-    }
-    
-    private func presentModal() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        
-        let todayString = formatter.string(from: Date())
-        let savedDate = UserdefaultKey.dontSeeToday
-        
-        if todayString != savedDate {
-            let modalVC = TicketModalViewController()
-            modalVC.modalPresentationStyle = .overFullScreen
-            modalVC.modalTransitionStyle = .crossDissolve
-            self.present(modalVC, animated: true, completion: nil)
-        }
     }
     
     private func loadCoupon() {
@@ -107,12 +94,32 @@ class HomeContainerViewController: BaseViewController {
                 }
             }.disposed(by: disposeBag)
     }
+    
+    private func presentModal() {
+        if !UserdefaultKey.ticketReceived {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            
+            let todayString = formatter.string(from: Date())
+            let savedDate = UserdefaultKey.dontSeeToday
+            
+            if todayString != savedDate {
+                let modalVC = TicketModalViewController()
+                modalVC.modalPresentationStyle = .overFullScreen
+                modalVC.modalTransitionStyle = .crossDissolve
+                self.present(modalVC, animated: true, completion: nil)
+            }
+        }
+    }
                 
     private func presentTooltip() {
-        let vc = HomeToolTipViewController(point: myPageButton)
-        vc.modalPresentationStyle = .overFullScreen
-        vc.modalTransitionStyle = .crossDissolve
-        self.present(vc, animated: true, completion: nil)
+        if !UserdefaultKey.homeToolTip {
+            let toolTipView = ToolTipView(type: .up)
+            view.addSubview(toolTipView)
+            toolTipView.snp.makeConstraints {
+                $0.edges.equalToSuperview()
+            }
+        }
     }
     
     private func addSubviews() {

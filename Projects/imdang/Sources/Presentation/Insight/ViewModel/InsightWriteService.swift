@@ -19,7 +19,7 @@ final class InsightWriteService {
 
     func createInsight(dto: InsightDTO, image: UIImage) -> Observable<Bool> {
         return Observable<Bool>.create { observer in
-            let url = "http://imdang.info/insights/create"
+            let url = dto.insightId == nil ? "http://imdang.info/insights/create" : "http://imdang.info/insights/update"
             
             guard let jsonData = try? JSONEncoder().encode(dto) else {
                 return Disposables.create()
@@ -29,29 +29,42 @@ final class InsightWriteService {
                 "Authorization": "Bearer \(UserdefaultKey.accessToken)"
             ]
             AF.upload(multipartFormData: { multipartFormData in
-                multipartFormData.append(jsonData, withName: "createInsightCommand", mimeType: "application/json")
+                multipartFormData.append(jsonData, withName: dto.insightId == nil ? "createInsightCommand" : "updateInsightCommand", mimeType: "application/json")
                 
-                if let imageData = image.jpegData(compressionQuality: 0.2) {
-                    multipartFormData.append(imageData, withName: "mainImage", fileName: "image.jpg", mimeType: "image/jpeg")
+                if let imageData = image.jpegData(compressionQuality: 0.8) {
+                    multipartFormData.append(imageData, withName: "mainImage", fileName: "image.jpeg", mimeType: "image/jpeg")
                 }
                 
             }, to: url, method: .post, headers: headers)
             .validate()
             .response { response in
-                switch response.result {
-                case .success(let data):
-                    if let data = data {
-                        print("Upload successful: \(String(data: data, encoding: .utf8) ?? "")")
+                if (200..<300).contains(response.response?.statusCode ?? 0) {
+                    
+                    if let data = response.data, !data.isEmpty {
+                        print("""
+                        📲 NETWORK Response LOG
+                        📲 StatusCode: \(response.response?.statusCode ?? 0)
+                        📲 Data: \(response.data?.toPrettyPrintedString ?? "")
+                        """)
                         observer.onNext(true)
+                        observer.onCompleted()
                     } else {
-                        print("Upload successful but no data received.")
-                        observer.onNext(true)
+                        observer.onNext(false)
+                        observer.onCompleted()
                     }
-                case .failure(let error):
-                    print("Upload error: \(error)")
-                    observer.onNext(false)
+                } else {
+                    if let errorData = response.data {
+                        do {
+                            let decodedError = try JSONDecoder().decode(BasicResponse.self, from: errorData)
+                            print("❌ 에러 메세지: \(decodedError.message)")
+                            print("❌ 에러 코드: \(response.response?.statusCode ?? -1)")
+                        } catch {
+                            observer.onError(error)
+                        }
+                    } else {
+                        observer.onError(NSError(domain: "Network Error", code: response.response?.statusCode ?? -1, userInfo: nil))
+                    }
                 }
-                observer.onCompleted()
             }
             return Disposables.create()
         }

@@ -58,8 +58,6 @@ class InsightViewController: BaseViewController, View {
         navigationViewBottomShadow.isHidden = true
         backButtonActionEnable = false
         
-//        super.disposeBag = DisposeBag()
-        reactor = InsightReactor()
         setupSubviews()
         
         configNavigationBarItem()

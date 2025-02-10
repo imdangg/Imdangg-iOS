@@ -9,12 +9,12 @@
 import UIKit
 import SnapKit
 import RxSwift
-import RxCocoa
+import RxRelay
 
 class AreaModalViewController: UIViewController {
+    let selectedComplex = BehaviorRelay<String?>(value: nil)
     private var tableView: UITableView!
-    private var Insight: Insight!
-    private let disposeBag = DisposeBag()
+    private var complexes: [AptComplexByDistrict]?
     private let grabber = UIButton().then {
         $0.backgroundColor = .grayScale200
         $0.layer.cornerRadius = 3
@@ -23,8 +23,12 @@ class AreaModalViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
-        setupTableView()
+        self.modalPresentationStyle = .pageSheet
+        self.modalTransitionStyle = .coverVertical
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
         if let sheetPresentationController = sheetPresentationController {
             sheetPresentationController.detents = [.medium(), .large()]
@@ -39,7 +43,6 @@ class AreaModalViewController: UIViewController {
         tableView.dataSource = self
         tableView.separatorColor = .clear
         tableView.showsVerticalScrollIndicator = false
-        tableView(tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
         
         tableView.register(cell: AreaModalTableCell.self)
         
@@ -60,23 +63,28 @@ class AreaModalViewController: UIViewController {
         }
     }
     
-    func config(insight: Insight) {
-        self.Insight = insight
+    func config(complexes: [AptComplexByDistrict]?) {
+        guard let complexes else { return }
+        self.complexes = complexes
+        setupTableView()
+        tableView.reloadData()
     }
 }
 
 extension AreaModalViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return complexes?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: AreaModalTableCell.identifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: AreaModalTableCell.self)
         cell.selectionStyle = .none
-        
+        cell.config(apt: complexes?[indexPath.row])
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedComplex.accept(complexes?[indexPath.row].apartmentComplexName)
+        self.dismiss(animated: true)
     }
 }
