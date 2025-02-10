@@ -80,12 +80,12 @@ extension TermsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         if indexPath.row == 0 {
-            let vc =  PersonInfoViewController()
+            let vc =  MyPageWebViewController(title: "개인정보 수집 및 이용", urlString:   "https://principled-cry-2aa.notion.site/4d557e465d6143a3abc133397966c3d1?pvs=4")
             vc.hidesBottomBarWhenPushed = false
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if indexPath.row == 1 {
-            let vc = TermsDetailViewController()
+            let vc = MyPageWebViewController(title: "이용 약관", urlString:  "https://principled-cry-2aa.notion.site/54dd2a7ccd5a4c8193e06df782d02119?pvs=4")
             vc.hidesBottomBarWhenPushed = false
             self.navigationController?.pushViewController(vc, animated: true)
         }

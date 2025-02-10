@@ -13,15 +13,17 @@ class BaseInfoButtonCell: UICollectionViewCell {
     let buttonView = CommonButton(title: ""
                                           ,initialButtonType: .unselectedBorderStyle
                                           ,radius: 8)
-    let disposeBag = DisposeBag()
+    var disposeBag = DisposeBag()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.backgroundColor = .white
         layout()
     }
+    
     override func prepareForReuse() {
         super.prepareForReuse()
+        disposeBag = DisposeBag()
     }
     
     required init?(coder: NSCoder) {
