@@ -28,11 +28,13 @@ class CommomTextField: UITextField {
     var isClearButtonTapped = BehaviorSubject<Bool>(value: false)
     let placeholderText: String
     var textfieldType: InputType
+    var limitNum: Int
     let disposeBag = DisposeBag()
     
-    init(frame: CGRect = .zero, placeholderText: String, textfieldType: InputType) {
+    init(frame: CGRect = .zero, placeholderText: String, textfieldType: InputType, limitNum: Int? = 10) {
         self.placeholderText = placeholderText
         self.textfieldType = textfieldType
+        self.limitNum = limitNum!
         super.init(frame: frame)
         setAttribute()
     }
@@ -106,7 +108,7 @@ class CommomTextField: UITextField {
         switch type {
         case .stringInput:
             self.keyboardType = .default
-            nickNameTypeBind()
+            nickNameTypeBind(limitNum: limitNum)
         case .dateInput:
             self.keyboardType = .numberPad
             numberPadTypeBind()
@@ -125,11 +127,22 @@ extension Reactive where Base: CommomTextField {
 // NumberPad Type
 extension CommomTextField {
     
-    func nickNameTypeBind() {
+    func nickNameTypeBind(limitNum: Int) {
         self.rx.text
             .orEmpty
             .map { text in
-                let limitedText = String(text.prefix(10))
+                let limitedText = String(text.prefix(limitNum))
+                return limitedText
+            }
+            .bind(to: self.rx.text)
+            .disposed(by: disposeBag)
+    }
+    
+    func titleTypeBind() {
+        self.rx.text
+            .orEmpty
+            .map { text in
+                let limitedText = String(text.prefix(20))
                 return limitedText
             }
             .bind(to: self.rx.text)
