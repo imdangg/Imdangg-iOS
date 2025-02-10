@@ -5,7 +5,7 @@
 //  Created by 임대진 on 1/15/25.
 //
 
-import Foundation
+import UIKit
 import NetworkKit
 import RxSwift
 import Alamofire
@@ -80,6 +80,9 @@ class ServerJoinService {
             tokenReissue()
                 .subscribe { result in
                     print(result ? "토근 갱신 완료" : "토근 갱신 실패")
+                    if result == false {
+                        (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(SigninViewController(), animated: true)
+                    }
                 }
                 .disposed(by: disposeBag)
         } else {
