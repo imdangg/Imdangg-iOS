@@ -33,4 +33,8 @@ class BaseInfoTextFieldCell: UICollectionViewCell {
             $0.horizontalEdges.equalToSuperview()
         }
     }
+    
+    func setData(text: String) {
+        titleTextField.text = text
+    }
 }

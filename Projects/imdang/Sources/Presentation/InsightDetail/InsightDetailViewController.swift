@@ -16,6 +16,7 @@ final class InsightDetailViewController: BaseViewController {
     private var insight: InsightDetail!
     private var mainImage: UIImage?
     private var tableView: UITableView!
+    private var showEditButton: Bool
     private var exchangeState: DetailExchangeState
     private var disposeBag = DisposeBag()
     private var myInsights: [Insight]?
@@ -35,6 +36,7 @@ final class InsightDetailViewController: BaseViewController {
     private let agreeButton = CommonButton(title: "수락", initialButtonType: .enabled)
     private let waitButton = CommonButton(title: "대기중", initialButtonType: .disabled)
     private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
+    private let editButton = CommonButton(title: "수정하기", initialButtonType: .whiteBackBorderStyle)
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }.then { $0.applyTopBlur() }
     private let headerView = InsightDetailCategoryTapView()
     private let categoryTapView = InsightDetailCategoryTapView().then {
@@ -42,10 +44,11 @@ final class InsightDetailViewController: BaseViewController {
     }
     
     
-    init(insight: InsightDetail, mainImage: UIImage? = nil) {
+    init(insight: InsightDetail, mainImage: UIImage? = nil, showEditButton: Bool = true) {
         exchangeState = insight.exchangeRequestStatus
         self.insight = insight
         self.mainImage = mainImage
+        self.showEditButton = showEditButton
         super.init(nibName: nil, bundle: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleModalDismiss), name: .detailModalDidDismiss, object: nil)
     }
@@ -128,7 +131,7 @@ final class InsightDetailViewController: BaseViewController {
     }
     
     private func addSubviews() {
-        [buttonBackView, requestButton, waitButton, doneButton, degreeButton, agreeButton].forEach {
+        [buttonBackView, requestButton, waitButton, doneButton, degreeButton, agreeButton, editButton].forEach {
             view.addSubview($0)
         }
     }
@@ -140,7 +143,7 @@ final class InsightDetailViewController: BaseViewController {
             $0.bottom.equalToSuperview()
         }
         
-        [requestButton, waitButton, doneButton].forEach {
+        [requestButton, waitButton, doneButton, editButton].forEach {
             $0.snp.makeConstraints {
                 $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.height.equalTo(56)
@@ -166,16 +169,20 @@ final class InsightDetailViewController: BaseViewController {
     }
     
     private func updateButton() {
-        [requestButton, waitButton, doneButton, degreeButton, agreeButton].forEach {
+        [requestButton, waitButton, doneButton, degreeButton, agreeButton, editButton].forEach {
             $0.isHidden = true
         }
         
         switch exchangeState {
         case .null:
             if insight.memberId == UserdefaultKey.memberId {
-                buttonBackView.isHidden = true
-                tableView.snp.updateConstraints {
-                    $0.bottom.equalToSuperview()
+                if showEditButton {
+                    editButton.isHidden = false
+                } else {
+                    buttonBackView.isHidden = true
+                    tableView.snp.updateConstraints {
+                        $0.bottom.equalToSuperview()
+                    }
                 }
             } else {
                 requestButton.isHidden = false
@@ -193,20 +200,14 @@ final class InsightDetailViewController: BaseViewController {
             }
         case .rejected:
             if insight.memberId == UserdefaultKey.memberId {
-                buttonBackView.isHidden = true
-                tableView.snp.updateConstraints {
-                    $0.bottom.equalToSuperview()
-                }
+                editButton.isHidden = false
             } else {
                 requestButton.isHidden = false
             }
         case .accepted:
             if let state = insight.exchangeRequestCreatedByMe {
                 if state {
-                    buttonBackView.isHidden = true
-                    tableView.snp.updateConstraints {
-                        $0.bottom.equalToSuperview()
-                    }
+                    editButton.isHidden = false
                 } else {
                     doneButton.isHidden = false
                 }
@@ -276,6 +277,18 @@ final class InsightDetailViewController: BaseViewController {
                         }
                     })
                     .disposed(by: owner.disposeBag)
+            })
+            .disposed(by: disposeBag)
+        
+        editButton.rx.tap
+            .subscribe(with: self, onNext: { owner, _ in
+                let vc = InsightViewController()
+                let reactor = InsightReactor()
+                reactor.detail = owner.insight
+                reactor.detail.score = 0
+                reactor.updateInsightId = owner.insight.insightId
+                vc.reactor = reactor
+                owner.navigationController?.pushViewController(vc, animated: true)
             })
             .disposed(by: disposeBag)
         

@@ -16,6 +16,7 @@ class InsightReactor: Reactor {
     
     var detail = InsightDetail.emptyInsight
     var mainImage: UIImage?
+    var updateInsightId: String?
     var scoreRecord = [Int]()
     
     struct State {
@@ -76,7 +77,9 @@ class InsightReactor: Reactor {
             addScore(haveText: detail.favorableNews.text != "")
             
             if let image = mainImage {
-                return insightService.createInsight(dto: detail.toDTO(), image: image)
+                var data = detail.toDTO()
+                data.insightId = updateInsightId
+                return insightService.createInsight(dto: data, image: image)
                     .map { success in
                         print("Upload success state updated: \(success)")
                         return Mutation.setUploadSuccess(success)

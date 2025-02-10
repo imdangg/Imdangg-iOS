@@ -17,6 +17,7 @@ class SearchingViewController: UIViewController {
     private var disposeBag = DisposeBag()
     private var apartmentComplexes: [String]?
     private let searchingViewModel = SearchingViewModel()
+    private var selectedIndex: Int = 0
     private let myInsights = BehaviorRelay<[Insight]>(value: [])
     private let todayInsights = BehaviorRelay<[Insight]>(value: [])
     private let topInsights = BehaviorRelay<[Insight]>(value: [])
@@ -56,8 +57,8 @@ class SearchingViewController: UIViewController {
             .subscribe(with: self, onNext: { owner, data in
                 
                 owner.myInsights.accept(data)
-                let visibleCells = owner.collectionView.indexPathsForVisibleItems.filter({ $0.section == 1 })
-                owner.collectionView.reloadItems(at: visibleCells)
+                
+                owner.collectionView.reloadSections([1])
             })
             .disposed(by: disposeBag)
     }
@@ -68,7 +69,8 @@ class SearchingViewController: UIViewController {
             .subscribe(with: self, onNext: { owner, data in
                 if data.isEmpty { return }
                 owner.apartmentComplexes = data
-                owner.collectionView.reloadData()
+                
+                owner.collectionView.reloadSections([1])
                 
                 owner.fetchMyVisitedInsight(aptName: data[0])
             })
@@ -80,7 +82,7 @@ class SearchingViewController: UIViewController {
                 
                 owner.todayInsights.accept(data)
                 
-                owner.collectionView.reloadData()
+                owner.collectionView.reloadSections([2])
             })
             .disposed(by: disposeBag)
         
@@ -90,7 +92,7 @@ class SearchingViewController: UIViewController {
                 
                 owner.topInsights.accept(data)
                 
-                owner.collectionView.reloadData()
+                owner.collectionView.reloadSections([3])
             })
             .disposed(by: disposeBag)
     }
@@ -326,11 +328,17 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
                 return UICollectionReusableView()
             case 1:
                 let title = "내가 다녀온 단지의 다른 인사이트"
-                headerView.configure(with: title, type: .notTopten, showHorizontalCollection: apartmentComplexes == nil ? false : true, aptItems: apartmentComplexes)
+                headerView.configure(with: title, type: .notTopten, showHorizontalCollection: apartmentComplexes == nil ? false : true, aptItems: apartmentComplexes, index: selectedIndex)
                 headerView.buttonAction = {
                     fullVC.config(type: .my, title: title, chipItems: self.apartmentComplexes)
                     self.navigationController?.pushViewController(fullVC, animated: true)
                 }
+                headerView.chipView.selectedIndex
+                    .distinctUntilChanged()
+                    .subscribe(with: self) { owner, selected in
+                        owner.selectedIndex = selected
+                    }
+                    .disposed(by: disposeBag)
                 
                 headerView.chipView.selectedItem
                     .distinctUntilChanged()
@@ -384,12 +392,12 @@ extension SearchingViewController: UICollectionViewDataSource, UICollectionViewD
             bannerImageView.snp.makeConstraints { $0.edges.equalToSuperview() }
             return cell
         case 1:
-            if myInsights.value.isEmpty {
-                let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: EmptyMyInsightCollectionCell.self)
-                return cell
-            } else {
+            if !myInsights.value.isEmpty {
                 let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightCollectionCell.self)
                 cell.configure(insight: myInsights.value[indexPath.row], layoutType: .horizontal)
+                return cell
+            } else {
+                let cell = collectionView.dequeueReusableCell(forIndexPath: indexPath, cellType: EmptyMyInsightCollectionCell.self)
                 return cell
             }
         case 2:

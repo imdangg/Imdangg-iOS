@@ -39,7 +39,7 @@ final class InsightDetailImageCell: UITableViewCell {
     func config(url: String, mainImage: UIImage? = nil) {
         // 인사이트 작성후 보여지는 이미지 필요시
         if let image = mainImage {
-            insightImageView.image = UIImage()
+            insightImageView.image = image
         } else {
             guard let url = URL(string: url) else {
                 insightImageView.image = UIImage()

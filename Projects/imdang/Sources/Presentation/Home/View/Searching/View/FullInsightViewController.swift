@@ -42,7 +42,6 @@ class FullInsightViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         customBackButton.isHidden = false
-        
         setupTableView()
         addSubViews()
         makeConstraints()
@@ -114,7 +113,8 @@ class FullInsightViewController: BaseViewController {
         self.chipViewHidden = chipViewHidden
         self.chipView.isHidden = chipViewHidden
         if let chipItems {
-            self.chipView.updateItems(chipItems)
+            chipView.updateItems(chipItems, index: 0)
+            chipView.selectedItem.accept(chipItems[0])
         }
     }
 }

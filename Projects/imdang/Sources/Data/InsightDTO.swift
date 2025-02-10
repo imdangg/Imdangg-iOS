@@ -61,6 +61,7 @@ struct InsightDTO: Codable {
         let text: String
     }
     
+    var insightId: String? = nil
     let memberId: String
     let score: Int
     let title: String

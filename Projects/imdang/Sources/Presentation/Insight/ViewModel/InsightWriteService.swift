@@ -19,7 +19,7 @@ final class InsightWriteService {
 
     func createInsight(dto: InsightDTO, image: UIImage) -> Observable<Bool> {
         return Observable<Bool>.create { observer in
-            let url = "http://imdang.info/insights/create"
+            let url = dto.insightId == nil ? "http://imdang.info/insights/create" : "http://imdang.info/insights/update"
             
             guard let jsonData = try? JSONEncoder().encode(dto) else {
                 return Disposables.create()
@@ -29,7 +29,7 @@ final class InsightWriteService {
                 "Authorization": "Bearer \(UserdefaultKey.accessToken)"
             ]
             AF.upload(multipartFormData: { multipartFormData in
-                multipartFormData.append(jsonData, withName: "createInsightCommand", mimeType: "application/json")
+                multipartFormData.append(jsonData, withName: dto.insightId == nil ? "createInsightCommand" : "updateInsightCommand", mimeType: "application/json")
                 
                 if let imageData = image.jpegData(compressionQuality: 0.8) {
                     multipartFormData.append(imageData, withName: "mainImage", fileName: "image.jpeg", mimeType: "image/jpeg")

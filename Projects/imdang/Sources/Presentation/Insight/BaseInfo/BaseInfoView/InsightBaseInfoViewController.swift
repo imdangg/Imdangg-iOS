@@ -11,6 +11,7 @@ import Then
 import RxSwift
 import RxRelay
 import ReactorKit
+import Kingfisher
 
 enum ItemType {
     case text
@@ -27,8 +28,6 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
     private let insightService = InsightWriteService()
     private var baseInfo = InsightDetail.emptyInsight
     private var imageData: UIImage?
-    private var buildingName = ""
-    private var summary: String = ""
     private var nextButtonView = NextAndBackButton()
     
     private var selectedIndexPaths: [BehaviorRelay<Set<IndexPath>>] = [
@@ -84,6 +83,8 @@ class InsightBaseInfoViewController: UIViewController, TotalAppraisalFootereView
         ]
     
     func bind(reactor: InsightReactor) {
+        baseInfo = reactor.detail
+        collectionView.reloadData()
         
         nextButtonView.nextButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
@@ -128,6 +129,11 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
         switch item {
         case .text:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BaseInfoTextFieldCell.identifier, for: indexPath) as! BaseInfoTextFieldCell
+            if indexPath.section == 1 {
+                cell.setData(text: baseInfo.title)
+            } else if indexPath.section == 3 {
+                cell.setData(text: baseInfo.visitAt.replacingOccurrences(of: "-", with: "."))
+            }
             cell.titleTextField.rx.text
                 .subscribe(onNext: { [weak self] text in
                     guard let self = self else { return }
@@ -160,15 +166,32 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             let itemArray = items[indexPath.section].itemData
 
             cell.configure(title: itemArray[indexPath.row])
-
             let selectedSetRelay = selectedIndexPaths[indexPath.section - 4]
-
-                selectedSetRelay
-                    .map { selectedSet in
-                        selectedSet.contains { $0 == indexPath } ? .selectedBorderStyle : .unselectedBorderStyle
-                    }
-                    .bind(to: cell.rx.commonButtonState)
-                    .disposed(by: disposeBag)
+            
+            selectedSetRelay
+                .map { selectedSet in
+                    selectedSet.contains { $0 == indexPath } ? .selectedBorderStyle : .unselectedBorderStyle
+                }
+                .bind(to: cell.rx.commonButtonState)
+                .disposed(by: disposeBag)
+            
+            switch indexPath.section {
+            case 4:
+                let indices = items[4].itemData.enumerated().compactMap { baseInfo.visitTimes.contains($0.element) ? $0.offset : nil }
+                selectedSetRelay.accept(Set(indices.map { [4, $0] }))
+                updateSectionState(index: indexPath.section, newState: baseInfo.visitTimes.isEmpty == false ? TextFieldState.done : TextFieldState.normal)
+            case 5:
+                let indices = items[5].itemData.enumerated().compactMap { baseInfo.visitMethods.contains($0.element) ? $0.offset : nil }
+                selectedSetRelay.accept(Set(indices.map { [5, $0] }))
+                updateSectionState(index: indexPath.section, newState: baseInfo.visitMethods.isEmpty == false ? TextFieldState.done : TextFieldState.normal)
+            case 6:
+                if let index = items[6].itemData.firstIndex(of: baseInfo.access.replacingOccurrences(of: "_", with: " ")) {
+                    selectedSetRelay.accept(Set(arrayLiteral: IndexPath(row: index, section: 6)))
+                    updateSectionState(index: indexPath.section, newState: baseInfo.access.isEmpty == false ? TextFieldState.done : TextFieldState.normal)
+                }
+            default:
+                break
+            }
 
                 cell.buttonView.rx.tap
                     .subscribe(onNext: { [weak self] in
@@ -194,10 +217,15 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
 
                         selectedSetRelay.accept(selectedSet)
                         
-                        print("Section: \(indexPath.section), Selected: \(selectedSet.map { itemArray[$0.row] })")
+                        print("Section: \(indexPath), Selected: \(selectedSet.map { itemArray[$0.row] })")
                         
                         switch indexPath.section {
                         case 4:
+//                            if let visitTimes = reactor?.detail.visitTimes {
+//                                baseInfo.visitTimes = visitTimes
+//                            } else {
+//                                baseInfo.visitTimes = selectedSet.map { itemArray[$0.row] }
+//                            }
                             baseInfo.visitTimes = selectedSet.map { itemArray[$0.row] }
                             updateSectionState(index: indexPath.section, newState: baseInfo.visitTimes.isEmpty == false ? TextFieldState.done : TextFieldState.normal)
                             
@@ -219,6 +247,13 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
             
         case .image:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BaseInfoImageCell.identifier, for: indexPath) as! BaseInfoImageCell
+            
+            if let url = URL(string: baseInfo.mainImage), let mainImage = UIImageView().then({ $0.kf.setImage(with: url)}).image {
+                cell.resultImageAccept(image: mainImage)
+                self.imageData = mainImage
+                updateSectionState(index: indexPath.section, newState: TextFieldState.done)
+            }
+            
             cell.buttonTapState
                 .subscribe(onNext: { [weak self] in
                     guard let self else { return }
@@ -251,9 +286,9 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                 ? cell.configure(title: "지번 주소")
                 : cell.setData(title: baseInfo.address.toString())
             } else {
-                buildingName == ""
+                baseInfo.apartmentComplex.name == ""
                 ? cell.configure(title: "아파트 단지 명")
-                : cell.setData(title: buildingName)
+                : cell.setData(title: baseInfo.apartmentComplex.name)
             }
             
             cell.buttonAction = { result in
@@ -281,14 +316,13 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                         if self.baseInfo.address.siDo != "서울" {
                             self.showAlert(text: "지금은 서울 지역만 서비스가 가능합니다.", type: .confirmOnly, dimAction: false , comfrimAction: {
                                 self.baseInfo.address = Address(siDo: "", siGunGu: "", eupMyeonDong: "", buildingNumber: "")
-                                self.buildingName = ""
+                                self.baseInfo.apartmentComplex.name = ""
                                 collectionView.reloadSections(IndexSet([2]))
                             })
                         }
                     }
                     
                     if let buildingName = (data["buildingName"]) as? String {
-                        self.buildingName = buildingName
                         baseInfo.apartmentComplex.name = buildingName
                     }
                     
@@ -296,7 +330,7 @@ extension InsightBaseInfoViewController: UICollectionViewDataSource {
                 }
             }
             
-            updateSectionState(index: indexPath.section, newState: buildingName != "" ? TextFieldState.done : TextFieldState.normal)
+            updateSectionState(index: indexPath.section, newState: baseInfo.apartmentComplex.name != "" ? TextFieldState.done : TextFieldState.normal)
             
             return cell
         }
@@ -321,7 +355,8 @@ extension InsightBaseInfoViewController: UICollectionViewDelegateFlowLayout {
             let footer = collectionView.dequeueReusableFooter(forIndexPath: indexPath, footerType: InsightTotalAppraisalFooterView.self)
             footer.config(title: "인사이트 요약*")
             footer.setPlaceHolder(text: "예시)\n지하철역과 도보 10분 거리로 접근성이 좋지만, 근처 공사로 소음 문제가 있을 수 있을 것 같아요. 하지만 단지 내 공원이 잘 조성되어 있어 가족 단위 거주자에게 적합할 것 같아요")
-            footer.customTextView.text = summary
+            footer.customTextView.text = baseInfo.summary
+            updateSectionState(index: 7, newState: baseInfo.summary != "" ? TextFieldState.done : TextFieldState.normal)
             footer.delegate = self
             
             return footer
@@ -383,7 +418,6 @@ extension InsightBaseInfoViewController: UICollectionViewDelegateFlowLayout {
             
             baseInfo.summary = data
             updateSectionState(index: 7, newState: baseInfo.summary != "" ? TextFieldState.done : TextFieldState.normal)
-            self.summary = data
             let lastSection = self.items.count - 1
             let footerIndexPath = IndexPath(item: 0, section: lastSection)
             self.collectionView.reloadSections(IndexSet(integer: footerIndexPath.section))

@@ -28,7 +28,7 @@ struct InsightIDResponse: Codable {
 
 final class InsightDetailViewModel {
     private var disposeBag = DisposeBag()
-    private let networkManager = NetworkManager()
+    private let networkManager = NetworkManager(session: .default)
     
     func requestInsight(thisInsightId: String, myInsightId: String) -> Observable<Bool> {
         let parameters: [String: Any] = [

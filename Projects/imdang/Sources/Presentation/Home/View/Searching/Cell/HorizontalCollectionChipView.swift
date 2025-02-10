@@ -14,7 +14,7 @@ import RxSwift
 class HorizontalCollectionChipView: UIView {
     
     let selectedItem = BehaviorRelay<String?>(value: nil)
-    private var selectedIndex: Int?
+    let selectedIndex = BehaviorRelay<Int>(value: 0)
     private var items: [String] = []
     
     private var disposeBag = DisposeBag()
@@ -36,7 +36,6 @@ class HorizontalCollectionChipView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
-        bindCollectionView()
     }
     
     required init?(coder: NSCoder) {
@@ -44,7 +43,7 @@ class HorizontalCollectionChipView: UIView {
     }
     
     private func setDefaultSelection() {
-        selectedItem.accept(items[selectedIndex ?? 0])
+        selectedItem.accept(items[selectedIndex.value])
     }
     
     private func setupView() {
@@ -54,21 +53,10 @@ class HorizontalCollectionChipView: UIView {
         collectionView.delegate = self
     }
     
-    private func bindCollectionView() {
-        selectedItem
-            .distinctUntilChanged()
-            .subscribe(onNext: { [weak self] selected in
-                self?.collectionView.reloadSections([0])
-                if let selected = selected {
-                    print("아파트 이름\(selected)")
-                }
-            })
-            .disposed(by: disposeBag)
-    }
-    
-    func updateItems(_ newItems: [String]) {
+    func updateItems(_ newItems: [String], index: Int = 0) {
         items = newItems
-        setDefaultSelection()
+        print("index : \(index)")
+        self.selectedIndex.accept(index)
         collectionView.reloadData()
     }
 }
@@ -97,7 +85,7 @@ extension HorizontalCollectionChipView: UICollectionViewDataSource {
         label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         cell.contentView.addSubview(label)
         
-        if items[indexPath.item] == selectedItem.value {
+        if indexPath.item == selectedIndex.value {
             cell.backgroundColor = .mainOrange500
             label.textColor = .white
             cell.layer.borderColor = UIColor.mainOrange500.cgColor
@@ -158,6 +146,7 @@ extension HorizontalCollectionChipView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedItem = items[indexPath.item]
         self.selectedItem.accept(selectedItem)
-        self.selectedIndex = indexPath.item
+        self.selectedIndex.accept(indexPath.item)
+        self.collectionView.reloadData()
     }
 }

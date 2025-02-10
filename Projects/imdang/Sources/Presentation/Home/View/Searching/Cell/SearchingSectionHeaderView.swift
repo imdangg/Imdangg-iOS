@@ -149,7 +149,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
             .disposed(by: disposeBag)
     }
     
-    func configure(with title: String, type: HeaderType, showHorizontalCollection: Bool, aptItems: [String]? = nil) {
+    func configure(with title: String, type: HeaderType, showHorizontalCollection: Bool, aptItems: [String]? = nil, index: Int = 0) {
         titleLabel.text = title
         headerType = type
         isShowHorizontalCollectionChipView = showHorizontalCollection
@@ -163,7 +163,7 @@ class SearchingSectionHeaderView: UICollectionReusableView {
         }
         
         if let aptItems {
-            chipView.updateItems(aptItems)
+            chipView.updateItems(aptItems, index: index)
         }
     }
     
