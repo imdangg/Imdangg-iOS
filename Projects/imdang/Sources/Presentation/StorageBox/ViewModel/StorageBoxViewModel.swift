@@ -22,6 +22,7 @@ final class StorageBoxViewModel {
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager(session: .default)
     
+    // 단지별보기 모달 데이터
     func loadMyComplexes(address: AddressResponse) -> Observable<[AptComplexByDistrict]?> {
         let parameters: [String: Any] = [
             "siDo": address.siDo,
@@ -47,6 +48,7 @@ final class StorageBoxViewModel {
             }
     }
     
+    // 보관함 주소 박스 데이터
     func loadMyDistricts() -> Observable<[AddressResponse]?> {
         let endpoint = Endpoint<[AddressResponse]>(
             baseURL: .imdangAPI,
@@ -81,7 +83,7 @@ final class StorageBoxViewModel {
             parameters["apartmentComplexName"] = aptName
         }
         
-        let endpoint = Endpoint<MyInsightResponse>(
+        let endpoint = Endpoint<StorageResponse>(
             baseURL: .imdangAPI,
             path: "/my-insights",
             method: .get,
