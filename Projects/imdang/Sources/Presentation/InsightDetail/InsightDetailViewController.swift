@@ -20,8 +20,11 @@ final class InsightDetailViewController: BaseViewController {
     private var exchangeState: DetailExchangeState
     private var disposeBag = DisposeBag()
     private var myInsights: [Insight]?
+    private var coupon: CouponsResponse?
+    private let couponService = CouponService.shared
     private let insightDetailViewModel = InsightDetailViewModel()
     private let selectedIndex = BehaviorRelay<Int?>(value: nil)
+    private let accused = BehaviorRelay<Bool>(value: false)
     
     private let reportButton = UIButton().then {
         $0.setImage(ImdangImages.Image(resource: .report), for: .normal)
@@ -49,6 +52,7 @@ final class InsightDetailViewController: BaseViewController {
         self.insight = insight
         self.mainImage = mainImage
         self.showEditButton = showEditButton
+        self.accused.accept(insight.accused)
         super.init(nibName: nil, bundle: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleModalDismiss), name: .detailModalDidDismiss, object: nil)
     }
@@ -71,7 +75,7 @@ final class InsightDetailViewController: BaseViewController {
         addSubviews()
         makeConstraints()
         bindActions()
-        loadMyInsights()
+        loadData()
         
         view.addSubview(categoryTapView)
         categoryTapView.snp.makeConstraints {
@@ -79,6 +83,10 @@ final class InsightDetailViewController: BaseViewController {
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(44)
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
     }
     
     @objc private func handleModalDismiss() {
@@ -224,8 +232,8 @@ final class InsightDetailViewController: BaseViewController {
                 //                owner.showReportAlert(title: "이미 신고한 인사이트에요", description: "신고로 인해 5일간\n인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "5일간", type: .confirmOnly)
                 //                owner.showReportAlert(title: "인사이트 교환 불가", description: "해당 인사이트는 신고로 인해\n교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", type: .confirmOnly)
                 
-                if let insights = owner.myInsights {
-                    let vc = MyInsightsModalViewController(insightId: owner.insight.insightId, myInsights: insights)
+                if (owner.myInsights?.isEmpty == false) || (owner.coupon?.couponCount ?? 0 > 0) {
+                    let vc = MyInsightsModalViewController(insightId: owner.insight.insightId, myInsights: owner.myInsights, coupon: owner.coupon)
                     
                     vc.resultSend = {
                         if $0 {
@@ -294,18 +302,21 @@ final class InsightDetailViewController: BaseViewController {
         
         reportButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
-                
-                owner.showReportAlert(title: "이 인사이트를 신고할까요?", description: "허위, 과다 신고시 불이익이\n발생할 수 있어요", type: .cancellable, comfrimAction: {
-                    
-                    owner.insightDetailViewModel.accueInsight(insightId: owner.insight.insightId)
-                        .subscribe(with: self) { owner, result in
-                            if result {
-                                owner.showAlert(text: "신고가 완료되었어요.", type: .confirmOnly)
+                if !owner.accused.value {
+                    owner.showReportAlert(title: "이 인사이트를 신고할까요?", description: "허위, 과다 신고시 불이익이\n발생할 수 있어요", type: .cancellable, comfrimAction: {
+                        
+                        owner.insightDetailViewModel.accueInsight(insightId: owner.insight.insightId)
+                            .subscribe(with: self) { owner, result in
+                                if result {
+                                    owner.accused.accept(true)
+                                    owner.showAlert(text: "신고가 완료되었어요.", type: .confirmOnly)
+                                }
                             }
-                        }
-                        .disposed(by: owner.disposeBag)
-                })
-//                owner.showReportAlert(title: "이미 신고한 인사이트에요", description: "동일한 인사이트를 중복으로\n신고할 수 없어요", type: .confirmOnly)
+                            .disposed(by: owner.disposeBag)
+                    })
+                } else {
+                    owner.showReportAlert(title: "이미 신고한 인사이트에요", description: "동일한 인사이트를 중복으로\n신고할 수 없어요", type: .confirmOnly)
+                }
             })
             .disposed(by: disposeBag)
         
@@ -338,7 +349,9 @@ final class InsightDetailViewController: BaseViewController {
             .subscribe(with: self, onNext: { owner, index in
                 owner.headerView.selectedIndex.accept(index)
                 owner.categoryTapView.selectedIndex.accept(index)
-                owner.tableView.scrollToRow(at: IndexPath(row: 0, section: index + 2), at: .top, animated: true)
+                if owner.insight.memberId == UserdefaultKey.memberId {
+                    owner.tableView.scrollToRow(at: IndexPath(row: 0, section: index + 2), at: .top, animated: true)
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -358,12 +371,17 @@ final class InsightDetailViewController: BaseViewController {
         tableView.setContentOffset(offset, animated: true)
     }
 
-    private func loadMyInsights() {
+    private func loadData() {
         insightDetailViewModel.loadMyInsights()
             .subscribe(with: self, onNext: { owner, result in
                 owner.myInsights = result
             })
             .disposed(by: disposeBag)
+        
+        couponService.getCoupons()
+            .subscribe { result in
+                self.coupon = result
+            }.disposed(by: self.disposeBag)
     }
 }
 

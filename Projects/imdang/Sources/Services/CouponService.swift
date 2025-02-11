@@ -33,15 +33,6 @@ class CouponService {
         return networkManager.requestOptional(with: endpoint)
             .map { _ in
                 print("쿠폰 발급 성공")
-                self.getCoupons()
-                    .subscribe { success in
-                        if success {
-                            print("쿠폰 수: \(UserdefaultKey.couponCount ?? 0)")
-                         }
-                        else {
-                            print("쿠폰 로드 실패")
-                        }
-                    }.disposed(by: self.disposeBag)
                 return true
             }
             .catch { error in
@@ -51,7 +42,7 @@ class CouponService {
     }
     
     // @discardableResult 써서 ID는 리턴하게 하려했는데 생각대로 안됨
-    func getCoupons() -> Observable<Bool> {
+    func getCoupons() -> Observable<CouponsResponse> {
         let endpoint = Endpoint<CouponsResponse>(
             baseURL: .imdangAPI,
             path: "/my-coupons/detail",
@@ -61,8 +52,7 @@ class CouponService {
 
         return networkManager.request(with: endpoint)
             .map { response in
-                UserdefaultKey.couponCount = response.couponCount
-                return true
+                return response
             }
             .catch { error in
                 print("Coupons request failed with error: \(error)")

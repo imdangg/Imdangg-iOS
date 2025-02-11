@@ -153,6 +153,7 @@ class ReportAlertViewController: UIViewController {
                     $0.height.equalTo(52)
                 }
             } else {
+                emailLabel.removeFromSuperview()
                 confirmButton.snp.makeConstraints {
                     $0.top.equalTo(descriptionLabel.snp.bottom).offset(24)
                     $0.bottom.equalToSuperview().inset(24)

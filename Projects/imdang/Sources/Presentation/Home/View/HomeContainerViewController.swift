@@ -85,13 +85,8 @@ class HomeContainerViewController: BaseViewController {
     
     private func loadCoupon() {
         couponService.getCoupons()
-            .subscribe { success in
-                if success {
-                    print("\(UserdefaultKey.couponCount ?? 0)")
-                 }
-                else {
-                    print("쿠폰 받기 실패")
-                }
+            .subscribe { result in
+                UserdefaultKey.couponCount = result.couponCount
             }.disposed(by: disposeBag)
     }
     
