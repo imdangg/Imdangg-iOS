@@ -12,7 +12,6 @@ import RxCocoa
 import Then
 import ReactorKit
 
-
 enum SigninAlertType {
     case normal
     case withdrawal
@@ -57,7 +56,7 @@ final class SigninViewController: UIViewController, View {
     
     let appleButton = UIButton().then {
         $0.backgroundColor = .black
-        $0.setTitle("애플 로그인", for: .normal)
+        $0.setTitle("Apple로 로그인", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = .pretenRegular(16)
         

@@ -10,7 +10,7 @@ import Foundation
 internal import Alamofire
 
 public enum BaseURL: String {
-    case imdangAPI
+    case imdangAPI = "IMDANG_DEV_API"
     
     var configValue: String {
         if let infoDictionary: [String: Any] = Bundle.main.infoDictionary,
@@ -28,7 +28,7 @@ extension String {
         
         if urlDecodedString == "" {
             urlDecodedString = self
-            urlDecodedString = urlDecodedString.replacingOccurrences(of: "%3A%2F%2", with: "://")
+            urlDecodedString = urlDecodedString.replacingOccurrences(of: "%3A%2F%2F", with: "://")
             urlDecodedString = urlDecodedString.replacingOccurrences(of: "%26", with: "&")
             urlDecodedString = urlDecodedString.replacingOccurrences(of: "%2F", with: "/")
             urlDecodedString = urlDecodedString.replacingOccurrences(of: "%3A", with: ":")

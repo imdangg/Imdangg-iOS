@@ -20,13 +20,7 @@ let NetworkKit = Project(
                 .external(name: "Alamofire"),
                 .external(name: "RxSwift"),
                 .external(name: "RxCocoa")
-            ],
-            settings: .settings(
-                configurations: [
-                    .debug(name: "Debug", xcconfig: "Config/URL.xcconfig"),
-                    .release(name: "Release", xcconfig: "Config/URL.xcconfig")
-                ]
-            )
+            ]
         ),
         .target(
             name: "NetworkKitTests",

@@ -46,14 +46,11 @@ let project = Project(
                     "NAVER_APP_KEY_ID": "$(NAVER_APP_KEY_ID)",
                     "NAVER_APP_KEY": "$(NAVER_APP_KEY)",
                     "WELCOME_COUPON": "$(WELCOME_COUPON)",
+                    "IMDANG_API": "$(IMDANG_API)",
+                    "IMDANG_DEV_API": "$(IMDANG_DEV_API)",
                     "NSCameraUsageDescription": "카메라를 사용하여 인사이트 사진을 업로드합니다.",
                     "NSAppTransportSecurity": [
-                        "NSExceptionDomains": [
-                            "imdang.info": [
-                                "NSIncludesSubdomains": true,
-                                "NSExceptionAllowsInsecureHTTPLoads": true
-                            ]
-                        ]
+                        "NSAllowsArbitraryLoads": true
                     ],
                     "UIBackgroundModes": ["remote-notification"]
 

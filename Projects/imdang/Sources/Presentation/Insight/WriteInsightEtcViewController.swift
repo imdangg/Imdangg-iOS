@@ -25,7 +25,6 @@ class WriteInsightEtcViewController: UIViewController, View {
     private var baseInfo = InsightDetail.emptyInsight
     private var checkSectionState = PublishRelay<Set<Int>>()
     private var selectedButtonNames: [Int: Set<String>] = [:]
-    private var selectedButtonIndexInSection: [Int: Int] = [:]
     private var nextButtonView = NextAndBackButton()
     
     init(info: [InsightSectionInfo], title: String) {
@@ -162,7 +161,6 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        selectedButtonIndexInSection[indexPath.section] = indexPath.row // 리로드 처리
         cellRedundancyAndUnselectProcessing(collectionView, indexPath: indexPath) // 리로드 처리
         
         let isClear = checkCellAllClear(collectionView, indexPath: indexPath)
@@ -178,13 +176,6 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
         
         let buttonTitle = sectionInfo.buttonTitles[indexPath.row]
         cell.config(buttonTitle: buttonTitle)
-        
-        // 리로드 처리
-        if selectedButtonIndexInSection[indexPath.section] == indexPath.row {
-            cell.isClicked = true
-        } else {
-            cell.isClicked = false
-        }
         
         switch categoryName {
         case "인프라":
@@ -204,19 +195,6 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
         }
         
         return cell
-    }
-    
-    private func setSectionInfo(arr: [(String, [String])], cell: InsightEtcCollectionCell, collectionView: UICollectionView, indexPath: IndexPath) {
-        for (i, section) in arr.enumerated() {
-            for row in section.1 {
-                if cell.label.text == row.replacingOccurrences(of: "_", with: " ") {
-                    cell.isClicked = true
-                    setSectionState(isClear: false, index: i)
-                    selectedButtonNames[indexPath.section, default: []].insert(cell.label.text ?? "")
-                }
-            }
-            headerCheckIconProcessing(isClear: false, collectionView, indexPath: indexPath)
-        }
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -293,7 +271,7 @@ extension WriteInsightEtcViewController {
                 if visibleIndexPath.section == indexPath.section {
                     if visibleIndexPath.row == indexPath.row {
                         cell.isClicked = true
-                        selectedButtonNames[visibleIndexPath.section] = [cell.label.text!]
+                        selectedButtonNames[visibleIndexPath.section] = ["\(indexPath.section)\(cell.label.text!)"]
                     } else {
                         cell.isClicked = false
                     }
@@ -340,8 +318,11 @@ extension WriteInsightEtcViewController {
                             }
                         } else {
                             cell.isClicked.toggle()
-                            
-                            selectedButtonNames[visibleIndexPath.section, default: []].insert(selectedText)
+                            if cell.isClicked {
+                                selectedButtonNames[visibleIndexPath.section, default: []].insert(selectedText)
+                            } else {
+                                selectedButtonNames[visibleIndexPath.section, default: []].remove(selectedText)
+                            }
                             
                             // 해당없음 셀의 상태 해제
                             for otherVisibleIndexPath in collectionView.indexPathsForVisibleItems {
@@ -399,6 +380,20 @@ extension WriteInsightEtcViewController {
 
 // 데이터 매핑
 extension WriteInsightEtcViewController {
+    
+    private func setSectionInfo(arr: [(String, [String])], cell: InsightEtcCollectionCell, collectionView: UICollectionView, indexPath: IndexPath) {
+        for (i, section) in arr.enumerated() {
+            for item in section.1 {
+                if i == indexPath.section && cell.label.text == item.replacingOccurrences(of: "_", with: " ") {
+                    cell.isClicked = true
+                    setSectionState(isClear: false, index: i)
+                    selectedButtonNames[indexPath.section, default: []].insert(cell.label.text ?? "")
+                }
+            }
+            headerCheckIconProcessing(isClear: false, collectionView, indexPath: indexPath)
+        }
+    }
+    
     private func setFooter(title: String, footer: InsightTotalAppraisalFooterView) {
         switch title {
         case "인프라":
@@ -416,7 +411,7 @@ extension WriteInsightEtcViewController {
     
     func setInfoData(title: String, items: [String]) {
         var baseInfo = self.baseInfo
-        let convertItems = items.map { $0.replacingOccurrences(of: " ", with: "_") }
+        let convertItems = items.map { $0.replacingOccurrences(of: "\\d", with: "", options: .regularExpression).replacingOccurrences(of: " ", with: "_") }
 
         let categoryMapping: [String: [String: (inout InsightDetail) -> Void]] = [
             "인프라": [
