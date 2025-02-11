@@ -271,7 +271,7 @@ extension WriteInsightEtcViewController {
                 if visibleIndexPath.section == indexPath.section {
                     if visibleIndexPath.row == indexPath.row {
                         cell.isClicked = true
-                        selectedButtonNames[visibleIndexPath.section] = ["\(indexPath.section)\(cell.label.text!)"]
+                        selectedButtonNames[visibleIndexPath.section] = [cell.label.text!]
                     } else {
                         cell.isClicked = false
                     }
@@ -411,7 +411,7 @@ extension WriteInsightEtcViewController {
     
     func setInfoData(title: String, items: [String]) {
         var baseInfo = self.baseInfo
-        let convertItems = items.map { $0.replacingOccurrences(of: "\\d", with: "", options: .regularExpression).replacingOccurrences(of: " ", with: "_") }
+        let convertItems = items.map { $0.replacingOccurrences(of: " ", with: "_") }
 
         let categoryMapping: [String: [String: (inout InsightDetail) -> Void]] = [
             "인프라": [
