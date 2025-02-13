@@ -16,8 +16,10 @@ class MyInsightsModalViewController: UIViewController {
     private var tableView: UITableView!
     private var insightId: String
     private var selectedInsightId: String?
-    private var myInsights: [Insight] = []
+    private var coupon: CouponsResponse?
+    private var myInsights: [Insight]?
     private let disposeBag = DisposeBag()
+    private let couponService = CouponService.shared
     private let insightDetailViewModel = InsightDetailViewModel()
     
     private let grabber = UIButton().then {
@@ -35,9 +37,10 @@ class MyInsightsModalViewController: UIViewController {
         $0.applyTopBlur()
     }
     
-    init(insightId: String, myInsights: [Insight]) {
+    init(insightId: String, myInsights: [Insight]?, coupon: CouponsResponse?) {
         self.insightId = insightId
         self.myInsights = myInsights
+        self.coupon = coupon
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -123,8 +126,23 @@ class MyInsightsModalViewController: UIViewController {
                             }
                         })
                         .disposed(by: owner.disposeBag)
+                } else if let couponId = owner.coupon?.memberCouponId {
+                    
+                    owner.insightDetailViewModel.requestInsight(thisInsightId: owner.insightId, couponId: "\(couponId)")
+                        .subscribe(onNext: {
+                            if $0 {
+                                owner.showAlert(text: "교환 요청을 완료했어요.\n교환 내역은 교환소에서 확인해보세요.", moveButtonTitle: "교환소 확인하기", type: .moveButton) {
+                                    owner.dismiss(animated: true)
+                                    owner.resultSend?(true)
+                                } etcAction: {
+                                    owner.dismiss(animated: true)
+                                    NotificationCenter.default.post(name: .detailModalDidDismiss, object: nil)
+                                }
+                            }
+                        })
+                        .disposed(by: owner.disposeBag)
                 } else {
-                    owner.showAlert(text: "쿠폰사용 준비중", type: .confirmOnly)
+                    owner.showAlert(text: "교환 요청에 실패했어요", type: .confirmOnly)
                 }
             })
             .disposed(by: disposeBag)
@@ -133,7 +151,7 @@ class MyInsightsModalViewController: UIViewController {
 
 extension MyInsightsModalViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1 + myInsights.count
+        return 1 + (myInsights?.count ?? 0)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -143,6 +161,7 @@ extension MyInsightsModalViewController: UITableViewDelegate, UITableViewDataSou
         case 0:
             cell.config(type: .ticket, ticketCount: UserdefaultKey.couponCount)
         default:
+            guard let myInsights = myInsights else { return cell }
             cell.config(type: .insight, insight: myInsights[indexPath.row - 1])
         }
         
@@ -154,6 +173,7 @@ extension MyInsightsModalViewController: UITableViewDelegate, UITableViewDataSou
         case 0:
             selectedInsightId = nil
         default:
+            guard let myInsights = myInsights else { return }
             selectedInsightId = myInsights[indexPath.row - 1].insightId
         }
     }

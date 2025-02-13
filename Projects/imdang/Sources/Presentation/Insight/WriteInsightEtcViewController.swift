@@ -20,13 +20,11 @@ class WriteInsightEtcViewController: UIViewController, View {
     
     private let insightSectionInfo: [InsightSectionInfo]
     private let categoryName: String!
-    private var totalAppraisalText: String = ""
     private var selectedSections: Set<Int> = []
     private var collectionView: UICollectionView!
     private var baseInfo = InsightDetail.emptyInsight
     private var checkSectionState = PublishRelay<Set<Int>>()
     private var selectedButtonNames: [Int: Set<String>] = [:]
-    private var selectedButtonIndexInSection: [Int: Int] = [:]
     private var nextButtonView = NextAndBackButton()
     
     init(info: [InsightSectionInfo], title: String) {
@@ -80,12 +78,15 @@ class WriteInsightEtcViewController: UIViewController, View {
         }
         if categoryName == "호재" {
             nextButtonView.config(needBack: false, title: "작성완료 및 업로드")
+            presentTooltip()
         } else {
             nextButtonView.config(needBack: true)
         }
     }
     
     func bind(reactor: InsightReactor) {
+        baseInfo = reactor.detail
+        
         nextButtonView.nextButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
                 guard owner.nextButtonView.isEnable else {
@@ -126,7 +127,7 @@ class WriteInsightEtcViewController: UIViewController, View {
             .subscribe(onNext: { result in
                 self.showAlert(text: "인사이트 업로드가 완료되었어요.\n작성한 내 인사이트는 보관함에서\n확인할 수 있어요.", type: .moveButton) { [self] in
                     if let image = reactor.mainImage {
-                        let vc = InsightDetailViewController(url: "", image: image, insight: reactor.detail)
+                        let vc = InsightDetailViewController(insight: reactor.detail, mainImage: image, showEditButton: false)
                         self.navigationController?.pushViewController(vc, animated: true)
                         if let firstVC = self.navigationController?.viewControllers.first {
                             self.navigationController?.setViewControllers([firstVC, vc], animated: true)
@@ -140,6 +141,14 @@ class WriteInsightEtcViewController: UIViewController, View {
             })
             .disposed(by: disposeBag)
     }
+    
+    private func presentTooltip() {
+        let toolTipView = ToolTipView(type: .down)
+        view.addSubview(toolTipView)
+        toolTipView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+    }
 }
 
 extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -152,7 +161,6 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        selectedButtonIndexInSection[indexPath.section] = indexPath.row // 리로드 처리
         cellRedundancyAndUnselectProcessing(collectionView, indexPath: indexPath) // 리로드 처리
         
         let isClear = checkCellAllClear(collectionView, indexPath: indexPath)
@@ -169,11 +177,21 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
         let buttonTitle = sectionInfo.buttonTitles[indexPath.row]
         cell.config(buttonTitle: buttonTitle)
         
-        // 리로드 처리
-        if selectedButtonIndexInSection[indexPath.section] == indexPath.row {
-            cell.isClicked = true
-        } else {
-            cell.isClicked = false
+        switch categoryName {
+        case "인프라":
+            if baseInfo.infra.amenities.isEmpty { break }
+            setSectionInfo(arr: baseInfo.infra.conversionArray(), cell: cell, collectionView: collectionView, indexPath: indexPath)
+        case "단지 환경":
+            if baseInfo.complexEnvironment.security.isEmpty { break }
+            setSectionInfo(arr: baseInfo.complexEnvironment.conversionArray(), cell: cell, collectionView: collectionView, indexPath: indexPath)
+        case "단지 시설":
+            if baseInfo.complexFacility.surroundings.isEmpty { break }
+            setSectionInfo(arr: baseInfo.complexFacility.conversionArray(), cell: cell, collectionView: collectionView, indexPath: indexPath)
+        case "호재":
+            if baseInfo.favorableNews.cultures.isEmpty { break }
+            setSectionInfo(arr: baseInfo.favorableNews.conversionArray(), cell: cell, collectionView: collectionView, indexPath: indexPath)
+        default:
+            break
         }
         
         return cell
@@ -196,9 +214,9 @@ extension WriteInsightEtcViewController: UICollectionViewDelegate, UICollectionV
         } else if kind == UICollectionView.elementKindSectionFooter {
             let footer = collectionView.dequeueReusableFooter(forIndexPath: indexPath, footerType: InsightTotalAppraisalFooterView.self)
             footer.config(title: categoryName + " 총평")
-            footer.customTextView.text = totalAppraisalText
             footer.delegate = self
             
+            setFooter(title: categoryName, footer: footer)
             return footer
         }
         return UICollectionReusableView()
@@ -235,7 +253,6 @@ extension WriteInsightEtcViewController: TotalAppraisalFootereViewDelegate {
             guard let self = self else { return }
             
             setInfoData(title: title, items: [data])
-            totalAppraisalText = data
             let lastSection = self.insightSectionInfo.count - 1
             let footerIndexPath = IndexPath(item: 0, section: lastSection)
             collectionView.reloadSections(IndexSet(integer: footerIndexPath.section))
@@ -301,8 +318,11 @@ extension WriteInsightEtcViewController {
                             }
                         } else {
                             cell.isClicked.toggle()
-                            
-                            selectedButtonNames[visibleIndexPath.section, default: []].insert(selectedText)
+                            if cell.isClicked {
+                                selectedButtonNames[visibleIndexPath.section, default: []].insert(selectedText)
+                            } else {
+                                selectedButtonNames[visibleIndexPath.section, default: []].remove(selectedText)
+                            }
                             
                             // 해당없음 셀의 상태 해제
                             for otherVisibleIndexPath in collectionView.indexPathsForVisibleItems {
@@ -360,6 +380,35 @@ extension WriteInsightEtcViewController {
 
 // 데이터 매핑
 extension WriteInsightEtcViewController {
+    
+    private func setSectionInfo(arr: [(String, [String])], cell: InsightEtcCollectionCell, collectionView: UICollectionView, indexPath: IndexPath) {
+        for (i, section) in arr.enumerated() {
+            for item in section.1 {
+                if i == indexPath.section && cell.label.text == item.replacingOccurrences(of: "_", with: " ") {
+                    cell.isClicked = true
+                    setSectionState(isClear: false, index: i)
+                    selectedButtonNames[indexPath.section, default: []].insert(cell.label.text ?? "")
+                }
+            }
+            headerCheckIconProcessing(isClear: false, collectionView, indexPath: indexPath)
+        }
+    }
+    
+    private func setFooter(title: String, footer: InsightTotalAppraisalFooterView) {
+        switch title {
+        case "인프라":
+            footer.customTextView.text = baseInfo.infra.text
+        case "단지 환경":
+            footer.customTextView.text = baseInfo.complexEnvironment.text
+        case "단지 시설":
+            footer.customTextView.text = baseInfo.complexFacility.text
+        case "호재":
+            footer.customTextView.text = baseInfo.favorableNews.text
+        default:
+            break
+        }
+    }
+    
     func setInfoData(title: String, items: [String]) {
         var baseInfo = self.baseInfo
         let convertItems = items.map { $0.replacingOccurrences(of: " ", with: "_") }

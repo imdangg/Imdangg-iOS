@@ -28,15 +28,21 @@ struct InsightIDResponse: Codable {
 
 final class InsightDetailViewModel {
     private var disposeBag = DisposeBag()
-    private let networkManager = NetworkManager()
+    private let networkManager = NetworkManager(session: .default)
     
-    func requestInsight(thisInsightId: String, myInsightId: String) -> Observable<Bool> {
-        let parameters: [String: Any] = [
+    func requestInsight(thisInsightId: String, myInsightId: String? = nil, couponId: String? = nil) -> Observable<Bool> {
+        var parameters: [String: Any] = [
             "requestedInsightId": thisInsightId,
-            "requestMemberId": UserdefaultKey.memberId,
-            "requestMemberInsightId": myInsightId,
-            "memberCouponId": UserdefaultKey.couponCount == nil ? "null" : UserdefaultKey.couponCount!
+            "requestMemberId": UserdefaultKey.memberId
         ]
+        
+        if let myInsightId = myInsightId {
+            parameters["requestMemberInsightId"] = myInsightId
+        }
+        
+        if let couponId = couponId {
+            parameters["memberCouponId"] = couponId
+        }
         
         let endpoint = Endpoint<ExchangeResponse>(
             baseURL: .imdangAPI,
@@ -64,7 +70,7 @@ final class InsightDetailViewModel {
         
         let endpoint = Endpoint<ExchangeResponse>(
             baseURL: .imdangAPI,
-            path: "/exchanges/reject",
+            path: "/exchanges/accept",
             method: .post,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
             parameters: parameters
@@ -142,9 +148,9 @@ final class InsightDetailViewModel {
             "accuseMemberId": UserdefaultKey.memberId
         ]
         
-        let endpoint = Endpoint<ExchangeResponse>(
+        let endpoint = Endpoint<InsightIDResponse>(
             baseURL: .imdangAPI,
-            path: "/insights/accue",
+            path: "/insights/accuse",
             method: .post,
             headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
             parameters: parameters

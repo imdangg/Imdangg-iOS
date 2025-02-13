@@ -7,6 +7,7 @@ import GoogleSignIn
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
+    private let serverService = ServerJoinService.shared
     static let kakaoCodeRelay = PublishRelay<String>()
     static let googleCodeRelay = PublishRelay<String>()
     
@@ -16,13 +17,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-//        let tab = TabBarController()
+        let tabBarController = TabBarController()
         let viewController = SigninViewController()
         viewController.view.backgroundColor = .white
 
         let navigationController = UINavigationController(rootViewController: viewController)
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = navigationController
+        window?.rootViewController = UserdefaultKey.isSiginedIn ? tabBarController : navigationController
         window?.makeKeyAndVisible()
         
     }
@@ -44,6 +45,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         } else if let error = url.queryParameters?["error"] {
             print("Error: \(error)")
         }
+    }
+    
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        serverService.checkTokenExpired()
     }
 
     // 사용법 :

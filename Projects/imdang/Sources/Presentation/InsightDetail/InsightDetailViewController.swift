@@ -9,21 +9,22 @@ import UIKit
 import SnapKit
 import Then
 import RxSwift
+import RxRelay
 
 final class InsightDetailViewController: BaseViewController {
 
     private var insight: InsightDetail!
     private var mainImage: UIImage?
     private var tableView: UITableView!
-    private var insightImageUrl = ""
+    private var showEditButton: Bool
     private var exchangeState: DetailExchangeState
     private var disposeBag = DisposeBag()
     private var myInsights: [Insight]?
+    private var coupon: CouponsResponse?
+    private let couponService = CouponService.shared
     private let insightDetailViewModel = InsightDetailViewModel()
-    
-    private let categoryTapView = InsightDetailCategoryTapView().then {
-        $0.isHidden = true
-    }
+    private let selectedIndex = BehaviorRelay<Int?>(value: nil)
+    private let accused = BehaviorRelay<Bool>(value: false)
     
     private let reportButton = UIButton().then {
         $0.setImage(ImdangImages.Image(resource: .report), for: .normal)
@@ -38,14 +39,20 @@ final class InsightDetailViewController: BaseViewController {
     private let agreeButton = CommonButton(title: "수락", initialButtonType: .enabled)
     private let waitButton = CommonButton(title: "대기중", initialButtonType: .disabled)
     private let doneButton = CommonButton(title: "교환 완료", initialButtonType: .disabled)
+    private let editButton = CommonButton(title: "수정하기", initialButtonType: .whiteBackBorderStyle)
     private let buttonBackView = UIView().then { $0.backgroundColor = .white }.then { $0.applyTopBlur() }
+    private let headerView = InsightDetailCategoryTapView()
+    private let categoryTapView = InsightDetailCategoryTapView().then {
+        $0.isHidden = true
+    }
     
-    init(url: String, image: UIImage? = nil, insight: InsightDetail) {
+    
+    init(insight: InsightDetail, mainImage: UIImage? = nil, showEditButton: Bool = true) {
         exchangeState = insight.exchangeRequestStatus
-        insightImageUrl = url
-        mainImage = image
         self.insight = insight
-        
+        self.mainImage = mainImage
+        self.showEditButton = showEditButton
+        self.accused.accept(insight.accused)
         super.init(nibName: nil, bundle: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleModalDismiss), name: .detailModalDidDismiss, object: nil)
     }
@@ -68,7 +75,7 @@ final class InsightDetailViewController: BaseViewController {
         addSubviews()
         makeConstraints()
         bindActions()
-        loadMyInsights()
+        loadData()
         
         view.addSubview(categoryTapView)
         categoryTapView.snp.makeConstraints {
@@ -76,6 +83,10 @@ final class InsightDetailViewController: BaseViewController {
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(44)
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
     }
     
     @objc private func handleModalDismiss() {
@@ -128,7 +139,7 @@ final class InsightDetailViewController: BaseViewController {
     }
     
     private func addSubviews() {
-        [buttonBackView, requestButton, waitButton, doneButton, degreeButton, agreeButton].forEach {
+        [buttonBackView, requestButton, waitButton, doneButton, degreeButton, agreeButton, editButton].forEach {
             view.addSubview($0)
         }
     }
@@ -140,7 +151,7 @@ final class InsightDetailViewController: BaseViewController {
             $0.bottom.equalToSuperview()
         }
         
-        [requestButton, waitButton, doneButton].forEach {
+        [requestButton, waitButton, doneButton, editButton].forEach {
             $0.snp.makeConstraints {
                 $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.height.equalTo(56)
@@ -166,16 +177,20 @@ final class InsightDetailViewController: BaseViewController {
     }
     
     private func updateButton() {
-        [requestButton, waitButton, doneButton, degreeButton, agreeButton].forEach {
+        [requestButton, waitButton, doneButton, degreeButton, agreeButton, editButton].forEach {
             $0.isHidden = true
         }
         
         switch exchangeState {
         case .null:
             if insight.memberId == UserdefaultKey.memberId {
-                buttonBackView.isHidden = true
-                tableView.snp.updateConstraints {
-                    $0.bottom.equalToSuperview()
+                if showEditButton {
+                    editButton.isHidden = false
+                } else {
+                    buttonBackView.isHidden = true
+                    tableView.snp.updateConstraints {
+                        $0.bottom.equalToSuperview()
+                    }
                 }
             } else {
                 requestButton.isHidden = false
@@ -193,20 +208,14 @@ final class InsightDetailViewController: BaseViewController {
             }
         case .rejected:
             if insight.memberId == UserdefaultKey.memberId {
-                buttonBackView.isHidden = true
-                tableView.snp.updateConstraints {
-                    $0.bottom.equalToSuperview()
-                }
+                editButton.isHidden = false
             } else {
                 requestButton.isHidden = false
             }
         case .accepted:
             if let state = insight.exchangeRequestCreatedByMe {
                 if state {
-                    buttonBackView.isHidden = true
-                    tableView.snp.updateConstraints {
-                        $0.bottom.equalToSuperview()
-                    }
+                    editButton.isHidden = false
                 } else {
                     doneButton.isHidden = false
                 }
@@ -223,8 +232,8 @@ final class InsightDetailViewController: BaseViewController {
                 //                owner.showReportAlert(title: "이미 신고한 인사이트에요", description: "신고로 인해 5일간\n인사이트 교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", highligshtText: "5일간", type: .confirmOnly)
                 //                owner.showReportAlert(title: "인사이트 교환 불가", description: "해당 인사이트는 신고로 인해\n교환이 불가능해요.\n문의 사항은 아래 메일로 남겨주세요.", type: .confirmOnly)
                 
-                if let insights = owner.myInsights {
-                    let vc = MyInsightsModalViewController(insightId: owner.insight.insightId, myInsights: insights)
+                if (owner.myInsights?.isEmpty == false) || (owner.coupon?.couponCount ?? 0 > 0) {
+                    let vc = MyInsightsModalViewController(insightId: owner.insight.insightId, myInsights: owner.myInsights, coupon: owner.coupon)
                     
                     vc.resultSend = {
                         if $0 {
@@ -279,20 +288,35 @@ final class InsightDetailViewController: BaseViewController {
             })
             .disposed(by: disposeBag)
         
+        editButton.rx.tap
+            .subscribe(with: self, onNext: { owner, _ in
+                let vc = InsightViewController()
+                let reactor = InsightReactor()
+                reactor.detail = owner.insight
+                reactor.detail.score = 0
+                reactor.updateInsightId = owner.insight.insightId
+                vc.reactor = reactor
+                owner.navigationController?.pushViewController(vc, animated: true)
+            })
+            .disposed(by: disposeBag)
+        
         reportButton.rx.tap
             .subscribe(with: self, onNext: { owner, _ in
-                
-                owner.showReportAlert(title: "이 인사이트를 신고할까요?", description: "허위, 과다 신고시 불이익이\n발생할 수 있어요", type: .cancellable, comfrimAction: {
-                    
-                    owner.insightDetailViewModel.accueInsight(insightId: owner.insight.insightId)
-                        .subscribe(with: self) { owner, result in
-                            if result {
-                                owner.showAlert(text: "신고가 완료되었어요.", type: .confirmOnly)
+                if !owner.accused.value {
+                    owner.showReportAlert(title: "이 인사이트를 신고할까요?", description: "허위, 과다 신고시 불이익이\n발생할 수 있어요", type: .cancellable, comfrimAction: {
+                        
+                        owner.insightDetailViewModel.accueInsight(insightId: owner.insight.insightId)
+                            .subscribe(with: self) { owner, result in
+                                if result {
+                                    owner.accused.accept(true)
+                                    owner.showAlert(text: "신고가 완료되었어요.", type: .confirmOnly)
+                                }
                             }
-                        }
-                        .disposed(by: owner.disposeBag)
-                })
-//                owner.showReportAlert(title: "이미 신고한 인사이트에요", description: "동일한 인사이트를 중복으로\n신고할 수 없어요", type: .confirmOnly)
+                            .disposed(by: owner.disposeBag)
+                    })
+                } else {
+                    owner.showReportAlert(title: "이미 신고한 인사이트에요", description: "동일한 인사이트를 중복으로\n신고할 수 없어요", type: .confirmOnly)
+                }
             })
             .disposed(by: disposeBag)
         
@@ -300,14 +324,64 @@ final class InsightDetailViewController: BaseViewController {
             .subscribe(with: self, onNext: { owner, _ in
             })
             .disposed(by: disposeBag)
+        
+        headerView.selectedIndex
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .subscribe(with: self, onNext: { owner, index in
+                owner.selectedIndex.accept(index)
+            })
+            .disposed(by: disposeBag)
+        
+        categoryTapView.selectedIndex
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .subscribe(with: self, onNext: { owner, index in
+                owner.selectedIndex.accept(index)
+            })
+            .disposed(by: disposeBag)
+        
+        selectedIndex
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .background))
+            .observe(on: MainScheduler.asyncInstance)
+            .subscribe(with: self, onNext: { owner, index in
+                owner.headerView.selectedIndex.accept(index)
+                owner.categoryTapView.selectedIndex.accept(index)
+                if owner.insight.memberId == UserdefaultKey.memberId {
+                    owner.tableView.scrollToRow(at: IndexPath(row: 0, section: index + 2), at: .top, animated: true)
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
-    private func loadMyInsights() {
+    func scrollToSection(index: Int) {
+        let indexPath = IndexPath(row: 0, section: index + 2)
+        
+        guard let cell = tableView.cellForRow(at: indexPath) else { return }
+        
+        let cellTopY = cell.frame.origin.y
+        
+        let targetOffsetY = cellTopY - 70
+        
+        var offset = tableView.contentOffset
+        offset.y = targetOffsetY
+        
+        tableView.setContentOffset(offset, animated: true)
+    }
+
+    private func loadData() {
         insightDetailViewModel.loadMyInsights()
             .subscribe(with: self, onNext: { owner, result in
                 owner.myInsights = result
             })
             .disposed(by: disposeBag)
+        
+        couponService.getCoupons()
+            .subscribe { result in
+                self.coupon = result
+            }.disposed(by: self.disposeBag)
     }
 }
 
@@ -327,7 +401,7 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
         switch indexPath.section {
         case 0:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailImageCell.self)
-            cell.config(url: insightImageUrl, image: mainImage)
+            cell.config(url: insight.mainImage, mainImage: mainImage)
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(forIndexPath: indexPath, cellType: InsightDetailTitleTableCell.self)
@@ -380,20 +454,17 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
         switch section {
         case 2:
             return 44
-        case 3,4,5,6:
-            return 32
         default:
             return 0
         }
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = InsightDetailCategoryTapView()
         switch section {
         case 2:
             return headerView
         default:
-            return UIView().then { $0.backgroundColor = .white }
+            return nil
         }
     }
     
@@ -437,4 +508,17 @@ extension InsightDetailViewController: UITableViewDataSource, UITableViewDelegat
             categoryTapView.isHidden = true
         }
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        switch indexPath.section {
+            case 2,3,4,5,6:
+            if indexPath.row == 0 {
+                categoryTapView.setCurrentIndex.accept(indexPath.section - 2)
+                headerView.setCurrentIndex.accept(indexPath.section - 2)
+            }
+        default:
+            return
+        }
+    }
+
 }

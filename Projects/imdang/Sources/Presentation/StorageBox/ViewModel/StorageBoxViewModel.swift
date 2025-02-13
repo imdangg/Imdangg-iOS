@@ -10,6 +10,11 @@ import NetworkKit
 import Alamofire
 import RxSwift
 
+struct AptComplexByDistrict: Codable {
+    let apartmentComplexName: String
+    let insightCount: Int
+}
+
 final class StorageBoxViewModel {
     var totalCount = 0
     var totalPage = 0
@@ -17,6 +22,33 @@ final class StorageBoxViewModel {
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager(session: .default)
     
+    // 단지별보기 모달 데이터
+    func loadMyComplexes(address: AddressResponse) -> Observable<[AptComplexByDistrict]?> {
+        let parameters: [String: Any] = [
+            "siDo": address.siDo,
+            "siGunGu": address.siGunGu,
+            "eupMyeonDong": address.eupMyeonDong
+        ]
+        
+        let endpoint = Endpoint<[AptComplexByDistrict]>(
+            baseURL: .imdangAPI,
+            path: "/my-insights/by-district/apartment-complexes",
+            method: .get,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
+            parameters: parameters
+        )
+        
+        return networkManager.requestOptional(with: endpoint)
+            .map { data in
+                return data
+            }
+            .catch { error in
+                print("Error: \(error.localizedDescription)")
+                return Observable.just(nil)
+            }
+    }
+    
+    // 보관함 주소 박스 데이터
     func loadMyDistricts() -> Observable<[AddressResponse]?> {
         let endpoint = Endpoint<[AddressResponse]>(
             baseURL: .imdangAPI,
@@ -51,7 +83,7 @@ final class StorageBoxViewModel {
             parameters["apartmentComplexName"] = aptName
         }
         
-        let endpoint = Endpoint<MyInsightResponse>(
+        let endpoint = Endpoint<StorageResponse>(
             baseURL: .imdangAPI,
             path: "/my-insights",
             method: .get,

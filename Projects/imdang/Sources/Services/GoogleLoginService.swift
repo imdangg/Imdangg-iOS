@@ -49,7 +49,10 @@ class GoogleLoginService {
                                 onNext: { entity in
                                     UserdefaultKey.isJoined = entity.joined
                                     UserdefaultKey.accessToken = entity.accessToken
+                                    UserdefaultKey.refreshToken = entity.refreshToken
+                                    UserdefaultKey.tokenTimeInterval = Date().timeIntervalSince1970
                                     UserdefaultKey.memberId = entity.memberId
+                                    UserdefaultKey.signInType = SignInType.google.rawValue
                                     observer.onNext(true)
                                     observer.onCompleted()
                                 },
@@ -67,6 +70,50 @@ class GoogleLoginService {
                 }
             }
             
+            return Disposables.create()
+        }
+    }
+    
+    func withdrawalToServer() -> Observable<Bool> {
+        return Observable.create { observer in
+            GIDSignIn.sharedInstance.currentUser?.refreshTokensIfNeeded { [self] user, error in
+                if let error = error {
+                    print("Token refresh error: \(error.localizedDescription)")
+                    observer.onNext(false)
+                    observer.onCompleted()
+                }
+
+                if let newAccessToken = user?.accessToken.tokenString {
+                    let parameters: [String: Any] = [
+                        "token": newAccessToken
+                    ]
+                    
+                    let endpoint = Endpoint<BasicResponse>(
+                        baseURL: .imdangAPI,
+                        path: "/members/withdrawal/google",
+                        method: .post,
+                        headers: [
+                            .contentType("application/json"),
+                            .authorization(bearerToken: UserdefaultKey.accessToken)
+                        ],
+                        parameters: parameters
+                    )
+                    
+                    networkManager.requestOptional(with: endpoint)
+                        .subscribe(onNext: { _ in
+                            UserdefaultKey.resetUserDefaults()
+                            observer.onNext(true)
+                            observer.onCompleted()
+                        },
+                        onError: { error in
+                            print("Google Withdrawal request failed with error: \(error)")
+                            observer.onNext(false)
+                            observer.onCompleted()
+                        }
+                    )
+                    .disposed(by: disposeBag)
+                }
+            }
             return Disposables.create()
         }
     }

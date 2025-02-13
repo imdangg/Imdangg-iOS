@@ -5,10 +5,11 @@
 //  Created by 임대진 on 11/27/24.
 //
 
-import Foundation
+import UIKit
 import RxSwift
 import RxKakaoSDKUser
 import KakaoSDKUser
+import KakaoSDKCommon
 import KakaoSDKAuth
 import Alamofire
 import NetworkKit
@@ -64,7 +65,10 @@ class KakaoLoginService {
                     onNext: { entity in
                         UserdefaultKey.isJoined = entity.joined
                         UserdefaultKey.accessToken = entity.accessToken
+                        UserdefaultKey.refreshToken = entity.refreshToken
+                        UserdefaultKey.tokenTimeInterval = Date().timeIntervalSince1970
                         UserdefaultKey.memberId = entity.memberId
+                        UserdefaultKey.signInType = SignInType.kakao.rawValue
                         observer.onNext(true)
                         observer.onCompleted()
                     },
@@ -80,23 +84,49 @@ class KakaoLoginService {
         }
     }
     
-    func kakaoLogout() {
-        UserApi.shared.rx.logout()
-            .subscribe(onCompleted:{
-                print("logout() success.")
-            }, onError: {error in
-                print(error)
-            })
-            .disposed(by: disposeBag)
+    func withdrawalToServer() -> Observable<Bool> {
+        guard AuthApi.hasToken() else {
+            (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(SigninViewController(), animated: true)
+            return Observable.just(false)
+        }
+
+        return UserApi.shared.rx.accessTokenInfo()
+            .asObservable()
+            .flatMap { _ in
+                return Observable.just(AUTH.tokenManager.getToken()?.accessToken)
+            }
+            .catch { error -> Observable<String?> in
+                if let sdkError = error as? SdkError, sdkError.isInvalidTokenError() {
+                    return AuthApi.shared.rx.refreshToken()
+                        .asObservable()
+                        .map { $0.accessToken }
+                }
+                return Observable.just(nil)
+            }
+            .compactMap { $0 }
+            .flatMap { [self] token in
+                let parameters: [String: Any] = ["token": token]
+                let endpoint = Endpoint<BasicResponse>(
+                    baseURL: .imdangAPI,
+                    path: "/members/withdrawal/kakao",
+                    method: .post,
+                    headers: [
+                        .contentType("application/json"),
+                        .authorization(bearerToken: UserdefaultKey.accessToken)
+                    ],
+                    parameters: parameters
+                )
+
+                return networkManager.requestOptional(with: endpoint)
+                    .map { _ in
+                        UserdefaultKey.resetUserDefaults()
+                        return true
+                    }
+                    .catch { error in
+                        print("Kakao Withdrawal request failed with error: \(error)")
+                        return Observable.just(false)
+                    }
+            }
     }
-    
-    func kakaoUnlink() {
-        UserApi.shared.rx.unlink()
-            .subscribe(onCompleted:{
-                print("unlink() success.")
-            }, onError: {error in
-                print(error)
-            })
-            .disposed(by: disposeBag)
-    }
+
 }

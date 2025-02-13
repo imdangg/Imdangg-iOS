@@ -17,6 +17,9 @@ final class DeleteAccountViewController: BaseViewController {
     private let disposeBag = DisposeBag()
     private var onTabCheckButton = false
     let appleService = AppleLoginService.shared
+    let kakaoService = KakaoLoginService.shared
+    let googleService = GoogleLoginService.shared
+    
     private let noticeScripts = [
         "1. 탈퇴한 계정의 이용 내역, 쿠폰, 혜택은 복구되지 않습니다.",
         "2. 작성하신 인사이트 및 댓글은 삭제되지 않습니다. 삭제 희망시 탈퇴 전 고객센터로 요청해 주시길 바랍니다.",
@@ -108,8 +111,16 @@ final class DeleteAccountViewController: BaseViewController {
  
         deleteButton.rx.tap
             .flatMap { [weak self] in
-                // 다른 로그인 판별 필요
-                self?.appleService.sendAppleWithdrawalToServer() ?? .just(false)
+                switch SignInType(rawValue: UserdefaultKey.signInType) {
+                case .apple:
+                    return self?.appleService.sendAppleWithdrawalToServer() ?? .just(false)
+                case .kakao:
+                    return self?.kakaoService.withdrawalToServer() ?? .just(false)
+                case .google:
+                    return self?.googleService.withdrawalToServer() ?? .just(false)
+                default:
+                    return Observable.just(false)
+                }
             }
             .filter { $0 }
             .subscribe(onNext: { [weak self] _ in

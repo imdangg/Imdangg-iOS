@@ -1,15 +1,15 @@
 //
-//  InsightResponse.swift
+//  StorageResponse.swift
 //  imdang
 //
-//  Created by 임대진 on 1/31/25.
+//  Created by 임대진 on 2/11/25.
 //
 
 import Foundation
 
-struct InsightResponse: Codable {
+struct StorageResponse: Codable {
     let number: Int
-    let content: [InsightContent]
+    let content: [StorageContent]
     let pageable: Pageable
     let sort: Sort
     let numberOfElements: Int
@@ -27,12 +27,12 @@ struct InsightResponse: Codable {
     }
 }
 
-struct InsightContent: Codable {
+struct StorageContent: Codable {
     let mainImage: String?
     let memberNickname: String
     let title: String
     let recommendedCount: Int
     let insightId: String
     let address: Address
-    let createdAt: String
+    let createdAt: String?
 }

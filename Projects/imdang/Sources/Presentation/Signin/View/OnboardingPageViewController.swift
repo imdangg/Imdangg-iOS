@@ -6,10 +6,14 @@
 //
 
 import UIKit
+import RxSwift
+import RxRelay
 
 class OnboardingPageViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
     private let pages: [UIViewController]
+    private var disposeBag = DisposeBag()
     private var pageControl = UIPageControl()
+    let crrentPageIndex = BehaviorRelay<Int>(value: 0)
     
     init() {
         let page1 = OnboardingViewController(title: "가이드로 인사이트 작성하기", description: "가이드라인으로 체계화된 인사이트를\n간편하게 작성할 수 있어요", image: ImdangImages.Image(resource: .guideImage1))
@@ -60,6 +64,7 @@ class OnboardingPageViewController: UIPageViewController, UIPageViewControllerDa
                 let nextVC = pages[currentIndex + 1]
                 setViewControllers([nextVC], direction: .forward, animated: true, completion: nil)
                 pageControl.currentPage += 1
+                crrentPageIndex.accept(pageControl.currentPage)
             } else {
                 let vc = UserInfoEntryViewController(reactor: UserInfoEntryReactor())
                 self.navigationController?.pushViewController(vc, animated: true)
@@ -84,6 +89,7 @@ class OnboardingPageViewController: UIPageViewController, UIPageViewControllerDa
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         if completed, let visibleVC = viewControllers?.first, let index = pages.firstIndex(of: visibleVC) {
             pageControl.currentPage = index
+            crrentPageIndex.accept(index)
         }
     }
 }

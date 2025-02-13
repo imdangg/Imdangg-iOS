@@ -42,7 +42,7 @@ class BaseInfoTextFieldCell: UICollectionViewCell {
             $0.horizontalEdges.equalToSuperview()
         }
     }
-    
+
     private func bind() {
         titleTextField.rx.controlEvent([.editingDidBegin])
             .subscribe(onNext: { [weak self] _ in
@@ -63,6 +63,10 @@ class BaseInfoTextFieldCell: UICollectionViewCell {
                 didTappedClearButton?()
             })
             .disposed(by: disposeBag)
+    }
+    
+    func setData(text: String) {
+        titleTextField.text = text
     }
 
 }

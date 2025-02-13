@@ -10,31 +10,28 @@ import NetworkKit
 import Alamofire
 import RxSwift
 
+struct TokenResponse: Codable {
+    let accessToken: String
+    let refreshToken: String
+    let expiresIn: Double
+}
+
 final class HomeViewModel {
     private var disposeBag = DisposeBag()
-    private let networkManager = NetworkManager()
+    private let networkManager = NetworkManager(session: .default)
     
-    func issueCoupons(id: String) -> Observable<Bool> {
-        let parameters: [String: Any] = [
-            "memberId": UserdefaultKey.memberId,
-            "couponId": id,
-        ]
-        
-        let endpoint = Endpoint<BasicResponse>(
+    func loadMyNickname() {
+        let endpoint = Endpoint<UserDetail>(
             baseURL: .imdangAPI,
-            path: "/coupons/issue",
-            method: .post,
-            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
-            parameters: parameters
+            path: "/members/detail",
+            method: .get,
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
         )
         
-        return networkManager.requestOptional(with: endpoint)
-            .map { _ in
-                return true
+        networkManager.request(with: endpoint)
+            .subscribe { result in
+                UserdefaultKey.memberNickname = result.nickname
             }
-            .catch { error in
-                print("Error: \(error.localizedDescription)")
-                return Observable.just(false)
-            }
+            .disposed(by: disposeBag)
     }
 }

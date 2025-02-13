@@ -133,10 +133,10 @@ extension NotificationViewController:  UICollectionViewDataSource, UICollectionV
                     tab.selectedIndex = 2
                     (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootView(tab, animated: true)
                 case .request_reject:
-                    let view2 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight)
+                    let view2 = InsightDetailViewController(insight: InsightDetail.emptyInsight)
                     self.navigationController?.pushViewController(view2, animated: true)
                 case .response:
-                    let view3 = InsightDetailViewController(url: "", insight: InsightDetail.emptyInsight)
+                    let view3 = InsightDetailViewController(insight: InsightDetail.emptyInsight)
                     self.navigationController?.pushViewController(view3, animated: true)
                 }
             }

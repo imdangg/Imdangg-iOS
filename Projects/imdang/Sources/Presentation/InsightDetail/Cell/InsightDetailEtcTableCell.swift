@@ -44,7 +44,8 @@ final class InsightDetailEtcTableCell: UITableViewCell {
     
     private func makeConstraints() {
         stackView.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview()
+            $0.top.equalToSuperview().offset(32)
+            $0.bottom.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(20)
         }
     }

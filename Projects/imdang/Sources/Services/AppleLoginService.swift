@@ -98,7 +98,9 @@ extension AppleLoginService {
                         UserdefaultKey.isJoined = response.joined
                         UserdefaultKey.accessToken = response.accessToken
                         UserdefaultKey.memberId = response.memberId
+                        UserdefaultKey.tokenTimeInterval = Date().timeIntervalSince1970
                         UserdefaultKey.refreshToken = response.appleRefreshToken ?? ""
+                        UserdefaultKey.signInType = SignInType.apple.rawValue
                         observer.onNext(true)
                         observer.onCompleted()
                     },
@@ -136,7 +138,10 @@ extension AppleLoginService {
         )
         
         return networkManager.requestOptional(with: endpoint)
-            .map { response in true }
+            .map { _ in
+                UserdefaultKey.resetUserDefaults()
+                return true
+            }
             .catch { error in
                 print("Withdrawal request failed with error: \(error)")
                 return Observable.just(false)

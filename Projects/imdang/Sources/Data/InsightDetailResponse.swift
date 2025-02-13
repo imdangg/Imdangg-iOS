@@ -11,7 +11,7 @@ struct InsightDetailResponse: Codable {
     var memberId: String = UserdefaultKey.memberId
     var memberNickname: String
     var score: Int?
-    var mainImage: String
+    var mainImage: String?
     var title: String
     var address: Address
     var apartmentComplex: InsightDTO.ApartmentComplex
@@ -44,7 +44,7 @@ extension InsightDetailResponse {
             memberId: self.memberId,
             memberNickname: self.memberNickname,
             score: self.score ?? 0,
-            mainImage: self.mainImage,
+            mainImage: self.mainImage ?? "",
             title: self.title,
             address: self.address,
             apartmentComplex: self.apartmentComplex,
