@@ -32,7 +32,15 @@ final class UserInfoEntryViewController: BaseViewController, View {
     }
     
     //nickname
-    private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임", isEssential: false, descriptionText: "최소 2자-최대10자", limitNumber: 10)
+    private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임 (필수)", isEssential: false, descriptionText: "최소 2자-최대10자", limitNumber: 10).then {
+        $0.titleLabel.do {
+            let attributedString = NSMutableAttributedString(string: "닉네임 (필수)")
+            let range = ("닉네임 (필수)" as NSString).range(of: "(필수)")
+            attributedString.addAttribute(.foregroundColor, value: UIColor.error, range: range)
+            
+            $0.attributedText = attributedString
+        }
+    }
     private var nicknameTextField = CommomTextField(placeholderText: "임당이", textfieldType: .stringInput)
     private var niknameFooterView = TextFieldFooterView()
     
