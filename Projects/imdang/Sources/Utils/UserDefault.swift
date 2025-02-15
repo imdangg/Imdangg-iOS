@@ -47,8 +47,8 @@ enum UserdefaultKey {
     @UserDefault(key: "dontSeeToday", defaultValue: "")
     static var dontSeeToday: String
     
-    @UserDefault(key: "ticketReceived", defaultValue: false)
-    static var ticketReceived: Bool
+    @UserDefault(key: "couponReceived", defaultValue: false)
+    static var couponReceived: Bool
     
     @UserDefault(key: "homeToolTip", defaultValue: false)
     static var homeToolTip: Bool
@@ -73,7 +73,7 @@ enum UserdefaultKey {
         UserdefaultKey.refreshToken = ""
         UserdefaultKey.tokenTimeInterval = nil
         UserdefaultKey.dontSeeToday = ""
-        UserdefaultKey.ticketReceived = false
+        UserdefaultKey.couponReceived = false
         UserdefaultKey.homeToolTip = false
         UserdefaultKey.wirteToolTip = false
         UserdefaultKey.couponCount = nil

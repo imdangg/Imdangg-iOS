@@ -20,13 +20,17 @@ class ServerJoinService {
     private var disposeBag = DisposeBag()
     private let networkManager = NetworkManager()
     
-    func joinImdang(nickname: String, birthDate: String, gender: Gender) -> Observable<Bool> {
-        let parameters: [String: String] = [
+    func joinImdang(nickname: String, birthDate: String?, gender: Gender) -> Observable<Bool> {
+        var parameters: [String: String] = [
             "nickname": nickname,
-            "birthDate": birthDate,
-            "gender": gender.rawValue,
             "deviceToken": UserdefaultKey.deviceToken
         ]
+        if let birthDate = birthDate {
+            parameters["birthDate"] = birthDate
+        }
+        if gender != .none {
+            parameters["gender"] = gender.rawValue
+        }
         
         let endpoint = Endpoint<BasicResponse>(
             baseURL: .imdangAPI,

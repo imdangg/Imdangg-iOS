@@ -48,6 +48,7 @@ class GoogleLoginService {
                             .subscribe(
                                 onNext: { entity in
                                     UserdefaultKey.isJoined = entity.joined
+                                    UserdefaultKey.couponReceived = entity.couponReceived
                                     UserdefaultKey.accessToken = entity.accessToken
                                     UserdefaultKey.refreshToken = entity.refreshToken
                                     UserdefaultKey.tokenTimeInterval = Date().timeIntervalSince1970

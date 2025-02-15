@@ -25,7 +25,7 @@ final class UserInfoEntryViewController: BaseViewController, View {
     }
     
     private var subTitle = UILabel().then {
-        $0.text = "추후 진행할 이벤트를 위해 조사하고 있어요.\n개인정보는 유출되지 않으니 걱정 마세요"
+        $0.text = "추후 진행할 이벤트를 위해 조사하고 있어요\n개인정보는 유출되지 않으니 걱정 마세요"
         $0.numberOfLines = 2
         $0.font = .pretenMedium(16)
         $0.textColor = UIColor.grayScale700
@@ -255,12 +255,8 @@ final class UserInfoEntryViewController: BaseViewController, View {
                 print("nickname empty")
                 return
             }
-            guard let birthDate = birthTextField.text, !birthDate.isEmpty else {
-                print("birthDate empty")
-                return
-            }
                 
-            joinService.joinImdang(nickname: nickname, birthDate: birthDate, gender: reactor.currentState.selectedGender)
+            joinService.joinImdang(nickname: nickname, birthDate: birthTextField.text, gender: reactor.currentState.selectedGender)
                     .subscribe { success in
                         if success {
                             let vc = JoinCompletedViewController()
@@ -306,10 +302,8 @@ final class UserInfoEntryViewController: BaseViewController, View {
         reactor.state
             .map { state in
                 let isNicknameValid = (state.nicknameTextFieldState == .done)
-                let isBirthValid = (state.birthTextFieldState == .done)
-                let isGenderSelected = (state.selectedGender != .none)
                 
-                return isNicknameValid && isBirthValid && isGenderSelected
+                return isNicknameValid
             }
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] isEnableSubmitButton in
@@ -352,8 +346,8 @@ final class UserInfoEntryViewController: BaseViewController, View {
     
     private func validateBirthInput(text: String?) -> UserInfoEntryReactor.Action {
         guard let text = text, !text.isEmpty else {
-            birthFooterView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
-            return .changeBirthTextFieldState(.error)
+//            birthFooterView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
+            return .changeBirthTextFieldState(.done)
         }
 
         let dateFormatter = DateFormatter()

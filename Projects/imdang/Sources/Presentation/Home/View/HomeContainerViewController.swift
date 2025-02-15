@@ -91,20 +91,20 @@ class HomeContainerViewController: BaseViewController {
     }
     
     private func presentModal() {
-        if !UserdefaultKey.ticketReceived {
+//        if !UserdefaultKey.couponReceived {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             
             let todayString = formatter.string(from: Date())
             let savedDate = UserdefaultKey.dontSeeToday
             
-            if todayString != savedDate {
+//            if todayString != savedDate {
                 let modalVC = TicketModalViewController()
                 modalVC.modalPresentationStyle = .overFullScreen
                 modalVC.modalTransitionStyle = .crossDissolve
                 self.present(modalVC, animated: true, completion: nil)
-            }
-        }
+//            }
+//        }
     }
                 
     private func presentTooltip() {
