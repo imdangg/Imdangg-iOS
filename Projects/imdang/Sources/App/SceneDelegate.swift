@@ -49,6 +49,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func sceneWillEnterForeground(_ scene: UIScene) {
         serverService.checkTokenExpired()
+        AnalyticsService().screenEvent(ScreenName: .splash)
     }
 
     // 사용법 :

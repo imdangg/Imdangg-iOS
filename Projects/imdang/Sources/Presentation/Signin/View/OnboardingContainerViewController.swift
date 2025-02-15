@@ -40,7 +40,11 @@ class OnboardingContainerViewController: UIViewController {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backbutton)
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
-
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .onBoarding)
+    }
     
     private func addSubView() {
         addChild(onboardingPageVC)

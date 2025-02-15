@@ -50,13 +50,10 @@ final class StorageBoxViewController: BaseViewController {
         $0.layer.borderColor = UIColor.grayScale200.cgColor
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
-//        if let _ = collectionView, !addresses.value.isEmpty {
-//            let indexPath = IndexPath(item: 0, section: 0)
-//            collectionView.scrollToItem(at: indexPath, at: .left, animated: false)
-//        }
+        AnalyticsService().screenEvent(ScreenName: .StorageBox)
     }
     
     override func viewDidLoad() {

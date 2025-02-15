@@ -52,6 +52,11 @@ final class MyPageViewController: BaseViewController, View {
         addSubViews()
         layout()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .mypage)
+    }
    
     private func configNavigationBarItem() {
         customBackButton.isHidden = false

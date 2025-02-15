@@ -38,6 +38,11 @@ final class NotificationViewController: BaseViewController, View {
         setupCollectionView()
         configNavigationBarItem()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .notification)
+    }
 
     private func configNavigationBarItem() {
         customBackButton.isHidden = false

@@ -84,6 +84,11 @@ final class UserInfoEntryViewController: BaseViewController, View {
         presentModal()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .userInfoInput)
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
     }

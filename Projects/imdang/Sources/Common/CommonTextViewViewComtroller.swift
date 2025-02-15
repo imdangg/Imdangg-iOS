@@ -135,7 +135,20 @@ class CommonTextViewViewComtroller: BaseViewController {
         if !textView.text.isEmpty {
             updateCurrentTextCount()
         }
+        
+        if NavigationTitleLabel.text == "인사이트 요약" {
+            AnalyticsService().screenEvent(ScreenName: .basicInfoSummary)
+        } else if NavigationTitleLabel.text == "인프라 총평" {
+            AnalyticsService().screenEvent(ScreenName: .infraSummary)
+        } else if NavigationTitleLabel.text == "단지 환경 총평" {
+            AnalyticsService().screenEvent(ScreenName: .environmentSummary)
+        } else if NavigationTitleLabel.text == "단지 시설 총평" {
+            AnalyticsService().screenEvent(ScreenName: .FacilitySummary)
+        } else if NavigationTitleLabel.text == "호재 총평" {
+            AnalyticsService().screenEvent(ScreenName: .FavoriteNewsSummary)
+        }
     }
+    
     private func addsubViews() {
         leftNaviItemView.addSubview(NavigationTitleLabel)
         textFieldBackground.addSubview(textView)

@@ -54,6 +54,21 @@ class FullInsightViewController: BaseViewController {
         loadInsights()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        switch insightType {
+        case .my:
+            AnalyticsService().screenEvent(ScreenName: .myVisitInsights)
+        case .today:
+            AnalyticsService().screenEvent(ScreenName: .todayNewInsights)
+        case .search:
+            AnalyticsService().screenEvent(ScreenName: .listOfInsightsByDistrict)
+        default:
+            break
+        }
+    }
+    
     private func setupTableView() {
         tableView = UITableView(frame: view.bounds, style: .plain)
         tableView.backgroundColor = .white

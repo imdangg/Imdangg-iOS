@@ -65,6 +65,11 @@ class InsightViewController: BaseViewController, View {
         presentAlert()
         setBackButton()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .insightWriting)
+    }
 
     private func setupSubviews() {
         baseVC.reactor = self.reactor

@@ -50,6 +50,7 @@ class SearchingViewController: UIViewController {
         
         selectedIndex = 0
         loadInsightData()
+        AnalyticsService().screenEvent(ScreenName: .homeSearch)
     }
     
     private func fetchMyVisitedInsight(aptName: String) {

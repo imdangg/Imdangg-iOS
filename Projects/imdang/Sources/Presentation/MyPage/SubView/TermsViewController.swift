@@ -28,6 +28,11 @@ final class TermsViewController: BaseViewController {
         configNavigationBarItem()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .serviceTerms)
+    }
+    
     func setUp(){
         tableView.backgroundColor = .grayScale25
         tableView.dataSource = self
