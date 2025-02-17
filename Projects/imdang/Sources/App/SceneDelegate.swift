@@ -48,7 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     func sceneWillEnterForeground(_ scene: UIScene) {
-        serverService.checkTokenExpired()
+        serverService.checkTokenExpired(splash: true)
         AnalyticsService().screenEvent(ScreenName: .splash)
     }
 

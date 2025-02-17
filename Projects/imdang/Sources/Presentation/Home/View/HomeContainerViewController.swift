@@ -63,7 +63,7 @@ class HomeContainerViewController: BaseViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-//        serverService.checkTokenExpired()
+        serverService.checkTokenExpired()
         presentModal()
         loadCoupon()
     }

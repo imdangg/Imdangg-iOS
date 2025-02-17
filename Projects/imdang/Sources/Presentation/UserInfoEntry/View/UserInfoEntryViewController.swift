@@ -254,12 +254,12 @@ final class UserInfoEntryViewController: BaseViewController, View {
 
         // gender
         selectMaleButton.rx.tap
-            .map{ Reactor.Action.tapGenderButton(.male)}
+            .map{ Reactor.Action.tapGenderButton( reactor.currentState.selectedGender == .male ? .none : .male )}
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         selectFemaleButton.rx.tap
-            .map{ Reactor.Action.tapGenderButton(.female)}
+            .map{ Reactor.Action.tapGenderButton( reactor.currentState.selectedGender == .female ? .none : .female )}
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -304,11 +304,10 @@ final class UserInfoEntryViewController: BaseViewController, View {
         reactor.state
             .map {$0.selectedGender}
             .distinctUntilChanged()
-            .filter { $0 != .none }
             .subscribe(onNext: { [weak self] state in
                 self?.selectMaleButton.rx.commonButtonState.onNext(state == .male ? .selectedBorderStyle : .unselectedBorderStyle)
                 self?.selectFemaleButton.rx.commonButtonState.onNext(state == .female ? .selectedBorderStyle : .unselectedBorderStyle)
-                self?.genderHeaderView.rx.textFieldState.onNext(.done)
+                self?.genderHeaderView.rx.textFieldState.onNext(state == .none ? .normal : .done)
             })
             .disposed(by: disposeBag)
         
