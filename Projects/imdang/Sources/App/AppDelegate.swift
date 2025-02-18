@@ -37,6 +37,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             GIDSignIn.sharedInstance.configuration = config
         }
         
+        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+            if let error = error {
+                return
+            }
+
+            if let user = user {
+            } else {
+            }
+        }
         
         return true
     }
