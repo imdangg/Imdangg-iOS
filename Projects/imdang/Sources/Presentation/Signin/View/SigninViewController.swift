@@ -98,6 +98,12 @@ final class SigninViewController: UIViewController, View {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .signIn)
+        UserdefaultKey.isSiginedIn = false
+    }
+    
     private func showAlert(type: SigninAlertType) {
         if type == .normal { return }
         showAlert(text: type.message, type: .confirmOnly)

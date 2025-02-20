@@ -24,6 +24,7 @@ class HomeContainerViewController: BaseViewController {
     private let searchViewController = SearchingViewController()
     private let exchangeViewController = ExchangeViewController(reactor: ExchangeReactor())
     
+    private let containerView = UIView()
     private let searchButton = UIButton().then {
         $0.setTitle("탐색", for: .normal)
         $0.setTitleColor(.grayScale900, for: .normal)
@@ -44,16 +45,6 @@ class HomeContainerViewController: BaseViewController {
         $0.setImage(ImdangImages.Image(resource: .person), for: .normal)
     }
     
-    private let searchView = UIView().then {
-        $0.backgroundColor = .white
-        $0.isHidden = false
-    }
-    
-    private let exchangeView = UIView().then {
-        $0.backgroundColor = .white
-        $0.isHidden = true
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         homeViewModel.loadMyNickname()
@@ -61,6 +52,7 @@ class HomeContainerViewController: BaseViewController {
         addSubviews()
         configNavigationBarItem()
         makeConstraints()
+        switchToViewController(searchViewController)
         bindActions()
         presentTooltip()
         
@@ -91,7 +83,7 @@ class HomeContainerViewController: BaseViewController {
     }
     
     private func presentModal() {
-        if !UserdefaultKey.ticketReceived {
+        if !UserdefaultKey.couponReceived {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             
@@ -118,38 +110,14 @@ class HomeContainerViewController: BaseViewController {
     }
     
     private func addSubviews() {
-        [searchView, exchangeView].forEach { view.addSubview($0) }
-        
-        addChild(searchViewController)
-        addChild(exchangeViewController)
-        
-        searchView.addSubview(searchViewController.view)
-        exchangeView.addSubview(exchangeViewController.view)
-        
-        searchViewController.didMove(toParent: self)
-        exchangeViewController.didMove(toParent: self)
+        [containerView].forEach { view.addSubview($0) }
     }
     
     private func makeConstraints() {
-        
-        searchView.snp.makeConstraints {
-            $0.top.equalTo(myPageButton.snp.bottom)
-            $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview()
-        }
-        
-        exchangeView.snp.makeConstraints {
+        containerView.snp.makeConstraints {
             $0.topEqualToNavigationBottom(vc: self)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
-        }
-        
-        searchViewController.view.snp.makeConstraints {
-            $0.edges.equalTo(searchView)
-        }
-        
-        exchangeViewController.view.snp.makeConstraints {
-            $0.edges.equalTo(exchangeView)
         }
     }
     
@@ -216,16 +184,24 @@ class HomeContainerViewController: BaseViewController {
         .disposed(by: disposeBag)
     }
     
+    private func switchToViewController(_ viewController: UIViewController) {
+        children.forEach { $0.willMove(toParent: nil); $0.view.removeFromSuperview(); $0.removeFromParent() }
+        
+        addChild(viewController)
+        containerView.addSubview(viewController.view)
+        viewController.view.frame = containerView.bounds
+        viewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        viewController.didMove(toParent: self)
+    }
+    
     func changeView(showView: HomeTapState) {
         switch showView {
         case .search:
-            searchView.isHidden = false
-            exchangeView.isHidden = true
+            switchToViewController(searchViewController)
             exchangeButton.setTitleColor(.grayScale500, for: .normal)
             searchButton.setTitleColor(.grayScale900, for: .normal)
         case .exchange:
-            searchView.isHidden = true
-            exchangeView.isHidden = false
+            switchToViewController(exchangeViewController)
             searchButton.setTitleColor(.grayScale500, for: .normal)
             exchangeButton.setTitleColor(.grayScale900, for: .normal)
         }

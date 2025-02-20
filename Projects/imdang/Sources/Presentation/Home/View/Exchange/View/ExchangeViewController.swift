@@ -42,8 +42,12 @@ final class ExchangeViewController: UIViewController, UITableViewDelegate, UITab
         
         reactor?.action.onNext(.loadInsights)
     }
-
-
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .homeExchange)
+    }
+    
     private func setupTableView() {
         view.addSubview(tableView)
         

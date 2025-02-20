@@ -96,6 +96,7 @@ extension AppleLoginService {
                 .subscribe(
                     onNext: { response in
                         UserdefaultKey.isJoined = response.joined
+                        UserdefaultKey.couponReceived = response.couponReceived
                         UserdefaultKey.accessToken = response.accessToken
                         UserdefaultKey.memberId = response.memberId
                         UserdefaultKey.tokenTimeInterval = Date().timeIntervalSince1970

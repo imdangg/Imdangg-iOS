@@ -56,6 +56,11 @@ final class DeleteAccountViewController: BaseViewController {
         bindUI()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .withdrawal)
+    }
+    
     private func addSubViews() {
         [noticeTitleLabel, noticeStackView, agreeButton, deleteButton].forEach {view.addSubview($0)}
     }

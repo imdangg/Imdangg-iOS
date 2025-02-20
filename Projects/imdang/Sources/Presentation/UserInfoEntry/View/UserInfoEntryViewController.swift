@@ -25,14 +25,22 @@ final class UserInfoEntryViewController: BaseViewController, View {
     }
     
     private var subTitle = UILabel().then {
-        $0.text = "추후 진행할 이벤트를 위해 조사하고 있어요.\n개인정보는 유출되지 않으니 걱정 마세요"
+        $0.text = "추후 진행할 이벤트를 위해 조사하고 있어요\n개인정보는 유출되지 않으니 걱정 마세요"
         $0.numberOfLines = 2
         $0.font = .pretenMedium(16)
         $0.textColor = UIColor.grayScale700
     }
     
     //nickname
-    private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임", isEssential: false, descriptionText: "최소 2자-최대10자", limitNumber: 10)
+    private var nicknameHeaderView = TextFieldHeaderView(title: "닉네임 (필수)", isEssential: false, descriptionText: "최소 2자-최대10자", limitNumber: 10).then {
+        $0.titleLabel.do {
+            let attributedString = NSMutableAttributedString(string: "닉네임 (필수)")
+            let range = ("닉네임 (필수)" as NSString).range(of: "(필수)")
+            attributedString.addAttribute(.foregroundColor, value: UIColor.error, range: range)
+            
+            $0.attributedText = attributedString
+        }
+    }
     private var nicknameTextField = CommomTextField(placeholderText: "임당이", textfieldType: .stringInput)
     private var niknameFooterView = TextFieldFooterView()
     
@@ -74,6 +82,11 @@ final class UserInfoEntryViewController: BaseViewController, View {
         view.addSubview(stackView)
         setup()
         presentModal()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .userInfoInput)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -241,12 +254,12 @@ final class UserInfoEntryViewController: BaseViewController, View {
 
         // gender
         selectMaleButton.rx.tap
-            .map{ Reactor.Action.tapGenderButton(.male)}
+            .map{ Reactor.Action.tapGenderButton( reactor.currentState.selectedGender == .male ? .none : .male )}
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         selectFemaleButton.rx.tap
-            .map{ Reactor.Action.tapGenderButton(.female)}
+            .map{ Reactor.Action.tapGenderButton( reactor.currentState.selectedGender == .female ? .none : .female )}
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -255,12 +268,8 @@ final class UserInfoEntryViewController: BaseViewController, View {
                 print("nickname empty")
                 return
             }
-            guard let birthDate = birthTextField.text, !birthDate.isEmpty else {
-                print("birthDate empty")
-                return
-            }
                 
-            joinService.joinImdang(nickname: nickname, birthDate: birthDate, gender: reactor.currentState.selectedGender)
+            joinService.joinImdang(nickname: nickname, birthDate: birthTextField.text, gender: reactor.currentState.selectedGender)
                     .subscribe { success in
                         if success {
                             let vc = JoinCompletedViewController()
@@ -295,21 +304,18 @@ final class UserInfoEntryViewController: BaseViewController, View {
         reactor.state
             .map {$0.selectedGender}
             .distinctUntilChanged()
-            .filter { $0 != .none }
             .subscribe(onNext: { [weak self] state in
                 self?.selectMaleButton.rx.commonButtonState.onNext(state == .male ? .selectedBorderStyle : .unselectedBorderStyle)
                 self?.selectFemaleButton.rx.commonButtonState.onNext(state == .female ? .selectedBorderStyle : .unselectedBorderStyle)
-                self?.genderHeaderView.rx.textFieldState.onNext(.done)
+                self?.genderHeaderView.rx.textFieldState.onNext(state == .none ? .normal : .done)
             })
             .disposed(by: disposeBag)
         
         reactor.state
             .map { state in
                 let isNicknameValid = (state.nicknameTextFieldState == .done)
-                let isBirthValid = (state.birthTextFieldState == .done)
-                let isGenderSelected = (state.selectedGender != .none)
                 
-                return isNicknameValid && isBirthValid && isGenderSelected
+                return isNicknameValid
             }
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] isEnableSubmitButton in
@@ -352,8 +358,8 @@ final class UserInfoEntryViewController: BaseViewController, View {
     
     private func validateBirthInput(text: String?) -> UserInfoEntryReactor.Action {
         guard let text = text, !text.isEmpty else {
-            birthFooterView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
-            return .changeBirthTextFieldState(.error)
+//            birthFooterView.rx.textFieldErrorMessage.onNext("생년월일을 입력해주세요.")
+            return .changeBirthTextFieldState(.done)
         }
 
         let dateFormatter = DateFormatter()

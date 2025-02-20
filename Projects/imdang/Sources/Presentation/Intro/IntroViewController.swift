@@ -58,6 +58,7 @@ class IntroViewController: BaseViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .serviceIntroduction)
 
         DispatchQueue.main.async {
             if self.type == .intro {

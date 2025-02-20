@@ -92,7 +92,7 @@ final class InsightDetailViewModel {
             "requestedMemberId": UserdefaultKey.memberId
         ]
         
-        let endpoint = Endpoint<InsightIDResponse>(
+        let endpoint = Endpoint<ExchangeResponse>(
             baseURL: .imdangAPI,
             path: "/exchanges/reject",
             method: .post,

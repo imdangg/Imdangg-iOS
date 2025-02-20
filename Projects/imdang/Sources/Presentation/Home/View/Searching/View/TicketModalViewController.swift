@@ -177,7 +177,7 @@ class TicketModalViewController: UIViewController {
                     couponService.issueCoupons(id: id)
                         .subscribe { success in
                             if success {
-                                UserdefaultKey.ticketReceived = true
+                                UserdefaultKey.couponReceived = true
                             } else {
                                 print("쿠폰 발급 실패")
                             }

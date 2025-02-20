@@ -61,6 +61,12 @@ class AddressListViewController: BaseViewController {
         makeConstraints()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        AnalyticsService().screenEvent(ScreenName: .searchToDistrictDetail)
+    }
+    
     private func loadDongAddresses(siGunGu: String) {
         searchingViewModel.loadDongAddresses(siGunGu: siGunGu)
             .subscribe(with: self) { owner, result in

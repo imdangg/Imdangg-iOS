@@ -19,7 +19,7 @@ class TextFieldHeaderView: UIView {
     let descriptionText: String?
     var limitNumber: Int?
     
-    private var titleLabel = UILabel().then {
+    var titleLabel = UILabel().then {
         $0.font = .pretenMedium(14)
         $0.textColor = UIColor.grayScale600
     }

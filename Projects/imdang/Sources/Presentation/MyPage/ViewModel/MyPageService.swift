@@ -47,7 +47,7 @@ class MyPageService {
             }
             .catch { error in
                 print("Logout request failed with error: \(error)")
-                return Observable.just(false)
+                return Observable.just(true) // TODO: 토큰 문제시 로그아웃안됨. 임시 로그아웃 처리
             }
     }
 }

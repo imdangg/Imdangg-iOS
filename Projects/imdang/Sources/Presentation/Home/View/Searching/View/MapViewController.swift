@@ -49,6 +49,15 @@ class MapViewController: BaseViewController {
         makeConstraints()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if titleLable.text == "지도로 찾기" {
+            AnalyticsService().screenEvent(ScreenName: .searchingWithMap)
+        } else if titleLable.text == "지도로 탐색" {
+            AnalyticsService().screenEvent(ScreenName: .findWithMap)
+        }
+    }
+    
     private func addSubviews() {
         leftNaviItemView.addSubview(titleLable)
         

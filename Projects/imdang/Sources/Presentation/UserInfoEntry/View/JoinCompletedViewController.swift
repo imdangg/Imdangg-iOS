@@ -75,6 +75,11 @@ final class JoinCompletedViewController: BaseViewController {
         bindAction()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService().screenEvent(ScreenName: .isJoined)
+    }
+    
     private func addSubviews() {
         [icon, titleLabel, subTitleLabel, Label1, Label2, Label3, startButton].forEach { view.addSubview($0) }
     }

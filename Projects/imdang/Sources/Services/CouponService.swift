@@ -18,16 +18,14 @@ class CouponService {
     
     func issueCoupons(id: String) -> Observable<Bool> {
         let parameters: [String: Any] = [
-            "memberId": UserdefaultKey.memberId,
-            "name": id,
+            "memberId": UserdefaultKey.memberId
         ]
         
         let endpoint = Endpoint<BasicResponse>(
             baseURL: .imdangAPI,
             path: "/coupons/issue",
             method: .post,
-            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)],
-            parameters: parameters
+            headers: [.contentType("application/json"), .authorization(bearerToken: UserdefaultKey.accessToken)]
         )
         
         return networkManager.requestOptional(with: endpoint)
